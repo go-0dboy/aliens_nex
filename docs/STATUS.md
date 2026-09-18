@@ -7,7 +7,8 @@
 **Research source registry completed by:** PR `#2 docs: add research source registry`  
 **Stage 1 completed by:** PR `#3 stage1: implement NEX wire foundation`  
 **Stage 1 merge commit:** `e9bf6ff0bbc19fd36c27451572d7b617ebabc9f8`  
-**Active Stage 2 branch:** `stage2/static-validation`
+**Active Stage 2 branch:** `stage2/static-validation`  
+**Active Stage 2 pull request:** `#4 stage2: static validation foundations`
 
 ## Stage 0 — Complete
 
@@ -26,7 +27,7 @@ PR #2 subsequently added `docs/SOURCES.md`, ADR-0004, and mandatory source-regis
 
 Stage 1 is defined and closed in `docs/STAGE-1.md`.
 
-The repository now has an executable, tested, and CI-verified canonical wire layer for:
+The repository has an executable, tested, and CI-verified canonical wire layer for:
 
 ```text
 Var
@@ -57,61 +58,108 @@ Accepted work order:
 2.9 property/fuzz tests, CI, and completion review
 ```
 
-### Stage 2 design decisions recorded
+### Stage 2 design decision
 
-ADR-0007 fixes the current type-annotation policy:
+ADR-0007 fixes the v0.1 type-annotation policy:
 
-- NEX-1 v0.1 canonical terms continue to omit ordinary term-level type annotations;
-- frontends may accept annotations but erase them when emitting v0.1 Core;
-- Stage 2 validates the existing HM-style inferred-type design;
+- canonical v0.1 Core terms omit ordinary term-level type annotations;
+- frontends may accept annotations but erase them when emitting canonical v0.1 Core;
+- Stage 2 implements inference for the existing erased-type representation;
 - erased types are **not** claimed globally optimal;
 - a future benchmark must compare erased HM inference against compact explicit/hybrid type information using total cost `specification + bootstrap + transmitted programs`.
 
-### Sub-stage 2.1 — de Bruijn scope validation — implemented on active branch
+## Completed Stage 2 checkpoints on the active branch
 
-Present on `stage2/static-validation`:
+### 2.1 — de Bruijn scope validation
 
-- `ValidateClosed(term)` checks that every `Var(k)` refers to an enclosing `Lam` or `Let` binder;
-- validation starts at binder depth `0`, therefore accepted top-level terms are closed;
-- `Lam(body)` validates `body` at depth + 1;
-- `App(f, x)` validates both children at the same depth;
-- `Let(value, body)` validates `value` in the outer depth and `body` at depth + 1;
-- this makes v0.1 `Let` explicitly non-recursive at the scope layer;
-- `Nat` and `Prim` do not change binder depth;
-- out-of-scope variables produce a distinct `ScopeError` / `ErrOutOfScope`;
-- invalid in-memory term shapes remain distinct from scope errors;
-- `conformance/static-v0.1.json` contains implementation-independent scope vectors;
-- Go tests consume those vectors and include direct error-structure and fuzz robustness checks;
-- the Go CI workflow now watches all `conformance/*.json` files rather than only wire vectors.
+Implemented and clean-checkout CI verified:
 
-## Verification state for Stage 2.1
+- `ValidateClosed(term)` enforces zero-based de Bruijn scope;
+- top-level validation starts at binder depth `0`, so accepted programs are closed;
+- `Lam` introduces one binder for its body;
+- `Let(value, body)` is non-recursive: its binder is visible only in `body`;
+- `App` validates both children in the same outer scope;
+- `Nat` and `Prim` do not affect binder depth;
+- out-of-scope variables produce distinct `ScopeError` / `ErrOutOfScope` diagnostics;
+- `conformance/static-v0.1.json` contains implementation-independent scope vectors.
 
-The implementation has been committed to the Stage 2 branch and CI has been configured to run the existing `reference/go/verify.sh` suite, which includes all package tests.
+Checkpoint CI: run `35349955837` — success.
 
-Before sub-stage 2.1 is considered accepted, the branch must show a successful clean-checkout CI run and the diff must be reviewed against the Stage 2 scope guard.
+### 2.2 — type and type-scheme representation
 
-## Remaining Stage 2 work
+Implemented and clean-checkout CI verified:
+
+- internal `TypeVarID` is independent of human-readable variable names;
+- monotypes represent type variable, `1`, `N`, function, product, and sum;
+- `TypeScheme` represents `forall` schemes;
+- malformed in-memory type/scheme shapes are rejected;
+- canonical test/debug rendering renames variables `T0`, `T1`, ... by first occurrence;
+- canonical scheme rendering is independent of internal type-variable IDs and ordinary quantified-list ordering for variables occurring in the body.
+
+Checkpoint CI: run `35350348515` — success.
+
+### 2.3 — substitutions and free type variables
+
+Implemented and clean-checkout CI verified:
+
+- free type variables for monotypes, schemes, and type environments;
+- substitution application to types, schemes, and environments;
+- quantified scheme variables are protected from substitution;
+- substitution chains are resolved;
+- cyclic substitutions are rejected separately;
+- substitution composition implements `newer o older`;
+- property/fuzz test checks:
+
+```text
+apply(compose(S2, S1), T)
+==
+apply(S2, apply(S1, T))
+```
+
+A local one-second property fuzz run completed 34,311 executions without failure.
+
+Checkpoint CI: run `35350580401` — success.
+
+### 2.4 — unification and occurs check
+
+Implemented and clean-checkout CI verified:
+
+- structural unification for type variables, `1`, `N`, functions, products, and sums;
+- deterministic type-mismatch diagnostics;
+- mandatory occurs check with distinct `ErrOccursCheck` / `OccursCheckError`;
+- substitutions produced by unification are composed through the Stage 2.3 machinery;
+- property/fuzz test constructs unifiable type pairs and checks:
+
+```text
+if Unify(A, B) = S
+then apply(S, A) == apply(S, B)
+```
+
+A local one-second unification fuzz run completed 38,212 executions without failure.
+
+Checkpoint CI: run `35350747002` — success.
+
+## Current Stage 2 boundary
+
+The project deliberately stops here before primitive typing and Algorithm W.
 
 Not yet implemented:
 
-- type AST and schemes;
-- substitution application/composition;
-- free type variable calculation;
-- unification;
-- occurs check;
-- one authoritative primitive type table;
+- authoritative primitive type-scheme table;
+- primitive/profile validity checking;
+- fresh type-variable generator for inference;
 - instantiation/generalization;
 - Algorithm W style inference;
-- canonical principal-type normalization;
-- positive/negative type conformance vectors.
+- principal type conformance vectors;
+- positive/negative complete static-validation corpus.
 
-No evaluator/runtime behavior belongs in this stage.
+No evaluator/runtime behavior has been added.
 
 ## Remaining project-wide unverified claims
 
 The following remain intentionally unverified or out of scope:
 
-- formal/exhaustive proof of decoder or type-inference correctness;
+- formal/exhaustive proof of decoder, substitution, unification, or future inference correctness;
 - conformance agreement with a second independent implementation;
 - evaluator behavior;
 - self-hosting feasibility;
@@ -120,4 +168,4 @@ The following remain intentionally unverified or out of scope:
 
 ## Next recommended step
 
-Verify and review sub-stage 2.1 on CI. If green, keep it as the accepted scope-validation foundation and proceed to sub-stage 2.2 only: define the type/type-scheme representation and its canonical test representation without implementing unification yet.
+Review the Stage 2.1–2.4 foundation in PR #4. If accepted, continue with sub-stage 2.5 only: define one authoritative Core primitive table containing IDs, names, and type schemes, then add primitive validity tests before any Algorithm W implementation.
