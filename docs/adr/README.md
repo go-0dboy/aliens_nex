@@ -18,6 +18,12 @@ An ADR is therefore required for any decision that materially changes one or mor
 - bootstrap architecture;
 - repository-wide development process.
 
+## Current ADRs
+
+- [ADR-0001: Adopt Architecture Decision Records](0001-adopt-architecture-decision-records.md)
+- [ADR-0002: NEX-1 Core v0.1 design basis](0002-nex-core-v0.1-design-basis.md)
+- [ADR-0003: English canonical documentation with Russian mirrors](0003-documentation-language-policy.md)
+
 ## Status values
 
 Each ADR MUST use one of these statuses:
