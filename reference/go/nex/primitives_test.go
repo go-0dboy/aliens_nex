@@ -19,7 +19,7 @@ func TestCorePrimitiveTableMatchesSpecification(t *testing.T) {
 		{5, "fst", "forall T0 T1. ((T0 * T1) -> T0)"},
 		{6, "snd", "forall T0 T1. ((T0 * T1) -> T1)"},
 		{7, "inl", "forall T0 T1. (T0 -> (T0 + T1))"},
-		{8, "inr", "forall T0 T1. (T1 -> (T0 + T1))"},
+		{8, "inr", "forall T0 T1. (T0 -> (T1 + T0))"},
 		{9, "case", "forall T0 T1 T2. ((T0 + T1) -> ((T0 -> T2) -> ((T1 -> T2) -> T2)))"},
 		{10, "unit", "1"},
 	}
