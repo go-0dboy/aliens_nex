@@ -82,8 +82,9 @@ Implemented:
 
 - `nex.MeasureTerm` for exact wire-bit, AST-node, constructor-count, and per-constructor wire-bit attribution;
 - `EvaluateClosedWithStats` for explicitly reference-only evaluator transition/depth counters;
+- shared `reference/go/bench` loading/parsing for frozen corpora so later experiments consume the same canonical Terms;
 - `reference/go/cmd/nexbench` for inherited frozen corpora and deterministic machine-readable reports;
-- `reference/go/verify.sh` clean-checkout reproduction of v0.1/v0.3 measurement plus all existing tests/fuzz checks.
+- `reference/go/verify.sh` clean-checkout reproduction of accepted measurements plus all existing tests/fuzz checks.
 
 Portable exact fields include:
 
@@ -102,7 +103,7 @@ evaluation transitions
 max evaluation depth
 ```
 
-### Stage 4.3 — internal NEX design experiments — First controlled experiments complete
+### Stage 4.3 — internal NEX design experiments — Complete first controlled set
 
 `reference/go/cmd/nexexperiment` measures unchanged NEX-1 v0.1 encodings; it does not modify normative semantics.
 
@@ -158,11 +159,38 @@ This strongly supports direct canonical natural literals for the tested construc
 
 Clean-checkout CI `35369168189` verified the internal experiment generator and all prior tests/fuzz properties. CI `35369320807` additionally exposed the full v0.3 aggregate report.
 
+### Stage 4.4 — erased HM versus hybrid root type information — First experiment complete
+
+`docs/experiments/stage4-type-information.md` defines an explicitly non-normative hybrid envelope. It leaves the canonical NEX-1 v0.1 term unchanged and appends/transmits only the inferred closed principal top-level `TypeScheme` using an experimental compact prefix code.
+
+This experiment measures only transmitted-program delta `Delta_P`. It does **not** claim that a root type replaces internal HM inference or that bootstrap cost `B` is reduced.
+
+Clean-checkout CI `35370010741` measured the frozen v0.3 corpus:
+
+```text
+erased NEX term bits        1371
+root principal-type bits     134
+hybrid total bits           1505
+Delta_P                      134 bits
+aggregate overhead           9.77%
+```
+
+The overhead is highly workload-dependent:
+
+```text
+identity      5 + 12 type bits  = +240%
+constant      9 + 20 type bits  = +222.2%
+composition  23 + 46 type bits  = +200%
+```
+
+Most benchmark programs whose inferred top-level type is simply `N` require only a 4-bit experimental root-type payload, so their relative overhead falls as the term grows (for example `factorial-4`: 239 + 4 bits, about +1.67%).
+
+Measured conclusion: transmitting this particular root principal-type envelope costs +9.77% over erased terms on v0.3. Unmeasured question: whether any explicit/hybrid verification design can save enough real bootstrap information to compensate for that program overhead. A distinct checker/verification design is required before making that claim.
+
 ## Remaining Stage 4 work
 
 Still pending:
 
-- 4.4 erased-HM versus explicit/hybrid type-information experiment;
 - 4.5 reproducible BLC / SKI-Jot / tiny typed stack baselines;
 - 4.6 call-by-name versus call-by-need comparison;
 - 4.7 bootstrap accounting model;
@@ -176,11 +204,11 @@ Still intentionally unverified:
 - formal/exhaustive proof of decoder, type-inference, or evaluator correctness;
 - conformance agreement with a second independent implementation;
 - bootstrap/self-hosting feasibility and size;
-- total-information-cost comparison against external baselines or an explicit-type NEX variant;
+- total-information-cost comparison against external baselines or a real explicit-type checker/bootstrap;
 - whether the v0.3 constructor distribution generalizes to other program populations;
 - practical CBN-versus-call-by-need cost on the accepted corpus;
 - any claim that NEX is globally optimal or the smallest possible language.
 
 ## Next recommended step
 
-Proceed to Stage 4.4 without changing NEX-1 v0.1. Define one or more explicitly experimental type-information envelopes, measure their transmitted-program overhead against erased HM on the frozen v0.3 corpus, and keep any checker/bootstrap simplification as a separately labelled hypothesis until an actual alternative checker exists.
+Proceed to Stage 4.5. Use primary sources and explicitly documented translation/encoding rules for each external baseline. Compare program payloads without treating baseline interpreter/decoder assumptions as free, and keep hand-optimized examples separate from documented canonical translations.
