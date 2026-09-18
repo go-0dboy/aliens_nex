@@ -34,6 +34,7 @@ An ADR is therefore required for any decision that materially changes one or mor
 - [ADR-0012: Maintain a living research dissertation](0012-maintain-living-research-dissertation.md)
 - [ADR-0013: Freeze the Stage 5 independence protocol and use Python for the first independent implementation](0013-stage5-independence-protocol.md)
 - [ADR-0014: Condition bootstrap cost on explicit receiver assumptions](0014-condition-bootstrap-cost-on-receiver-assumptions.md)
+- [ADR-0015: Close Stage 5 with a negative complete-bootstrap result](0015-stage5-decision-gate.md)
 
 ## Status values
 
