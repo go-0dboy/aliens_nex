@@ -70,8 +70,11 @@ func TestValidateTypeRejectsInvalidShapes(t *testing.T) {
 	cases := []*Type{
 		nil,
 		{Kind: TypeNat, A: TNat()},
+		{Kind: TypeNat, Var: 1},
 		{Kind: TypeUnit, B: TUnit()},
+		{Kind: TypeUnit, Var: 1},
 		{Kind: TypeFunc, A: TNat()},
+		{Kind: TypeFunc, Var: 1, A: TNat(), B: TNat()},
 		{Kind: TypeProduct, B: TNat()},
 		{Kind: TypeSum, A: TNat()},
 		{Kind: TypeKind(255)},
