@@ -35,15 +35,15 @@ type bootstrapCost struct {
 }
 
 type report struct {
-	Schema             string               `json:"schema"`
-	Formula            string               `json:"formula"`
-	CorpusVersion      string               `json:"corpus_version"`
-	P                  programCost          `json:"P_exact_program_cost"`
-	SProxy             specificationProxy   `json:"S_spec_text_proxy"`
-	R                  referenceProxy       `json:"R_reference_go_proxy"`
-	B                  bootstrapCost        `json:"B_bootstrap_cost"`
-	TotalCComputable   bool                 `json:"total_C_computable"`
-	InterpretationRule []string             `json:"interpretation_rules"`
+	Schema             string             `json:"schema"`
+	Formula            string             `json:"formula"`
+	CorpusVersion      string             `json:"corpus_version"`
+	P                  programCost        `json:"P_exact_program_cost"`
+	SProxy             specificationProxy `json:"S_spec_text_proxy"`
+	R                  referenceProxy     `json:"R_reference_go_proxy"`
+	B                  bootstrapCost      `json:"B_bootstrap_cost"`
+	TotalCComputable   bool               `json:"total_C_computable"`
+	InterpretationRule []string           `json:"interpretation_rules"`
 }
 
 var referenceManifest = []string{
