@@ -47,7 +47,7 @@ func TestIfzZeroDoesNotEvaluateNonzeroBranch(t *testing.T) {
 			App(Prim(NaturalUint64(3)), Nat(NaturalUint64(0))),
 			Nat(NaturalUint64(42)),
 		),
-		deferredFixIdentityTerm(),
+		divergingFixTerm(),
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
@@ -60,7 +60,7 @@ func TestIfzNonzeroDoesNotEvaluateZeroBranch(t *testing.T) {
 	term := App(
 		App(
 			App(Prim(NaturalUint64(3)), Nat(NaturalUint64(1))),
-			deferredFixIdentityTerm(),
+			divergingFixTerm(),
 		),
 		Nat(NaturalUint64(9)),
 	)
