@@ -26,6 +26,20 @@ Before making changes, read at least:
 - Prefer one canonical representation over convenience duplicates.
 - Update `docs/STATUS.md` after a meaningful project stage.
 
+## Documentation language policy
+
+English is the canonical documentation language.
+
+Per ADR-0003, semantic changes to any of these primary documents should update the Russian mirror in the same pull request:
+
+- `README.md` <-> `README.ru.md`;
+- `docs/NEX-1-vX.Y.md` <-> `docs/NEX-1-vX.Y.ru.md`;
+- `docs/ARCHITECTURE.md` <-> `docs/ARCHITECTURE.ru.md`.
+
+If a mirror cannot be updated immediately, explicitly mark it out of date in the pull request and in `docs/STATUS.md`.
+
+Russian translations are informative; the English document is authoritative when wording differs.
+
 ## NEX-specific constraints
 
 - NEX-1 Core v0.1 is normative in `docs/NEX-1-v0.1.md`.
