@@ -37,12 +37,12 @@ type TypeScheme struct {
 	Body       *Type
 }
 
-func TVar(id TypeVarID) *Type       { return &Type{Kind: TypeVar, Var: id} }
-func TUnit() *Type                   { return &Type{Kind: TypeUnit} }
-func TNat() *Type                    { return &Type{Kind: TypeNat} }
-func TFunc(a, b *Type) *Type         { return &Type{Kind: TypeFunc, A: a, B: b} }
-func TProduct(a, b *Type) *Type      { return &Type{Kind: TypeProduct, A: a, B: b} }
-func TSum(a, b *Type) *Type          { return &Type{Kind: TypeSum, A: a, B: b} }
+func TVar(id TypeVarID) *Type          { return &Type{Kind: TypeVar, Var: id} }
+func TUnit() *Type                     { return &Type{Kind: TypeUnit} }
+func TNat() *Type                      { return &Type{Kind: TypeNat} }
+func TFunc(a, b *Type) *Type           { return &Type{Kind: TypeFunc, A: a, B: b} }
+func TProduct(a, b *Type) *Type        { return &Type{Kind: TypeProduct, A: a, B: b} }
+func TSum(a, b *Type) *Type            { return &Type{Kind: TypeSum, A: a, B: b} }
 func MonoScheme(body *Type) TypeScheme { return TypeScheme{Body: body} }
 
 func EqualType(x, y *Type) bool {
