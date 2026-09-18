@@ -1,9 +1,6 @@
 package nex
 
-import (
-	"errors"
-	"testing"
-)
+import "testing"
 
 func TestCorePrimitiveArities(t *testing.T) {
 	want := []uint8{1, 1, 1, 3, 2, 1, 1, 1, 1, 3, 0}
@@ -32,9 +29,9 @@ func TestUnsaturatedPrimitiveIsFunctionWHNF(t *testing.T) {
 }
 
 func TestPartialPrimitiveApplicationKeepsArgumentDelayed(t *testing.T) {
-	// pair unit is only a partial application. unit execution is still deferred at this
-	// checkpoint, so success proves the first pair argument was stored without forcing it.
-	term := App(Prim(NaturalUint64(4)), Prim(NaturalUint64(10)))
+	// pair (fix id) is only a partial application. fix execution remains deferred until
+	// Stage 3.6, so success proves the stored pair argument was not forced.
+	term := App(Prim(NaturalUint64(4)), deferredFixIdentityTerm())
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
 		t.Fatal(err)
@@ -47,17 +44,12 @@ func TestPartialPrimitiveApplicationKeepsArgumentDelayed(t *testing.T) {
 	}
 }
 
-func TestSaturatedPrimitiveExecutionStillDeferred(t *testing.T) {
-	term := App(Prim(NaturalUint64(1)), Nat(NaturalUint64(0)))
-	_, err := EvaluateClosed(term, DefaultEvalLimits)
-	if !errors.Is(err, ErrPrimitiveExecutionDeferred) {
-		t.Fatalf("EvaluateClosed(succ 0) error = %v, want ErrPrimitiveExecutionDeferred", err)
+func TestZeroArityUnitIsImmediateWHNF(t *testing.T) {
+	value, err := EvaluateClosed(Prim(NaturalUint64(10)), DefaultEvalLimits)
+	if err != nil {
+		t.Fatal(err)
 	}
-}
-
-func TestZeroArityUnitExecutionStillDeferred(t *testing.T) {
-	_, err := EvaluateClosed(Prim(NaturalUint64(10)), DefaultEvalLimits)
-	if !errors.Is(err, ErrPrimitiveExecutionDeferred) {
-		t.Fatalf("EvaluateClosed(unit) error = %v, want ErrPrimitiveExecutionDeferred", err)
+	if value == nil || value.Kind != ValueUnit {
+		t.Fatalf("value = %#v, want unit", value)
 	}
 }
