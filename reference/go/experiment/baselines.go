@@ -25,13 +25,13 @@ func BLCBits(term *nex.Term) (int, error) {
 		if index > uint64(math.MaxInt-2) {
 			return 0, fmt.Errorf("BLC variable index too large for measurement")
 		}
-		return int(index) + 2, nil // BLC index i=k+1 is 1^i 0.
+		return int(index) + 2, nil
 	case nex.KindLam:
 		body, err := BLCBits(term.A)
 		if err != nil {
 			return 0, err
 		}
-		return 2 + body, nil // 00 body
+		return 2 + body, nil
 	case nex.KindApp:
 		left, err := BLCBits(term.A)
 		if err != nil {
@@ -41,7 +41,7 @@ func BLCBits(term *nex.Term) (int, error) {
 		if err != nil {
 			return 0, err
 		}
-		return 2 + left + right, nil // 01 left right
+		return 2 + left + right, nil
 	default:
 		return 0, ErrBaselineUnsupported
 	}
@@ -132,7 +132,7 @@ func toNamedLambda(term *nex.Term, env []int, nextID *int) (*namedTerm, error) {
 		return &namedTerm{kind: namedVar, binder: env[index]}, nil
 	case nex.KindLam:
 		id := *nextID
-		*nextID++
+		*nextID = *nextID + 1
 		bodyEnv := make([]int, 0, len(env)+1)
 		bodyEnv = append(bodyEnv, id)
 		bodyEnv = append(bodyEnv, env...)
@@ -240,11 +240,11 @@ func containsAnyCLVar(term *clTerm) bool {
 func jotCLBits(term *clTerm) int {
 	switch term.kind {
 	case clK:
-		return 5 // 11100
+		return 5
 	case clS:
-		return 8 // 11111000
+		return 8
 	case clApp:
-		return 1 + jotCLBits(term.a) + jotCLBits(term.b) // 1{A}{B}
+		return 1 + jotCLBits(term.a) + jotCLBits(term.b)
 	default:
 		panic("Jot encoding requires closed S/K term")
 	}
