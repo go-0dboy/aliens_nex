@@ -2,9 +2,9 @@
 
 [Русская версия](README.ru.md)
 
-Experimental repository for **NEX-1**: a compact, architecture-neutral, statically typed computational core for studying information-efficient transmission of programs when sender and receiver cannot assume a shared programming language, processor architecture, ABI, operating system, text encoding, or host runtime.
+Experimental repository for **NEX-1**: a compact, architecture-neutral, statically typed computational core for transmitting executable computational knowledge when sender and receiver cannot assume a shared programming language, processor architecture, ABI, operating system, text encoding, or host runtime.
 
-NEX is a research system. **Compact** is a design objective, not a proof of global minimality.
+The project objective is practical and research-oriented: **construct a formal system that an unknown receiver can be taught well enough to decode, type-check, execute, and eventually author programs in it**. Novelty is not a success criterion. Prior work is studied to improve the design.
 
 ## Current status
 
@@ -23,18 +23,13 @@ Stages 0–5 are complete. NEX-1 v0.1 currently has:
 
 Authoritative current state: [docs/STATUS.md](docs/STATUS.md).
 
-The 2026-09-19 full literature re-audit is recorded in:
-
-- [Canonical audit](docs/RESEARCH-AUDIT-2026-09-19.md)
-- [Russian mirror](docs/RESEARCH-AUDIT-2026-09-19.ru.md)
-- [ADR-0016](docs/adr/0016-post-stage5-literature-reaudit-corrections.md)
-
 ## Primary documents
 
 - [NEX-1 Core v0.1 specification](docs/NEX-1-v0.1.md) / [Russian translation](docs/NEX-1-v0.1.ru.md)
 - [Architecture](docs/ARCHITECTURE.md) / [Russian translation](docs/ARCHITECTURE.ru.md)
 - [Living research dissertation](docs/RESEARCH-DISSERTATION.md) / [Russian translation](docs/RESEARCH-DISSERTATION.ru.md)
 - [Post-Stage-5 research audit](docs/RESEARCH-AUDIT-2026-09-19.md) / [Russian mirror](docs/RESEARCH-AUDIT-2026-09-19.ru.md)
+- [Related work: teaching computation to an unknown receiver](docs/RELATED-WORK.md) / [Russian mirror](docs/RELATED-WORK.ru.md)
 - [Research source registry](docs/SOURCES.md)
 - [Current continuation status](docs/STATUS.md)
 - [Development workflow](docs/WORKFLOW.md)
@@ -42,11 +37,11 @@ The 2026-09-19 full literature re-audit is recorded in:
 - [Architecture Decision Records](docs/adr/README.md)
 - [AI agent instructions](AGENTS.md)
 
-English is canonical. README, specification, architecture overview, dissertation, and the post-Stage-5 audit maintain Russian mirrors according to the documentation policy.
+English is canonical. README, specification, architecture overview, dissertation, research audit, and related-work comparison maintain Russian mirrors where required by the documentation policy.
 
 ## NEX-1 v0.1 Core
 
-The current Core defines:
+The stable Core defines:
 
 - six term constructors: `Var`, `Lam`, `App`, `Let`, `Nat`, `Prim`;
 - zero-based de Bruijn indices;
@@ -69,7 +64,7 @@ The historical shorthand is:
 C = S + B + P
 ```
 
-but the re-audit makes the exact interpretation explicit. A numerical total is meaningful only for one concrete transmitted object under declared receiver assumptions `A`:
+The re-audit makes the exact interpretation stricter. A numerical total is meaningful only for one concrete transmitted object under declared receiver assumptions `A`:
 
 ```text
 C | A = |M_A|
@@ -109,7 +104,7 @@ The independently produced Python implementation was frozen before access to `re
 0 resource asymmetries
 ```
 
-The re-audit narrows the interpretation: this is strong **differential-conformance evidence of reconstructability on the tested surface**, not a proof of semantic correctness or specification completeness.
+The accepted interpretation is **strong differential-conformance evidence of reconstructability on the tested surface**, not a proof of semantic correctness or specification completeness.
 
 The 942 cases consist of:
 
@@ -132,20 +127,29 @@ A2(U)    A1 + exact universal binary machine U and framing
 A_host(H) terrestrial engineering control only
 ```
 
-No accepted complete receiver-neutral bootstrap currently exists, so full `B | A` and total `C | A` remain unknown.
+These profiles are experimental conditions, not claims about what an extraterrestrial intelligence necessarily knows. No accepted complete receiver-neutral bootstrap currently exists, so full `B | A` and total `C | A` remain unknown.
 
-## Related work and novelty boundary
+## Related work and design lessons
 
-NEX does **not** claim to have invented formal interstellar languages, executable interstellar messages, or types in extraterrestrial-message research. The maintained literature now explicitly includes:
+The project explicitly compares itself with Lincos, the DeVito–Oehrle science-based language, Lingua Cosmica, and especially CosmicOS. The purpose is to learn from prior approaches, not to establish priority.
 
-- Freudenthal's **Lincos**;
-- **CosmicOS**, which bootstraps programs and simulations;
-- Lingua Cosmica work using constructive type theory;
-- typed combinatory logic;
-- MDL/algorithmic-description literature;
-- call-by-need equivalence and differential-testing limitations.
+The comparison suggests a two-layer architecture:
 
-The narrower candidate contribution is the combination of compact typed binary Core, exact wire accounting, explicit receiver-conditioned bootstrap accounting, frozen comparative experiments including negative results, and blind independent reconstruction.
+```text
+NEX Teaching / Bootstrap Message
+        |
+        | progressively establishes meaning
+        v
+NEX-1 Core
+        |
+        | canonical typed programs
+        v
+subsequent computation
+```
+
+CosmicOS is especially relevant because it already treats the message as an executable curriculum: mathematics and logic are introduced first, then programs and simulations. NEX's complementary strength is the exact final target: a typed binary Core with explicit semantics, conformance tests, independent reconstruction evidence, and bit accounting.
+
+See [docs/RELATED-WORK.md](docs/RELATED-WORK.md) for the full comparison.
 
 ## Important current limitations
 
@@ -155,19 +159,26 @@ The project does not yet establish:
 - formal NEX-specific type safety;
 - a formal NEX-specific CBN/call-by-need equivalence theorem;
 - representativeness of the 17-program design corpus;
-- a complete receiver-neutral bootstrap;
+- a complete receiver-neutral teaching/bootstrap message;
 - numerical total `C | A`.
 
 The Stage 4 transition reduction `226151 -> 2484` is an evaluator transition-counter result, not a 98.90% wall-clock speedup claim.
 
 ## Next research direction
 
-Before an incompatible NEX-1 redesign, the post-Stage-5 audit recommends:
+The next stage should focus on **teachability and bootstrap construction**, not on an immediate Core redesign.
 
-1. NEX-specific preservation/canonical-forms/progress-or-safety metatheory;
-2. formal or mechanized call-by-need observational preservation for the exact Core;
-3. bounded exhaustive small-term cross-implementation testing;
-4. hold-out and independently specified workload families;
-5. one dependency-closed bootstrap under `A1(R)` or `A2(U)`.
+The central question is:
 
-The repository remains the source of truth. New measurements, falsifications, formal results, and literature corrections must update the research manuscript and source registry rather than relying on chat history.
+> What finite transmitted sequence can take a receiver from an explicit prior profile to demonstrable ability to decode, type-check, execute, and construct NEX programs?
+
+Candidate Stage-6 work includes:
+
+1. define the teaching/bootstrap message as a separate layer above the stable NEX-1 Core;
+2. design a progressive lesson sequence inspired by Lincos and CosmicOS;
+3. use type judgments and existing conformance vectors as receiver self-tests;
+4. define an operational success criterion for “NEX competence”;
+5. construct a finite machine-readable teaching artifact and measure its exact bits;
+6. continue NEX-specific metatheory and bounded-exhaustive cross-implementation testing as supporting evidence.
+
+The repository remains the source of truth. New measurements, falsifications, formal results, and literature corrections must update durable project documents rather than relying on chat history.
