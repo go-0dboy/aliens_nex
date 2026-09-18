@@ -1,11 +1,11 @@
 # NEX-1: минимальное архитектурно-независимое типизированное ядро для информационно-эффективной передачи вычислений
 
-## Проектирование, формализация, исполняемая семантика, эмпирическая оценка и протокол независимого восстановления
+## Проектирование, формализация, исполняемая семантика, эмпирическая оценка и независимое восстановление
 
 **Тип документа:** живая исследовательская рукопись в диссертационном стиле  
 **Основной язык:** английский  
 **Каноническая версия:** `RESEARCH-DISSERTATION.md`  
-**Граница учтённых данных:** Stage 0–4 завершены; checkpoint Stage 5.0–5.1, 18.09.2026  
+**Граница учтённых данных:** Stage 0–4 завершены; Stage 5 доведён до независимого восстановления и differential conformance (checkpoint 5.0–5.6), 18.09.2026  
 **Проект:** NEX / `aliens_nex`
 
 > Эта рукопись является научным синтезом исследования, поддерживаемым непосредственно в репозитории. Она ещё не оформлена под требования конкретного университета, ВАК, национальной системы аттестации или библиографического стандарта. Нормативное определение языка остаётся в `docs/NEX-1-v0.1.md`, а архитектурные и исследовательско-методологические решения — в принятых ADR.
@@ -14,27 +14,25 @@
 
 ## Аннотация
 
-В работе исследуется вопрос о том, может ли очень небольшое, архитектурно-независимое и статически типизированное вычислительное ядро уменьшить объём информации, необходимой для передачи исполняемого вычислительного знания между сторонами, которые не могут предполагать общий язык программирования, архитектуру процессора, ABI, операционную систему, текстовую нотацию или общую среду реализации. Объектом исследования является архитектурно-независимое представление и восстановление вычислений общего назначения в условиях крайне ограниченного канала передачи. Целевая функция определяется не только размером программ, а полной информационной стоимостью
+В работе исследуется вопрос о том, может ли очень небольшое, архитектурно-независимое и статически типизированное вычислительное ядро уменьшить объём информации, необходимой для передачи исполняемого вычислительного знания между сторонами, которые не могут предполагать общий язык программирования, архитектуру процессора, ABI, операционную систему, текстовую нотацию или общую среду реализации. Целью оптимизации является не только размер программы, а полная информационная модель
 
 ```text
 C = S + B + P
 ```
 
-где `S` — информация, необходимая для задания вычислительной системы, `B` — receiver-neutral bootstrap-информация, необходимая получателю для её реализации, а `P` — объём передаваемых программ.
+где `S` — информация, необходимая для описания вычислительной системы, `B` — информация bootstrap, необходимая получателю для её реализации при явно заданных исходных предположениях, а `P` — передаваемый программный payload.
 
-Экспериментальная система NEX-1 v0.1 использует шесть канонических конструкторов термов (`Var`, `Lam`, `App`, `Let`, `Nat`, `Prim`), zero-based de Bruijn indices, rank-1 let-полиморфизм Hindley–Milner, прямые arbitrary-precision натуральные литералы, произведения и суммы через фиксированные примитивы, общую рекурсию через `fix`, самоделимитирующееся префиксное бинарное представление и weak call-by-name semantics. Теоретическая база включает безымянную lambda-нотацию de Bruijn [1], Binary Lambda Calculus как компактный бинарный baseline [2], вывод типов Hindley–Milner и principal type schemes [3,4], типизированную рекурсию в духе PCF/LCF [5], integer coding Elias [6] и классические различия между call-by-name и lazy sharing [9–11].
+Экспериментальная система NEX-1 v0.1 использует шесть канонических конструкторов термов (`Var`, `Lam`, `App`, `Let`, `Nat`, `Prim`), нулевые индексы де Брёйна, rank-1 Hindley–Milner let-полиморфизм, натуральные числа произвольной точности, небольшой фиксированный набор примитивов, явную общую рекурсию через `fix`, самоделимитирующееся бинарное представление и weak call-by-name семантику. Теоретической основой служат безымянное представление де Брёйна [1; SRC-0001], Binary Lambda Calculus как компактный сравнительный baseline [2; SRC-0002], вывод типов Hindley–Milner и principal type schemes [3,4; SRC-0003, SRC-0004], типизированная рекурсия в традиции PCF/LCF [5; SRC-0005], универсальные коды Элиаса [6; SRC-0006] и работы по call-by-name и ленивому вычислению с sharing [9–11; SRC-0011–SRC-0013].
 
-Stages 1–3 создали исполняемые wire-, static- и dynamic-semantics. Stage 4 заморозил measurement rules и benchmark corpora до оптимизации и выполнил воспроизводимые сравнения. На принятом корпусе v0.3 из 17 программ канонические NEX-термы занимают 1371 бит при 345 AST-узлах. Наибольший измеренный вклад дают ссылки на примитивы — 460 бит (33,6%), далее `Var` — 286 бит (20,9%), `App` — 264 бита (19,3%), `Nat` — 244 бита (17,8%), `Lam` — 84 бита (6,1%), `Let` — 33 бита (2,4%). Прямой `Nat(255)` использует 21 бит против 2300 бит у проверенной repeated-`succ` конструкции. `Let` демонстрирует измеримую точку окупаемости, а не является безусловно выгодным. Не-нормативный principal-root-type envelope добавляет 134 бита, или 9,77% program-payload overhead, не доказывая уменьшения bootstrap.
+Stages 1–3 формируют исполняемые wire-, static- и dynamic-semantics. Stage 4 фиксирует benchmark corpora и правила измерений до оптимизаций. На принятом корпусе v0.3 из 17 программ канонические NEX-программы занимают 1371 бит при 345 AST-узлах. Ссылки на примитивы являются крупнейшим измеренным источником wire-cost: 460 бит, или 33,6%. Прямое `Nat(255)` занимает 21 бит против 2300 бит у проверенной цепочки повторных `succ`. `Let` имеет измеримую точку безубыточности и не является безусловно выгодным. Экспериментальная передача только principal root type добавляет 134 бита, или 9,77% `P`, не доказывая при этом сокращение bootstrap. На одинаковом pure-lambda подмножестве Binary Lambda Calculus компактнее NEX: 30 против 37 бит, поэтому глобальное превосходство NEX по размеру программ не заявляется. Экспериментальный call-by-need evaluator сохранил наблюдаемые результаты всех 17 программ, снизив число transitions Go-reference evaluator с 226151 до 2484 в сумме; это результат об эффективности реализации, а не об информационной стоимости передачи.
 
-На одинаковом pure-lambda subset из трёх программ Binary Lambda Calculus оказался компактнее NEX: 30 против 37 бит. Следовательно, universal NEX program-size superiority не подтверждается. Проектный tiny postfix structural encoding использует 1529 бит на полном корпусе против 1371 у NEX, но переиспользует NEX integer/primitive conventions и не является независимым сравнением полной bootstrap-стоимости. Экспериментальный call-by-need evaluator сохраняет одинаковый observable WHNF на всех 17 программах и уменьшает Go-reference transitions с 226151 до 2484 в сумме (98,90%), главным образом на рекурсивных и повторно форсируемых вычислениях. Это evidence о реализации, а не о стоимости передачи.
+Stage 5 проверяет новый вопрос: определяется ли поведение NEX спецификацией и language-neutral conformance artifacts независимо от исходной Go-реализации. До создания второй реализации был заморожен versioned conformance packet. Отдельная модель/контекст, получившая этот packet, но не `reference/go`, независимо восстановила wire codec, проверку closed scope, rank-1 HM inference и weak call-by-name evaluator на Python 3.12+ только со стандартной библиотекой. До сравнения с Go реализация прошла 17/17 integer wire vectors, 12/12 term wire vectors, 15/15 invalid wire vectors, 15/15 scope vectors, 19/19 type vectors, 21/21 evaluation vectors и 23/23 собственных теста. Затем полученная реализация была зафиксирована SHA-256 архива, и лишь после этой границы был открыт Go reference.
 
-Главный отрицательный результат сохраняется: полная информационная стоимость `C` пока численно неизвестна. `P` измеряется точно для выбранного корпуса, но Markdown size является только textual proxy для `S`, Go source — только host/reference proxy `R`, а реальный receiver-neutral bootstrap `B` неизвестен.
+В последующем post-freeze differential-эксперименте сравнивались только архитектурно-независимые наблюдения. Детерминированный набор содержит 942 случая: 17 программ frozen corpus v0.3, 325 сгенерированных корректных случаев, 100 сгенерированных случаев с одной статической ошибкой и 500 сгенерированных wire-термов. Все 942 portable observations совпали; не обнаружено ни semantic mismatch, ни resource asymmetry. Это сильное эмпирическое свидетельство того, что NEX-1 v0.1 может быть независимо восстановлен по замороженному specification/conformance packet без перевода исходной Go-реализации. Результат не является формальным доказательством полноты спецификации для всех возможных входов.
 
-Stage 5 начинает проверку того, можно ли восстановить NEX независимо от Go reference. ADR-0013 фиксирует implementation-input boundary и выбирает Python 3.12 standard-library-only для первой независимой реконструкции. При этом «вторая реализация» не считается независимой только потому, что написана на другом языке: текущий co-development context уже знает устройство Go reference и поэтому является когнитивно загрязнённым. Сильное independent evidence требует свежего изолированного контекста или другого реализатора, который получает только frozen conformance packet и разрешённую первичную теорию. Аудит Stage 5.1 уже выявил два presentation-layer omission: канонический alpha-normalized text principal type schemes и явный JSON fixture mapping для шестиконструкторного AST. Оба оформлены как packet observation conventions без изменения NEX-1 v0.1 semantics.
+Главной нерешённой переменной остаётся receiver-neutral bootstrap. `P` точно измерим на выбранных корпусах, тогда как Markdown-спецификация является лишь текстовым proxy для `S`, а размеры Go/Python-кода являются host artifacts и не равны `B`. Поэтому следующий исследовательский шаг — явное описание receiver assumption sets и условной стоимости `B | A`. До появления такого артефакта численное значение полной `C` остаётся недоказуемым, а проект не утверждает глобальную минимальность NEX или общее превосходство над альтернативными исчислениями.
 
-Таким образом, основной вклад текущего этапа — не заявление о глобальной минимальности, а создание исполняемой, фальсифицируемой и потенциально независимо проверяемой исследовательской системы, в которой утверждения о компактности, воспроизводимости и полной информационной стоимости можно проверять, а не предполагать.
-
-**Ключевые слова:** минимальный язык программирования, архитектурно-независимые вычисления, Binary Lambda Calculus, индексы de Bruijn, Hindley–Milner, кодирование программ, bootstrap, информационная стоимость, call-by-name, call-by-need, independent conformance, воспроизводимый benchmark.
+**Ключевые слова:** минимальный язык программирования, архитектурно-независимые вычисления, Binary Lambda Calculus, индексы де Брёйна, Hindley–Milner, бинарное кодирование, bootstrap, информационная стоимость, call-by-name, call-by-need, независимая реализация, differential conformance, воспроизводимое исследование.
 
 ---
 
@@ -42,144 +40,142 @@ Stage 5 начинает проверку того, можно ли восста
 
 ## 1.1 Мотивация
 
-Большинство языков программирования и форматов исполняемого кода предполагают общий контекст: кодировки символов, текстовый синтаксис, модель процессора, размер слова, object format, сервисы OS, соглашения компилятора или спецификацию VM. Для обычной земной разработки это естественно, но становится проблемой, если отправитель и получатель могут разделять только упорядоченный бинарный канал и базовые математические закономерности.
+Большинство исполняемого программного обеспечения предполагает значительный общий контекст: кодировки символов, синтаксис, модель процессора, разрядность, объектные форматы, сервисы ОС, компиляторы, виртуальные машины и соглашения о представлении данных. Для обычной разработки это полезно. В задаче, где отправитель и получатель могут разделять только надёжный упорядоченный канал и базовые математические закономерности, эти предположения становятся скрытой стоимостью.
 
-Мотивирующий мысленный эксперимент намеренно экстремален: как передать не просто данные, а повторно используемое вычислительное знание, если нельзя предполагать знание земного языка, CPU, ABI, OS или исходной нотации?
+Поэтому вопрос исследования состоит не просто в сжатии программы. Требуется понять, как передавать вычислительное знание, если нельзя считать известными земной язык программирования, CPU, ABI, ОС, текстовую кодировку или runtime.
 
-Минимизация длины программы недостаточна. Однобитная программа бесполезна, если для её понимания нужен огромный непереданный interpreter. И наоборот, сверхмалый interpreter может сделать все программы длиннее. Поэтому NEX исследует совместную функцию
+Однобитная программа бесполезна, если её смысл зависит от огромного непереданного интерпретатора. И наоборот, чрезмерно маленький универсальный интерпретатор может сделать все последующие программы слишком дорогими. Поэтому NEX рассматривает совместную стоимость:
 
 ```text
 C = S + B + P
 ```
 
-а не длину синтаксиса отдельно.
+Неизвестная величина не принимается равной нулю. Исходный код на host-языке не считается bootstrap для неизвестного получателя.
 
 ## 1.2 Научная проблема
 
-Проблема состоит в определении того, может ли компактное типизированное функциональное ядро дать выгодный баланс полной информационной стоимости при передаче вычислений общего назначения без общей платформы реализации.
+Необходимо определить, может ли компактное типизированное функциональное ядро обеспечить выгодный компромисс полной информационной стоимости для передачи вычислений общего назначения без общей вычислительной платформы и может ли это ядро быть независимо восстановлено из конечного specification/conformance package.
 
-Связанные аспекты:
+Проблема включает:
 
-1. **компактность представления** — малые, однозначные, самоделитирующиеся бинарные программы;
-2. **восстанавливаемость семантики** — scope, типы и смысл выполнения должны следовать из переданных правил;
-3. **вычислительная выразительность** — общая рекурсия и композиционное построение данных;
-4. **проверяемость** — детерминированное отклонение malformed и ill-typed программ;
-5. **стоимость bootstrap** — экономия program bits не должна скрывать большой receiver implementation;
-6. **эмпирическая фальсифицируемость** — compactness claims должны проверяться на frozen workloads и явных alternatives.
+1. компактность представления;
+2. детерминированное декодирование и валидацию;
+3. восстановление типов;
+4. вычислительную выразительность;
+5. non-strict семантику;
+6. стоимость bootstrap;
+7. независимую воспроизводимость;
+8. эмпирическую фальсифицируемость сравнительных утверждений.
 
 ## 1.3 Объект и предмет
 
-**Объект:** архитектурно-независимое представление и выполнение вычислений общего назначения в условиях крайне ограниченной передачи информации.
+**Объект:** архитектурно-независимое представление, проверка и выполнение вычислений общего назначения при крайне ограниченной передаче информации.
 
-**Предмет:** компромиссы между размером specification, receiver bootstrap complexity, program payload, static verifiability, evaluation strategy и независимой воспроизводимостью минимального typed lambda-core.
+**Предмет:** компромиссы между стоимостью спецификации, bootstrap получателя, размером программ, выводом типов, стратегией вычисления и независимой conformance-проверкой минимального типизированного lambda-core.
 
 ## 1.4 Цель
 
-Построить и эмпирически оценить минимальное исполняемое ядро, чья бинарная форма и семантика достаточно явны для независимого восстановления, а также разработать воспроизводимый метод проверки его полной communication cost относительно альтернатив.
+Создать и эмпирически проверить минимальное исполняемое ядро, бинарная форма и семантика которого достаточно явны для независимого восстановления, и выработать воспроизводимую методику оценки его полной информационной стоимости относительно альтернатив.
 
 ## 1.5 Задачи
 
-1. Определить минимальный architecture-neutral Core и его invariants.
-2. Определить canonical self-delimiting wire format.
-3. Реализовать executable encode/decode conformance.
-4. Реализовать static scope/type semantics.
-5. Реализовать dynamic semantics без скрытого machine behavior.
-6. Создать language-neutral conformance artifacts.
-7. Замораживать benchmark corpora до оптимизации.
-8. Измерять constructor-level wire cost и design trade-offs.
-9. Сравнивать selected baselines при явных assumptions.
-10. Отделять точный program cost от specification/implementation/bootstrap proxies.
-11. Проверить, может ли independent implementation восстановить то же поведение без доступа к Go source.
-12. Явно определить receiver assumptions до назначения численного bootstrap cost.
-13. Сохранять положительные, отрицательные, условные и нерешённые результаты в living research record.
+1. Определить архитектурно-независимый Core.
+2. Определить канонический самоделимитирующийся wire-format.
+3. Создать исполняемую encode/decode conformance.
+4. Определить closed-scope и principal-type semantics.
+5. Определить weak non-strict dynamic semantics.
+6. Отделить валидность языка от конечных implementation resource limits.
+7. Зафиксировать benchmark corpora до оптимизаций.
+8. Измерить точную wire-cost конструкций и контролируемых альтернатив.
+9. Сравнивать внешние baselines только при явных предположениях.
+10. Разделить точный `P`, proxies и неизвестный bootstrap.
+11. Проверить независимое восстановление без доступа к первой реализации.
+12. Явно определить receiver assumptions до численной оценки bootstrap.
+13. Сохранять положительные, отрицательные и нерешённые результаты в живой исследовательской рукописи.
 
 ## 1.6 Исследовательские вопросы
 
-**RQ1.** Можно ли задать typed lambda-core детерминированное, architecture-neutral, self-delimiting binary representation с executable conformance?
+**RQ1.** Можно ли задать детерминированное архитектурно-независимое самоделимитирующееся бинарное представление NEX с исполняемой conformance-проверкой?
 
-**RQ2.** Можно ли восстанавливать static validity и principal types без ordinary term-level type annotations?
+**RQ2.** Можно ли восстанавливать principal rank-1 types без обычных term-level type annotations?
 
-**RQ3.** Может ли semantics оставаться простой и non-strict, допуская существенно более эффективные реализации с теми же observables?
+**RQ3.** Может ли простая weak call-by-name semantics сосуществовать с существенно более эффективными реализациями, сохраняющими portable observations?
 
-**RQ4.** Какие Core constructs доминируют в transmitted program cost и оправдывают ли себя `Let` и direct `Nat`?
+**RQ4.** Какие конструкции доминируют в `P`, и оправданы ли `Let` и direct `Nat`?
 
-**RQ5.** Как NEX program payload соотносится с selected alternatives в контролируемых сравнениях?
+**RQ5.** Как NEX сравнивается с выбранными альтернативными кодировками при контролируемых условиях?
 
-**RQ6.** Можно ли уже численно оценить `C = S + B + P`, а если нет — какие evidence отсутствуют?
+**RQ6.** Можно ли уже вычислить `C = S + B + P`?
 
-**RQ7.** Определяют ли опубликованные specification и conformance packet поведение независимо от Go reference?
+**RQ7.** Может ли реализация без доступа к `reference/go` восстановить то же portable wire/static/dynamic behavior из замороженного packet?
 
-**RQ8.** При каких явных receiver assumptions можно определить measurable bootstrap `B | A`, не подменяя его host source size?
+**RQ8.** При каких явно заданных предположениях получателя `A` bootstrap может быть представлен и измерен как `B | A`?
 
 ## 1.7 Рабочие гипотезы
 
-**H1.** Nameless lambda representation с compact prefix encoding даёт малый и однозначный wire format.
+**H1.** Безымянные bindings и компактный prefix format дают небольшую однозначную wire-форму.
 
-**H2.** HM-style erased typing способен уменьшать `P`, но total benefit зависит от неизвестного bootstrap inference [3,4].
+**H2.** Rank-1 HM уменьшает type payload, но итоговая выгода зависит от bootstrap inference.
 
-**H3.** Небольшое число дополнительных constructs, таких как direct naturals и `Let`, может уменьшать payload, даже увеличивая specification.
+**H3.** `Let` и direct naturals могут уменьшать `P`, несмотря на увеличение языка.
 
-**H4.** Weak CBN способен служить простой normative semantics, а call-by-need sharing — observationally equivalent optimization [9–11].
+**H4.** Weak CBN может оставаться нормативным, а sharing — быть observationally equivalent оптимизацией на проверенном pure Core.
 
-**H5.** Нельзя заранее предполагать преимущество NEX над BLC на pure lambda terms [2].
+**H5.** NEX нельзя заранее считать компактнее BLC на pure lambda terms.
 
-**H6.** Program payload недостаточен для global superiority claim; нужны receiver-neutral `S` и `B`.
+**H6.** `P` недостаточно для доказательства общего превосходства.
 
-**H7.** Достаточно явные specification + language-neutral vectors должны позволить независимому реализатору восстановить те же portable observables без Go implementation guidance.
+**H7.** Достаточно явный specification/conformance packet позволяет независимому реализатору восстановить поведение NEX без reference-source guidance.
 
-## 1.8 Научная новизна и значимость на текущей границе данных
-
-Новизна не состоит в изобретении lambda calculus, de Bruijn indices, HM или lazy evaluation — это established foundations. Исследовательская новизна проекта заключается в объединении этих идей в явно information-accounted transmission experiment, где specification, bootstrap, program payload, conformance и implementation independence рассматриваются как единая фальсифицируемая система.
-
-Практическая значимость текущего этапа включает executable conformance, reproducible measurements, frozen corpus discipline и protocol, способный выявлять hidden assumptions между co-developed specification и reference implementation.
+**H8.** Численная стоимость bootstrap имеет смысл только при явных receiver assumptions.
 
 ---
 
-# 2. Теоретическая база и связанные работы
+# 2. Теоретическая база
 
-## 2.1 de Bruijn indices
+## 2.1 Безымянные переменные
 
-De Bruijn показал, что связанные переменные можно представлять числовыми ссылками вместо имён [1; SRC-0001]. NEX использует zero-based indices; alpha-renaming не несёт wire information.
+Де Брёйн показал, что связанные переменные могут быть представлены числовой позицией вместо имени [1]. NEX принимает этот принцип и фиксирует нулевые индексы. Alpha-renaming не влияет на передаваемый терм.
 
 ## 2.2 Binary Lambda Calculus
 
-BLC Тромпа демонстрирует компактное бинарное представление untyped lambda terms [2; SRC-0002] и служит внешним compactness baseline. NEX не копирует BLC: он добавляет static typing, `Let`, direct naturals и fixed primitives, поэтому Stage 4 сравнивает только identical pure-lambda subset.
+BLC Тромпа показывает практичность компактной прямой бинарной кодировки lambda terms [2]. Для NEX он служит как историческим ориентиром, так и baseline, способным опровергнуть чрезмерные утверждения о компактности.
 
 ## 2.3 Hindley–Milner
 
-Milner задаёт decidable rank-1 polymorphic inference [3; SRC-0003], Damas–Milner — principal type schemes [4; SRC-0004]. NEX использует эти идеи для reconstruction типов. Результат Wells по System F [7; SRC-0007] напоминает, что более сильный implicit polymorphism нельзя автоматически считать сохраняющим decidability.
+Работа Милнера и результат Дамаса–Милнера о principal type schemes лежат в основе rank-1 let-полиморфизма NEX [3,4]. Результат Уэллса о System F используется как граница: усиление неявного полиморфизма нельзя считать бесплатно сохраняющим decidable inference [7].
 
-## 2.4 Typed recursion
+## 2.4 Рекурсия
 
-Plotkin LCF/PCF даёт precedent малого typed functional language с naturals и fixed-point recursion [5; SRC-0005]. Точный primitive set и wire NEX являются проектными решениями.
+Работа Плоткина по LCF/PCF даёт исторический прецедент малого типизированного функционального языка с натуральными операциями и fixed-point recursion [5]. Конкретный primitive basis NEX является проектным решением.
 
-## 2.5 Self-delimiting integers
+## 2.5 Универсальные коды
 
-Elias предложил universal integer codes [6; SRC-0006]. NEX определяет `U(n)` как gamma coding от `n + 1`.
+Коды Элиаса дают семейство самоделимитирующихся кодов целых [6]. NEX определяет `U(n)` как gamma code для `n+1`.
 
-## 2.6 Evaluation strategy
+## 2.6 Стратегия вычисления
 
-Plotkin формализовал различие CBN/CBV [9; SRC-0011]. Launchbury описал lazy semantics с sharing [10; SRC-0012], Sestoft — abstract-machine treatment [11; SRC-0013]. NEX использует weak CBN нормативно, а call-by-need изучает только как optimization.
+Плоткин формализует различия call-by-name/call-by-value [9]. Launchbury и Sestoft дают основания для lazy sharing [10,11]. NEX оставляет weak CBN нормативным и рассматривает call-by-need как реализационную оптимизацию при сохранении portable result.
 
-## 2.7 Combinatory alternatives
+## 2.7 Комбинаторные альтернативы
 
-Combinatory logic даёт альтернативные малые basis [8; SRC-0009]. Barker Iota/Jot задаёт Jot mapping, использованный в Stage 4 [12; SRC-0014]. Shortest-Jot claim не делается.
+Классическая комбинаторная логика и материалы Barker по Iota/Jot используются как сравнительный фон [8,12]. Jot-эксперимент NEX не заявляет поиск кратчайшей программы.
 
-## 2.8 Portable core и embedding
+## 2.8 Разделение Core и окружения
 
-WebAssembly Core служит примером отделения portable computational core от host embedding [13; SRC-0008], но NEX не заимствует его конкретную machine/memory/module model.
+WebAssembly Core используется только как современный пример архитектурного разделения portable core и embedding [13], но не как семантическая основа NEX.
 
 ---
 
-# 3. Методология исследования
+# 3. Методология
 
-## 3.1 Артефактно-экспериментальный цикл
+## 3.1 Evidence-gated цикл
 
 ```text
 Problem
  -> Contract
  -> Invariant
- -> Failing test / executable example
+ -> Executable example / failing test
  -> Implementation
  -> Verification
  -> Diff review
@@ -187,58 +183,66 @@ Problem
  -> Research synthesis checkpoint
 ```
 
-Долговременной памятью проекта является repository, а не chat history.
+Репозиторий является долговременной памятью исследования.
 
-## 3.2 Классы evidence
+## 3.2 Классы утверждений
 
 Различаются:
 
-1. established external result;
-2. NEX design decision;
-3. reproducible NEX measurement;
-4. inference from current evidence;
-5. open hypothesis / unknown.
+1. внешние установленные результаты;
+2. проектные решения NEX;
+3. воспроизводимые измерения;
+4. интерпретации текущих данных;
+5. гипотезы и неизвестные величины.
 
 ## 3.3 Воспроизводимость
 
-Используются wire/static/evaluation vectors, negative cases, unit/property/fuzz tests, frozen corpora, deterministic experiment CLIs и clean-checkout GitHub Actions.
+Используются language-neutral conformance JSON, unit/property/fuzz tests, frozen corpora, deterministic experiment CLIs, Git/hash checkpoints, CI clean checkout и versioned reports.
 
-## 3.4 Frozen-corpus rule
+## 3.4 Frozen corpus
 
-ADR-0010 делает corpus version immutable после публикации comparative results. Сохранённый v0.2 с `factorial-5`, превысившим default CBN budget, является примером сохранения неудобного результата.
+После сравнительных выводов версия corpus не изменяется. Неудобные результаты сохраняются; например, v0.2 хранит факт превышения default CBN budget программой `factorial-5`.
 
-## 3.5 Total-information accounting
+## 3.5 Протокол независимости
+
+Вторая реализация не считается независимой только потому, что написана на другом языке. Если implementer видел первую реализацию, он может неосознанно перенести скрытые предположения.
+
+Поэтому Stage 5 замораживает packet до blind implementation, исключает `reference/go` и фиксирует полученную вторую реализацию content hash до разрешения прямого сравнения.
+
+## 3.6 Differential conformance
+
+После freeze сравниваются только portable observations:
+
+```text
+wire bits
+normalized principal type / portable static error
+observable WHNF / portable evaluation error
+```
+
+Object layout, fresh IDs, allocations, transition counts и internal runtime representation не являются conformance criteria.
+
+## 3.7 Информационный учёт
 
 ```text
 C = S + B + P
 ```
 
-- `P` — exact canonical program bits;
-- `S` — receiver-neutral specification cost, пока без accepted artifact;
-- `B` — receiver-neutral bootstrap cost, неизвестен;
-- `R` — host/reference proxy, который нельзя подменять под `B`.
+- `P` — точный размер canonical program bits для заданного corpus;
+- `S` — receiver-neutral specification cost, пока не сведённый к принятому артефакту;
+- `B` — receiver-neutral bootstrap, пока неизвестный;
+- `R` — размер host/reference implementation, не равный `B`.
 
-## 3.6 Independence как экспериментальная переменная
-
-Stage 5 вводит отдельное требование: independence implementation должна быть контролируемым условием.
-
-Вторая реализация на новом host language не считается независимой, если implementer уже знает внутреннее устройство первой. ADR-0013 поэтому отделяет
+Будущая оценка bootstrap должна быть условной:
 
 ```text
-packet/protocol construction
-        от
-independent implementation evidence
+B | A
 ```
-
-Первая независимая реализация может использовать только frozen packet, selected primary theory и документацию Python 3.12 standard library. `reference/go/**` и implementation-revealing project material запрещены до freeze checkpoint.
-
-Текущий co-development context уже участвовал в Go reference. Поэтому он может строить protocol, packet и neutral infrastructure, но не должен выдавать новую реализацию, написанную по памяти, за независимое evidence.
 
 ---
 
-# 4. Дизайн NEX-1 v0.1
+# 4. NEX-1 v0.1
 
-## 4.1 Terms
+## 4.1 Термы
 
 ```text
 Term ::= Var(index)
@@ -249,14 +253,12 @@ Term ::= Var(index)
        | Prim(id)
 ```
 
-## 4.2 Types
+## 4.2 Типы
 
 ```text
 T ::= a | 1 | N | T -> T | T * T | T + T
 S ::= forall a1 ... an. T
 ```
-
-Static semantics используют rank-1 HM-style inference с instantiation, generalization, unification и occurs check [3,4].
 
 ## 4.3 Core primitives
 
@@ -274,7 +276,7 @@ Static semantics используют rank-1 HM-style inference с instantiation
 10 unit
 ```
 
-## 4.4 Wire
+## 4.4 Wire format
 
 ```text
 00   U(k)   Var(k)
@@ -285,27 +287,23 @@ Static semantics используют rank-1 HM-style inference с instantiation
 1111 U(p)   Prim(p)
 ```
 
-`U(n)` = Elias gamma от `n + 1`.
-
 ## 4.5 Dynamic semantics
 
-Нормативная стратегия — weak CBN. Arguments и `Let` values delayed, reduction under `Lam` не производится до применения, primitive forcing selective, `fix` задаёт общую рекурсию.
+Нормативна weak call-by-name semantics: аргументы и `Let` values задерживаются, под `Lam` до применения reduction не выполняется, примитивы форсят только необходимые части, а общая рекурсия выражается через `fix`.
 
 ---
 
-# 5. Stage 0 — исследовательская и архитектурная база
+# 5. Stages 0–3: формальная и исполняемая основа
 
-Stage 0 ввёл canonical documentation, Russian mirrors, architecture/workflow/testing docs, ADR governance, repository-as-memory и primary-source registry.
+## 5.1 Stage 0
 
-**Вывод:** до оптимизации минимального языка необходим механизм, предотвращающий silent semantic drift и retrospective rationale rewriting.
+Созданы каноническая спецификация, русские зеркала, ADR, source registry, workflow/testing rules и repository-as-memory дисциплина.
 
----
+## 5.2 Stage 1 — wire
 
-# 6. Stage 1 — canonical wire foundation
+Реализованы arbitrary-precision `U(n)`, term encode/decode, exact/prefix decoding, malformed-input classes и отдельные resource limits.
 
-Stage 1 реализовал arbitrary-precision `U(n)`, six-constructor term model, encode/decode, exact/prefix APIs, malformed errors и resource limits, отделённые от wire invalidity.
-
-Wire corpus содержит 17 integer vectors, 12 term vectors и 15 invalid exact-input vectors.
+Conformance: 17 integer, 12 term и 15 invalid exact-input vectors.
 
 ```text
 Var(0)                    001
@@ -315,51 +313,33 @@ Lam(Var(0))               01001
 Lam(App(Prim(1),Var(0)))  01101111010001
 ```
 
-**Вывод:** RQ1 поддерживается executable conformance, но formal proof и independent decoder пока отсутствуют.
+**Вывод:** RQ1 поддержан эмпирически для v0.1 wire grammar.
+
+## 5.3 Stage 2 — static semantics
+
+Реализованы closed scope, Type/TypeScheme, FTV, substitutions, unification, occurs check, primitive schemes, instantiation, let-generalization и Algorithm-W-style inference.
+
+**Вывод:** RQ2 функционально поддержан, но total-cost optimality erased typing не доказана.
+
+## 5.4 Stage 3 — dynamic semantics
+
+Определён weak CBN evaluator и observable WHNF conformance. Проверена lazy selective forcing; resource refusal отделён от invalidity и divergence proof.
+
+**Вывод:** получена стабильная динамическая семантика, пригодная как цель независимой реализации.
 
 ---
 
-# 7. Stage 2 — static validation и principal types
+# 6. Stage 4: эмпирическая проверка
 
-Реализованы closed de Bruijn scope, type representation, substitutions, unification + occurs check, primitive schemes, instantiation, generalization и Algorithm-W-style inference.
+## 6.1 Corpus v0.3
 
-Ordinary type annotations erased из v0.1 wire. ADR-0007 фиксирует это как design choice, а не доказанный global optimum.
+| Метрика | Значение |
+|---|---:|
+| Программ | 17 |
+| AST nodes | 345 |
+| Wire bits | 1371 |
 
-**Вывод:** RQ2 функционально поддерживается reference implementation, total comparison explicit/certified alternatives остаётся открыт.
-
----
-
-# 8. Stage 3 — dynamic semantics и evaluator
-
-Stage 3 реализовал weak CBN и проверял саму non-strictness:
-
-```text
-(lambda x. 7) divergingTerm
-ifz 0 42 divergingTerm
-fst (pair 1 divergingTerm)
-```
-
-должны давать `7`, `42`, `1`, не вычисляя irrelevant computation. Curried primitives, `fix`, WHNF и resource refusal покрыты language-neutral vectors.
-
-**Вывод:** RQ3 поддерживается на normative-semantics уровне; sharing вынесен в empirical experiment.
-
----
-
-# 9. Stage 4 — эмпирическая проверка и benchmarking
-
-Stage 4 завершён PR #6, squash merge `ebffde6c8669f65dfcba98d31d261d59b48d4dd0`. Финальный PR head прошёл CI `35377200520`, post-merge `main` — `35377892126`.
-
-## 9.1 Frozen corpus
-
-```text
-programs   17
-wire bits  1371
-AST nodes  345
-```
-
-## 9.2 Wire attribution
-
-| Constructor | Bits | Share |
+| Конструктор | Биты | Доля |
 |---|---:|---:|
 | `Prim` | 460 | 33,6% |
 | `Var` | 286 | 20,9% |
@@ -368,427 +348,511 @@ AST nodes  345
 | `Lam` | 84 | 6,1% |
 | `Let` | 33 | 2,4% |
 
-Ранняя гипотеза о доминировании `App` не подтверждена v0.3; largest measured category — `Prim`.
+Гипотеза о доминировании `App` не подтверждена на данном corpus; крупнейшим измеренным источником оказался `Prim`.
 
-## 9.3 `Let`
+## 6.2 `Let`
 
-Для 5-bit payload `Let` стоит +4 bits при 2 uses, +2 при 3, tie при 4, и экономит 8 при 8. Для tested 14-bit payload два uses уже экономят 5 bits.
+Для 5-битного payload `Let` проигрывает при двух/трёх использованиях, даёт ничью при четырёх и экономит 8 бит при восьми. Для проверенного 14-битного payload два использования уже дают экономию 5 бит.
 
-**Решение:** сохранить `Let`.
+**Решение:** `Let` сохраняется.
 
-## 9.4 Direct naturals
+## 6.3 Direct `Nat`
 
 ```text
-Nat(255)          21 bits
-succ-chain(255) 2300 bits
+Nat(255)          21 бит
+succ-chain(255) 2300 бит
 ```
 
-**Решение:** сохранить direct `Nat`; global numeric-code optimality не заявляется.
+**Решение:** direct naturals сохраняются; глобальная оптимальность конкретного numeric code не заявляется.
 
-## 9.5 Root-type experiment
+## 6.4 Root-type envelope
 
 ```text
-erased term bits  1371
-root type bits      134
-hybrid total       1505
+erased terms      1371 бит
+root type           134 бита
+hybrid             1505 бит
 overhead           +9,77%
 ```
 
-Это только `Delta P`; bootstrap saving не доказан.
+Это измеряет только `Delta P`, а не уменьшение `B`.
 
-**Решение:** сохранить erased HM в v0.1 до реального checker/bootstrap comparison.
+## 6.5 Baselines
 
-## 9.6 Baselines
-
-Pure-lambda subset:
+На одинаковом pure-lambda subset:
 
 ```text
-NEX  37 bits
-BLC  30 bits
-Jot via fixed SK translation  288 bits
+NEX  37 бит
+BLC  30 бит
 ```
 
-Universal NEX-over-BLC claim запрещён.
+Поэтому общее превосходство NEX над BLC не заявляется.
 
-Full v0.3:
+Tiny postfix baseline на полном corpus: 1529 бит против 1371 у NEX, но baseline наследует integer/primitive assumptions NEX и не является независимым total-bootstrap сравнением.
+
+## 6.6 CBN vs call-by-need
 
 ```text
-NEX canonical wire  1371 bits
-tiny postfix stack  1529 bits
+CBN transitions          226151
+call-by-need transitions   2484
+reduction                 98,90%
 ```
 
-Tiny stack reuse NEX numeric/primitive assumptions, поэтому сравнение structural, а не total-bootstrap.
+Все 17 observable results совпали. Выигрыш сосредоточен в тяжёлых recursive/reused workloads и не является прямой частью `C`.
 
-## 9.7 CBN vs call-by-need
+## 6.7 Accounting
 
-Все 17 программ имеют одинаковый observable WHNF.
-
-```text
-CBN transitions             226151
-call-by-need transitions      2484
-reduction                    98,90%
-memo hits                       237
-programs improved              6/17
-```
-
-Например `factorial-4`: 209315 -> 895. Это host/reference evidence, не часть `C`.
-
-**Решение:** weak CBN нормативен, call-by-need разрешён при observable equivalence.
-
-## 9.8 Total information
-
-```text
-P exact                         1371 bits
-spec Markdown proxy           23440 UTF-8 bytes
-selected Go reference Core    43013 UTF-8 bytes
-B                              unknown
-C                              not numerically computable
-```
-
-**Вывод Stage 4:** локальные design decisions получили evidence, но global minimality и numerical total cost не подтверждены.
+`P=1371` бит известно точно. Markdown specification и Go source — только proxies. `R != B`; `C` пока численно не вычисляется.
 
 ---
 
-# 10. Stage 5 — независимое восстановление и receiver-neutral bootstrap
+# 7. Stage 5: независимое восстановление
 
-Stage 5 начат. Текущая граница evidence включает только Stage 5.0 и Stage 5.1; сама independent implementation намеренно не начата в co-development context.
+## 7.1 Зачем нужна вторая реализация
 
-## 10.1 Stage 5.0 — independence protocol
+Specification и первая implementation могли разделять одно и то же неявное допущение. Поэтому внутренне зелёные тесты недостаточны. Более сильная проверка — дать спецификацию другому implementer, не раскрывая reference source.
 
-ADR-0013 фиксирует packet относительно commit:
+ADR-0013 делает когнитивную независимость условием эксперимента, а не неформальным обещанием.
+
+## 7.2 Frozen conformance packet
+
+Packet зафиксирован относительно commit:
 
 ```text
 4f9c50aed13cdbdf72c9ce6510521477d49c05a5
 ```
 
-Первый independent implementation target:
+Первый independent target: Python 3.12+ standard-library-only. Packet содержит canonical specification, conformance vectors, выбранные normative ADR, source hashes и packet-local observation rules, но не раскрывает Go evaluator architecture.
+
+Audit выявил два presentation omissions:
+
+- canonical scheme text `T0`, `T1`, ...;
+- явное определение JSON fixture AST.
+
+Они оформлены как observation conventions и не меняют язык.
+
+## 7.3 Independent checkpoint
+
+Отдельная модель/контекст получила только frozen packet и инструкции эксперимента. Полученный архив:
 
 ```text
-Python 3.12+
-standard library only
+nex1-independent-python-v0.1.zip
+SHA-256 = 783e4186f9a8c024f00a732deae33b547c81ed4d7639c610a1e8bc5997eb3fbe
 ```
 
-Python выбран из-за существенного отличия host model от Go и наличия arbitrary-precision integers без third-party dependency. Его source size не является `B`.
-
-Packet allowlist включает canonical spec, wire/static/eval conformance и только ADR, необходимые для Core validity/resource semantics. До freeze checkpoint запрещены `reference/go/**`, Stage 4 experiment material, benchmark corpora, status/dissertation/history documents и ADR-0008, описывающий Go evaluator architecture.
-
-Текущий co-development context уже знает Go reference, поэтому новая реализация здесь была бы портом, но не сильным independent evidence. Требуется fresh isolated context или другой implementer с доступом только к packet и allowlisted theory.
-
-## 10.2 Reproducible packet
-
-`stage5/conformance-packet-v0.1/manifest.json` хранит exact Git blob hashes frozen source files. `stage5/build_packet.py` проверяет их, валидирует schema IDs, materializes только allowlisted files и создаёт SHA-256 manifest.
-
-Dedicated GitHub Actions run `35379868436` — success. Опубликован standalone artifact:
+ZIP comment / внешний checkpoint marker:
 
 ```text
-name: nex1-independent-conformance-packet-v0.1
-artifact id: 10560808823
-archive size: 28199 bytes
-artifact digest: sha256:fca1fddff742674c4e0b832ea53022d712f292d1361dfbe9b1b62c022ead15c3
+a594b73b711998df04b45eec296086d5577fba2f
 ```
 
-Размер архива — engineering artifact size, не `S` и не `B`.
+До открытия Go были получены:
 
-## 10.3 Stage 5.1 completeness audit
+| Проверка | Результат |
+|---|---:|
+| Integer wire | 17 / 17 |
+| Term wire | 12 / 12 |
+| Invalid wire | 15 / 15 |
+| Scope | 15 / 15 |
+| Types | 19 / 19 |
+| Evaluation | 21 / 21 |
+| Independent tests | 23 / 23 |
 
-Audit не обнаружил известного отсутствующего Core semantic rule, блокирующего первый independent pass, но выявил два presentation-layer omission.
+Дополнительно проведены 20000 generated wire round trips, проверки больших arbitrary-precision integer, typing/laziness и resource separation без обнаруженного дефекта.
 
-### F1 — principal type observation format
+Внутренняя архитектура не обязана совпадать с Go. Например, independent evaluator использует dedicated `FixThunk`, а не точное представление рекурсии Go reference.
 
-Principal schemes семантически определены с точностью до alpha-renaming, но static conformance хранит текст `T0`, `T1`, ... . Теперь packet задаёт canonical comparison rendering: quantified variables переименовываются по first occurrence, compound monotypes fully parenthesized.
+## 7.4 Защита freeze
 
-**Классификация:** conformance observation-format omission, не Core typing ambiguity.
+Для каждого импортированного author-written файла записаны byte length и SHA-256. CI сначала проверяет эти hashes, затем материализует canonical packet и запускает неизменённый verifier. Это не позволяет после сравнения незаметно «исправить» independent implementation и выдать исправление за blind reconstruction.
 
-### F2 — JSON fixture mapping
+## 7.5 Post-freeze differential conformance
 
-Conformance использовал JSON `kind/value/a/b`, но JSON не является NEX wire syntax и mapping не был явно зафиксирован как fixture contract.
+Только после фиксации archive SHA был открыт Go reference.
 
-**Классификация:** test-fixture representation omission, не Core wire ambiguity.
+Детерминированный набор `seed=20260918`:
 
-F1/F2 оформлены в `stage5/conformance-packet-v0.1/OBSERVATIONS.md` без изменения NEX-1 v0.1 semantics.
+| Группа | Случаи |
+|---|---:|
+| Frozen corpus v0.3 | 17 |
+| Generated valid | 325 |
+| Generated static single-defect | 100 |
+| Generated wire | 500 |
+| **Всего** | **942** |
 
-### F3 — deliberately unspecified details
+Сравнивались:
 
-Fresh type-variable allocation, substitution-map layout, evaluator object representation и environment/substitution machinery остаются implementation-specific. Packet сравнивает normalized principal schemes и observable WHNF, а не host internals.
+```text
+canonical wire bits
+normalized principal type / static error class
+observable WHNF / evaluation error class
+```
 
-### F4 — error precedence
+Результат:
 
-Не вводится искусственный global precedence rule для гипотетического input с несколькими independent static defects. Если independent/generated testing покажет необходимость такого portable rule, Stage 5.6 добавит минимальный explicit case.
+```text
+portable matches       942
+semantic mismatches      0
+resource asymmetries     0
+success                true
+```
 
-## 10.4 Интерпретация
+CI evidence:
 
-Даже до второй реализации Stage 5 уже показал пользу independent reconstruction: он вынудил разделить **language semantics**, **test presentation conventions** и **reference implementation architecture**. Именно такие hidden dependencies трудно обнаружить, тестируя только одну реализацию против её же assumptions.
+```text
+reference-go        35384938291  success
+stage5-independence 35384938418  success
+stage5-differential 35384938381  success
+```
 
-## 10.5 Следующий checkpoint
+Artifact ID `10563821507`, digest:
 
-Stage 5.2–5.4 должны выполняться в fresh isolated context по frozen packet. До открытия `reference/go` должен быть frozen pre-comparison implementation commit. После этого каждое discrepancy классифицируется как specification ambiguity/omission, Go bug, independent implementation bug, conformance gap или deliberately unspecified behavior.
+```text
+sha256:bda41629934f1c7b8f2554726002c3af5186d8cb19df649d8fab72129f8ba62a
+```
 
-Bootstrap-часть Stage 5 затем определит explicit receiver assumption sets и будет записывать измерения условно как `B | A`.
+## 7.6 Интерпретация
+
+H7 поддержана, а RQ7 получает наиболее сильный текущий ответ:
+
+> На замороженном conformance suite, принятом benchmark corpus и детерминированных generated differential cases реализация, созданная без перевода `reference/go`, восстановила то же portable wire/static/observable dynamic behavior.
+
+Ограничение важно: конечный набор тестов не доказывает, что prose specification однозначно определяет каждый возможный term или malformed input. Это сильное empirical conformance evidence, но не формальное доказательство semantic equivalence.
+
+## 7.7 Неоднозначности
+
+Independent implementation отдельно зафиксировала вопрос diagnostic precedence для терма с несколькими независимыми static defects. Python выбирает scope-first. После freeze выяснилось, что Go делает то же, но совпадение не превращается автоматически в normative rule.
+
+Текущий differential result не выявил:
+
+- Go semantic bug;
+- independent Python semantic bug;
+- contradictory conformance vector;
+- новую Core ambiguity, требующую несовместимого изменения v0.1.
+
+Поэтому global multi-error precedence остаётся implementation-specific.
+
+## 7.8 Вывод независимого восстановления
+
+RQ7 сильно поддержан в пределах текущей evidence horizon. NEX-1 v0.1 теперь опирается не только на co-developed specification + Go, но и на hash-frozen second reconstruction с zero-mismatch post-freeze differential checkpoint.
+
+Главный нерешённый вопрос смещается к bootstrap: что должен знать получатель до начала передачи NEX и сколько информации требуется для восстановления системы при таких assumptions.
 
 ---
 
-# 11. Обсуждение и ответы на RQ
+# 8. Ответы на исследовательские вопросы
 
-## 11.1 RQ1
+## RQ1
 
-**Поддерживается reference implementation; independent confirmation pending.** Wire grammar и vectors зрелые, но Stage 5 ещё должен доказать независимое восстановление.
+**Поддержан эмпирически.** Wire имеет language-neutral vectors, property/fuzz evidence и согласие двух независимо разработанных реализаций.
 
-## 11.2 RQ2
+## RQ2
 
-**Функционально поддерживается, globally unresolved.** HM inference работает; root-type experiment дал +9,77% `P`, но bootstrap saving неизвестен.
+**Функционально поддержан; global total-cost optimality не доказана.** Обе реализации восстанавливают проверенные principal schemes без ordinary annotations.
 
-## 11.3 RQ3
+## RQ3
 
-**Сильно поддерживается на tested corpus.** Weak CBN прост, call-by-need сохранил observables и сильно уменьшил repeated work на части recursive workloads.
+**Поддержан на проверенных программах.** Weak CBN независимо реконструирован; call-by-need показывает значительный implementation-level выигрыш на части workloads.
 
-## 11.4 RQ4
+## RQ4
 
-**Corpus-specific:** `Prim` — largest measured v0.3 contributor; `Let` и direct `Nat` оправданы против tested alternatives.
+**Получен corpus-specific ответ.** `Prim` доминирует в v0.3; direct `Nat` и `Let` оправданы против проверенных альтернатив.
 
-## 11.5 RQ5
+## RQ5
 
-**Смешанный результат:** BLC меньше на common pure-lambda subset; NEX меньше selected tiny postfix baseline на full v0.3. Total-cost winner неизвестен.
+**Результат смешанный.** BLC выигрывает на pure-lambda subset; NEX выигрывает у выбранного structural postfix baseline на v0.3; total-cost winner не определён.
 
-## 11.6 RQ6
+## RQ6
 
-**Нет.** `P` известен, receiver-neutral `S`/`B` отсутствуют.
+**Нет.** `P` известен, receiver-neutral `S` и `B` нет.
 
-## 11.7 RQ7
+## RQ7
 
-**Пока не отвечен.** Stage 5.0–5.1 создали credible protocol и выявили presentation gaps, но isolated second implementation ещё не frozen.
+**Сильно поддержан текущими данными.** Frozen independent Python проходит packet и совпадает с Go во всех 942 post-freeze differential cases без resource asymmetry.
 
-## 11.8 RQ8
+## RQ8
 
-**Пока не отвечен.** Принят принцип `B | A`, но Stage 5.7–5.8 ещё не выполнены.
-
----
-
-# 12. Ограничения и угрозы валидности
-
-1. **Малый corpus:** 17 программ не представляют всё software distribution.
-2. **Hand-construction bias:** часть terms/translations разработана вручную.
-3. **Одна complete implementation:** Go пока единственная полная реализация.
-4. **Cognitive contamination:** текущий context знает Go implementation и не может сам служить единственным источником independent evidence.
-5. **Runtime counters host-specific:** transitions/depth не portable computation units.
-6. **Explicit-type experiment incomplete:** root type не заменяет alternative checker/bootstrap.
-7. **External baselines limited:** BLC comparison узкий; tiny stack reuse NEX conventions; Jot зависит от одной translation.
-8. **Receiver-neutral `S`/`B` unknown:** главный gap исходной цели.
-9. **Нет machine-checked proof:** fuzz/conformance/CI — empirical evidence.
-10. **Packet completeness provisional:** окончательный аудит выполнит сам independent implementer; необходимость «посмотреть Go» до freeze будет evidence packet/spec gap.
+**Открыт.** Необходимо определить assumption sets и measurable `B | A`.
 
 ---
 
-# 13. Научный вклад на текущем этапе
+# 9. Ограничения и угрозы валидности
 
-1. Concrete architecture-neutral typed Core с canonical binary representation.
-2. Executable separation wire/scope/type validity и resource refusal.
-3. Language-neutral conformance для wire/static/dynamic semantics.
-4. Evidence-gated process с frozen benchmarks.
+## 9.1 Репрезентативность corpus
+
+17 программ не представляют всё пространство возможного ПО. Constructor shares остаются corpus-specific.
+
+## 9.2 Translation bias
+
+Некоторые baseline programs проектировались внутри NEX research и не являются independently shortest translations.
+
+## 9.3 Конечность независимой проверки
+
+Second implementation существенно усиливает evidence, но не доказывает полноту specification. Неисследованный corner case может оставаться неоднозначным.
+
+## 9.4 Когнитивная независимость процедурна
+
+Blind packet boundary и independence declaration фиксируются, но технически невозможно доказать, что модель никогда ранее не видела сходного материала. Поэтому independence claim методологический, а не абсолютный.
+
+## 9.5 Покрытие differential generator
+
+942 cases охватывают accepted corpus, valid templates, основные static error classes и arbitrary well-shaped wire terms, но не бесконечное пространство термов.
+
+## 9.6 Runtime counters implementation-specific
+
+Transitions/depth из Stage 4 относятся к конкретным Go evaluators.
+
+## 9.7 Explicit typing experiment неполон
+
+Измерен только root type envelope, а не полноценный альтернативный checker/bootstrap.
+
+## 9.8 `S` и `B` неизвестны
+
+Это крупнейший пробел относительно исходной цели.
+
+## 9.9 Нет machine-checked proof
+
+Conformance, fuzzing, freeze и differential testing остаются эмпирическими методами.
+
+---
+
+# 10. Научные результаты и вклад
+
+1. Конкретный architecture-neutral typed Core с canonical binary representation.
+2. Исполняемое разделение wire validity, scope validity, type validity и resource refusal.
+3. Language-neutral conformance corpora.
+4. Frozen benchmark methodology.
 5. Exact constructor-level wire attribution.
-6. Measured break-even `Let` и evidence за direct `Nat` против repeated `succ`.
+6. Empirical break-even для `Let` и сильный результат direct `Nat` против repeated `succ`.
 7. Quantified root-type transmission experiment.
-8. Controlled BLC/Jot/stack comparisons.
-9. Observational CBN/call-by-need experiment.
-10. Total-information accounting, запрещающий подменять `B` host source size.
-11. Living dissertation process.
-12. Frozen independent-conformance protocol с контролем leakage implementation knowledge.
-13. Reproducible standalone packet artifact с content hashes и dedicated CI.
-14. Early specification-audit findings, отделяющие semantics от presentation conventions.
+8. Контролируемые BLC/Jot/stack comparisons.
+9. CBN/call-by-need experiment с сохранением наблюдаемого результата.
+10. Total-information accounting discipline, не подменяющая `B` host source size.
+11. Versioned independence protocol и frozen conformance packet.
+12. Second implementation, созданная без перевода reference source.
+13. Hash-frozen pre-comparison checkpoint.
+14. 942-case post-freeze differential result: 942 matches, 0 semantic mismatch, 0 resource asymmetry.
+15. Living dissertation process, сохраняющий положительные, отрицательные и нерешённые результаты.
 
 ---
 
-# 14. Дальнейшие исследования
+# 11. Следующее исследование: receiver assumptions и bootstrap
 
-## 14.1 Isolated independent implementation
+## 11.1 Assumption sets
 
-Реализовать wire/static/normative dynamic semantics на Python 3.12 только по frozen packet и allowed theory; freeze commit до Go comparison.
+Нужно явно разделить:
 
-## 14.2 Differential conformance
+```text
+physical/channel assumptions
+binary distinguishability/order
+message framing / exact length
+basic mathematics
+integer/self-delimiting code concepts
+tree/binding concepts
+type/evaluation concepts
+host-machine assumptions
+```
 
-После independence freeze сравнить portable outputs с Go и классифицировать каждое расхождение, а не принудительно подгонять одну сторону.
+Вместо одного «универсального инопланетного prior» можно определить versioned sets `A0`, `A1`, `A2`.
 
-## 14.3 Receiver-assumption model
+## 11.2 Conditional bootstrap
 
-Определить explicit assumption sets для channel/framing, binary ordering, math concepts, integer coding, term structure и execution. Bootstrap cost должен записываться как `B | A`.
+Любая стоимость должна записываться:
 
-## 14.4 First measurable bootstrap artifact
+```text
+B | A
+```
 
-Исследовать concrete transmitted artifact: tiny abstract machine, layered decoder-validator-evaluator description или другую explicitly decodable форму. Circular interpreter assumptions нельзя скрывать.
+Если bootstrap artifact требует interpreter `Y`, `Y` должен входить либо в `A`, либо в accounting.
 
-## 14.5 Primitive-reference encoding
+## 11.3 Возможные bootstrap artifacts
 
-`Prim` остаётся largest measured wire category, но compactness redesign отложен до independent reconstruction.
+- tiny mathematical abstract machine;
+- minimal calculus/combinator bootstrap;
+- layered decoder → validator → evaluator;
+- compact executable notation с явно учитываемой decoding base.
 
-## 14.6 Full typing alternatives
+Ни один вариант заранее не объявляется правильным.
 
-Meaningful erased-vs-explicit comparison требует alternative verifier/checker и bootstrap accounting.
+Желательная декомпозиция:
 
-## 14.7 Broader corpora и formal verification
+```text
+B_decode
+B_static
+B_eval
+B_total_candidate
+```
 
-Нужны common-source corpora и возможная proof-assistant formalization decoder/substitution/unification/evaluator properties после дальнейшей стабилизации.
+Отрицательный результат допустим: если receiver-neutral artifact пока нельзя обосновать, это лучше, чем подменить его размером Go/Python source.
+
+## 11.4 Дальнейшая верификация
+
+Возможны third independent implementation, proof assistant для отдельных свойств, более широкий normalized corpus, полноценное erased-vs-explicit bootstrap comparison и только после evidence-stage — исследование компактности `Prim` для будущей версии.
 
 ---
 
-# 15. Заключение
+# 12. Заключение
 
-Исследование началось с вопроса: если языки программирования создаются для людей и известных машин, какое вычислительное представление использовать, когда нельзя предполагать ни то, ни другое?
+Исследование началось с идеи о том, что существующие языки проектируются для людей и известных машин, тогда как экстремально удалённый или неизвестный получатель может не разделять ни то, ни другое. Постепенно эта идея была превращена в фальсифицируемую экспериментальную систему.
 
-Результаты показывают, что ответ нельзя свести к самому короткому syntax. NEX-1 v0.1 имеет compact canonical binary form, reconstructible principal typing в reference implementation и явно non-strict semantics. Stage 4 показал ценность измерений: direct naturals сильно оправданы против tested successor construction, `Let` имеет реальный break-even, BLC компактнее на measured pure-lambda subset, call-by-need способен устранять огромный repeated runtime work без изменения program bits, а `Prim`, не `App`, оказался крупнейшим measured wire contributor. Одновременно total `C` остаётся unknown из-за отсутствия receiver-neutral `S`/`B`.
+NEX-1 v0.1 имеет canonical wire, principal rank-1 type reconstruction, weak call-by-name semantics, исполняемую conformance, reproducible benchmarks, отрицательные внешние сравнения и явные границы accounting. Stage 4 показал, что интуиции о «минимальном языке» недостаточны: `App` не является главным measured wire contributor на принятом corpus, direct naturals могут экономить порядки бит, `Let` имеет условную точку безубыточности, BLC может быть компактнее на pure lambda terms, а call-by-need способен резко уменьшать receiver work без изменения проверенного observable result.
 
-Stage 5 меняет формулировку с «проходит ли наша реализация наши tests?» на «может ли реализация, которая не видела нашу реализацию, восстановить ту же систему?». Уже первый protocol checkpoint показал ценность этого сдвига, выявив assumptions представления, которые были безвредны внутри одной codebase, но недостаточно явны для внешнего implementer.
+Stage 5 добавил другой вид доказательности. Specification и Go implementation развивались совместно, поэтому их внутреннее согласие не доказывало независимую определённость правил. Был создан frozen packet, выданный отдельному implementation context до доступа к Go. Полученная реализация прошла все packet vectors и была зафиксирована hash до сравнения. Лишь после этого был открыт Go reference. Последующий 942-case differential дал 942 portable matches, 0 semantic mismatch и 0 resource asymmetry.
 
-Следующее решающее evidence должно прийти из двух источников: isolated second implementation и measurable bootstrap при explicit receiver assumptions. Только после этого имеет смысл рассматривать NEX-1 v0.2 compactness redesign.
+Это не доказывает глобальную корректность, минимальность или оптимальность NEX. Но существенно усиливает утверждение о том, что текущий specification/conformance package независимо восстанавливаем на проверенной семантической поверхности. Главный нерешённый вопрос теперь снова совпадает с исходной мотивацией: что должен знать получатель заранее, что требуется передать для bootstrap NEX и какова цена этой информации при явных assumptions?
+
+Пока не появится defensible `B | A`, проект не будет заявлять численное значение полной `C` или глобальное превосходство. Сохранение этой неопределённости является частью научного метода, а не недостатком результата.
 
 ---
 
 # Словарь терминов
 
-**ABI (Application Binary Interface)** — соглашения бинарного взаимодействия компонентов с платформой.
+**ABI (Application Binary Interface)** — соглашения бинарного взаимодействия программ и платформы.
 
-**Alpha-equivalence** — эквивалентность lambda-термов, различающихся только именами bound variables.
+**Alpha-equivalence** — эквивалентность lambda terms, отличающихся только именами связанных переменных.
 
-**Architecture-neutral** — не зависящий от конкретной ISA, word size, ABI, OS или host runtime.
+**Architecture-neutral** — не зависящий от конкретного CPU ISA, word size, ABI, ОС или host runtime.
 
-**AST (Abstract Syntax Tree)** — структурное представление программы.
+**AST (Abstract Syntax Tree)** — структурное представление программного терма.
 
-**Binary Lambda Calculus (BLC)** — compact binary representation untyped lambda terms Джона Тромпа [2].
+**Binder** — конструкция, вводящая связанную переменную; в NEX v0.1 это `Lam` и body-часть `Let`.
 
-**Bootstrap (`B`)** — receiver-neutral информация, необходимая для реализации механизма обработки NEX; пока unknown.
+**Binary Lambda Calculus (BLC)** — компактное бинарное представление нетипизированных lambda terms Тромпа [2].
 
-**Call-by-name (CBN)** — non-strict strategy, где argument не вычисляется заранее и может вычисляться повторно [9].
+**Bootstrap (`B`)** — информация, необходимая получателю для реализации достаточной вычислительной основы NEX; не равна размеру Go/Python source.
+
+**Call-by-name (CBN)** — non-strict стратегия с delayed arguments и возможным повторным вычислением [9].
 
 **Call-by-need** — lazy evaluation с sharing/memoization [10,11].
 
-**Cognitive independence** — условие эксперимента, при котором implementer/context до freeze не использовал excluded reference implementation как implementation guidance.
+**Canonical representation** — уникальное проектное представление для wire/conformance.
 
-**Conformance packet** — frozen, versioned набор specification, normative decisions, vectors и observation conventions для independent implementation.
+**Conformance packet** — frozen allowlisted набор specification, ADR, vectors и observation rules для независимого implementer.
 
-**Conformance vector** — language-neutral input/expected-output artifact.
+**Conformance vector** — language-neutral вход/ожидаемый результат.
 
-**de Bruijn index** — numeric reference на binding depth вместо имени [1].
+**de Bruijn index** — числовая ссылка на binder position [1].
 
-**Erased typing** — ordinary term wire не несёт type annotations; типы восстанавливаются inference.
+**Differential conformance** — сравнение двух implementations на одинаковых входах только по portable observations.
+
+**Erased typing** — ordinary term wire не несёт type annotations; тип восстанавливается inference.
 
 **Hindley–Milner (HM)** — rank-1 polymorphic inference discipline [3,4].
 
-**Occurs check** — проверка, запрещающая унифицировать variable с типом, содержащим её же.
+**Independent checkpoint** — неизменяемое hash-identified состояние второй реализации, зафиксированное до reference comparison.
 
-**Principal type scheme** — наиболее общий HM type scheme [4].
+**Occurs check** — проверка unification, запрещающая бесконечный self-containing type.
+
+**Portable observation** — архитектурно-независимый результат: canonical bits, normalized type scheme, observable WHNF и т.п.
+
+**Principal type scheme** — наиболее общая HM type scheme [4].
 
 **Primitive (`Prim`)** — фиксированная Core operation с numeric ID.
 
-**Receiver-neutral** — не зависящий от непереданных terrestrial implementation conventions.
+**Receiver-neutral** — не опирающийся на незаявленные земные implementation conventions.
 
-**Resource refusal** — отказ реализации из-за finite limits, отличный от malformed/static invalid/normal result.
+**Resource asymmetry** — ситуация, когда одна implementation упирается в конечный resource guard, а другая выдаёт результат; это не автоматически semantic disagreement.
 
-**Specification cost (`S`)** — информация, необходимая для передачи правил вычислительной системы.
+**Resource refusal** — отказ из-за конечного implementation limit, отличный от malformed input, static invalidity или доказанной divergence.
 
-**Thunk** — delayed computation, концептуально term + environment или эквивалентная отложенная форма.
+**Specification cost (`S`)** — информация для передачи самих вычислительных правил.
+
+**Thunk** — delayed computation.
 
 **Total information cost (`C`)** — `C = S + B + P`.
 
-**Transmitted-program cost (`P`)** — exact canonical program bits для workload.
+**Transmitted-program cost (`P`)** — точное число canonical program bits для заданного набора программ.
 
-**Weak-head normal form (WHNF)** — вычисление только до раскрытия внешней computational form.
+**Unification** — решение равенств типов через substitutions.
 
-**Wire format** — canonical transmitted bit representation NEX terms.
+**Weak-head normal form (WHNF)** — вычисление до выявления внешнего constructor/function/value.
+
+**Wire format** — canonical bit representation NEX terms.
 
 ---
 
 # Библиография
 
-Stable source identifiers соответствуют `docs/SOURCES.md`.
+Стабильные идентификаторы источников соответствуют `docs/SOURCES.md`. Предпочтение отдаётся первичным и официальным источникам; выводы NEX не приписываются литературе.
 
-1. **de Bruijn, N. G.** (1972). *Lambda calculus notation with nameless dummies, a tool for automatic formula manipulation, with application to the Church-Rosser theorem.* DOI: https://doi.org/10.1016/1385-7258(72)90034-0. `[SRC-0001]`
+1. **de Bruijn, N. G.** (1972). *Lambda calculus notation with nameless dummies, a tool for automatic formula manipulation, with application to the Church-Rosser theorem.* Indagationes Mathematicae (Proceedings), 75(5), 381–392. DOI: https://doi.org/10.1016/1385-7258(72)90034-0. `[SRC-0001]`
 2. **Tromp, J.** *Binary Lambda Calculus.* https://tromp.github.io/cl/Binary_lambda_calculus.html. `[SRC-0002]`
-3. **Milner, R.** (1978). *A Theory of Type Polymorphism in Programming.* DOI: https://doi.org/10.1016/0022-0000(78)90014-4. `[SRC-0003]`
-4. **Damas, L.; Milner, R.** (1982). *Principal Type-Schemes for Functional Programs.* DOI: https://doi.org/10.1145/582153.582176. `[SRC-0004]`
-5. **Plotkin, G. D.** (1977). *LCF Considered as a Programming Language.* DOI: https://doi.org/10.1016/0304-3975(77)90044-5. `[SRC-0005]`
-6. **Elias, P.** (1975). *Universal codeword sets and representations of the integers.* DOI: https://doi.org/10.1109/TIT.1975.1055349. `[SRC-0006]`
-7. **Wells, J. B.** (1999). *Typability and type checking in System F are equivalent and undecidable.* DOI: https://doi.org/10.1016/S0168-0072(98)00047-5. `[SRC-0007]`
-8. **Schönfinkel, M.** (1924). *Über die Bausteine der mathematischen Logik.* `[SRC-0009]`
-9. **Plotkin, G. D.** (1975). *Call-by-name, call-by-value and the lambda-calculus.* DOI: https://doi.org/10.1016/0304-3975(75)90017-1. `[SRC-0011]`
-10. **Launchbury, J.** (1993). *A Natural Semantics for Lazy Evaluation.* DOI: https://doi.org/10.1145/158511.158618. `[SRC-0012]`
-11. **Sestoft, P.** (1997). *Deriving a lazy abstract machine.* DOI: https://doi.org/10.1017/S0956796897002712. `[SRC-0013]`
-12. **Barker, C.** (2001). *Iota and Jot: the simplest languages?* https://web.archive.org/web/20201112014512/http://www.nyu.edu/projects/barker/Iota/. `[SRC-0014]`
+3. **Milner, R.** (1978). *A Theory of Type Polymorphism in Programming.* JCSS, 17(3), 348–375. DOI: https://doi.org/10.1016/0022-0000(78)90014-4. `[SRC-0003]`
+4. **Damas, L.; Milner, R.** (1982). *Principal Type-Schemes for Functional Programs.* POPL. DOI: https://doi.org/10.1145/582153.582176. `[SRC-0004]`
+5. **Plotkin, G. D.** (1977). *LCF Considered as a Programming Language.* Theoretical Computer Science, 5(3), 223–255. DOI: https://doi.org/10.1016/0304-3975(77)90044-5. `[SRC-0005]`
+6. **Elias, P.** (1975). *Universal codeword sets and representations of the integers.* IEEE Transactions on Information Theory, 21(2), 194–203. DOI: https://doi.org/10.1109/TIT.1975.1055349. `[SRC-0006]`
+7. **Wells, J. B.** (1999). *Typability and type checking in System F are equivalent and undecidable.* Annals of Pure and Applied Logic, 98(1–3), 111–156. DOI: https://doi.org/10.1016/S0168-0072(98)00047-5. `[SRC-0007]`
+8. **Schönfinkel, M.** (1924). *Über die Bausteine der mathematischen Logik.* Mathematische Annalen, 92, 305–316. `[SRC-0009]`
+9. **Plotkin, G. D.** (1975). *Call-by-name, call-by-value and the lambda-calculus.* Theoretical Computer Science, 1(2), 125–159. DOI: https://doi.org/10.1016/0304-3975(75)90017-1. `[SRC-0011]`
+10. **Launchbury, J.** (1993). *A Natural Semantics for Lazy Evaluation.* POPL. DOI: https://doi.org/10.1145/158511.158618. `[SRC-0012]`
+11. **Sestoft, P.** (1997). *Deriving a lazy abstract machine.* Journal of Functional Programming, 7(3), 231–264. DOI: https://doi.org/10.1017/S0956796897002712. `[SRC-0013]`
+12. **Barker, C.** (2001). *Iota and Jot: the simplest languages?* `[SRC-0014]`
 13. **W3C WebAssembly Working Group.** *WebAssembly Core Specification.* https://www.w3.org/TR/wasm-core/. `[SRC-0008]`
 14. **The Go Project.** *The Go Programming Language Specification; math/big; testing/fuzzing documentation.* https://go.dev/ref/spec. `[SRC-0010]`
 
 ---
 
-# Приложение A. Воспроизводимость и артефакты
+# Приложение A. Артефакты воспроизводимости
 
-## A.1 Нормативные / архитектурные
+## A.1 Нормативные и исследовательские
 
-- `docs/NEX-1-v0.1.md`
-- `docs/NEX-1-v0.1.ru.md`
-- `docs/ARCHITECTURE.md`
-- `docs/adr/`
-- `docs/SOURCES.md`
+- `docs/NEX-1-v0.1.md`.
+- `docs/NEX-1-v0.1.ru.md`.
+- `docs/ARCHITECTURE.md`.
+- `docs/adr/`.
+- `docs/SOURCES.md`.
 
 ## A.2 Conformance
 
-- `conformance/wire-v0.1.json`
-- `conformance/static-v0.1.json`
-- `conformance/eval-v0.1.json`
+- `conformance/wire-v0.1.json`.
+- `conformance/static-v0.1.json`.
+- `conformance/eval-v0.1.json`.
 
-## A.3 Stage 4
+## A.3 Benchmarks
 
-- `benchmarks/corpus-v0.1.json`
-- `benchmarks/corpus-v0.2.json`
-- `benchmarks/corpus-v0.3.json`
-- `reference/go/cmd/nexbench`
-- `reference/go/cmd/nexexperiment`
-- `reference/go/cmd/nextypeexperiment`
-- `reference/go/cmd/nexbaseline`
-- `reference/go/cmd/nexstrategy`
-- `reference/go/cmd/nexaccount`
-- `reference/go/cmd/nexreport`
+- `benchmarks/corpus-v0.1.json`.
+- `benchmarks/corpus-v0.2.json`.
+- `benchmarks/corpus-v0.3.json`.
 
-## A.4 Stage 5 packet
+## A.4 Independent reconstruction
 
-- `docs/adr/0013-stage5-independence-protocol.md`
-- `stage5/conformance-packet-v0.1/manifest.json`
-- `stage5/conformance-packet-v0.1/OBSERVATIONS.md`
-- `stage5/conformance-packet-v0.1/AUDIT.md`
-- `stage5/build_packet.py`
-- `.github/workflows/stage5-independence.yml`
+- `stage5/conformance-packet-v0.1/`.
+- `stage5/build_packet.py`.
+- `independent/python/`.
+- `stage5/independent-checkpoints/python-v0.1.json`.
+- `stage5/verify_independent_checkpoint.py`.
+- `stage5/differential/run.py`.
+- `reference/go/cmd/nexdiffprobe`.
 
-Dedicated verification:
-
-```text
-GitHub Actions run 35379868436 — success
-artifact 10560808823
-sha256:fca1fddff742674c4e0b832ea53022d712f292d1361dfbe9b1b62c022ead15c3
-```
-
-## A.5 Stage completion evidence
+## A.5 Merge и CI evidence
 
 - Stage 1 merge: `e9bf6ff0bbc19fd36c27451572d7b617ebabc9f8`.
 - Stage 2 merge: `cefe889d90a275897de31aa23c4b9742a388ec8f`.
 - Stage 3 merge: `166cdc03282ea500263fdca7185f006f9b17a702`.
 - Stage 4 merge: `ebffde6c8669f65dfcba98d31d261d59b48d4dd0`.
-- Stage 4 post-merge CI: `35377892126` — success.
+- Stage 5 protocol/packet merge: `04f4f84cce50a15638802babbe934b70e495911c`.
+- Stage 5 post-merge packet CI: `35383798779` — success.
+- Independent/differential CI: `35384938291`, `35384938418`, `35384938381` — success.
+- Differential result: 942/942 portable matches, 0 mismatches, 0 resource asymmetries.
 
 ---
 
-# Приложение B. Evidence-gated decisions
+# Приложение B. Evidence-gated решения
 
-| Вопрос | Текущее решение | Evidence status |
+| Вопрос | Текущее решение | Статус данных |
 |---|---|---|
-| Сохранять direct `Nat`? | Да | Strong corpus experiment; не global optimality |
-| Сохранять `Let`? | Да | Measured break-even |
-| Сохранять erased HM? | Да в v0.1 | Working inference + root-type `Delta P`; bootstrap comparison missing |
-| CBN нормативен? | Да | Specification/conformance |
-| Call-by-need? | Allowed optimization | 17/17 agreement; reference-runtime savings |
-| `Prim` future priority? | Да, после independence | Largest measured v0.3 category |
-| NEX меньше BLC? | Global claim отсутствует | BLC 30 vs NEX 37 на shared lambda subset |
-| Total `C` известен? | Нет | Receiver-neutral `S`/`B` unresolved |
-| NEX independently reconstructable? | Ещё не установлено | Protocol/packet ready; isolated implementation pending |
-| Может текущий context дать independent implementation evidence? | Нет | Prior Go exposure = cognitive contamination |
+| Сохранять direct `Nat`? | Да, в v0.1 | Сильный corpus experiment против repeated `succ`; не global numeric-code optimality |
+| Сохранять `Let`? | Да | Измеримый break-even |
+| Сохранять erased HM? | Да, глобальный redesign отложен | Две реализации совпадают на проверенных principal schemes; bootstrap comparison отсутствует |
+| CBN нормативен? | Да | Specification + two-implementation conformance |
+| Call-by-need? | Допустим как observably equivalent optimization | Stage 4 runtime evidence |
+| Сначала оптимизировать `App`? | Нет оснований | `Prim` больше на v0.3 |
+| NEX меньше BLC? | Глобального утверждения нет | BLC 30 vs NEX 37 на common pure-lambda subset |
+| NEX независимо восстанавливаем? | Сильно поддержано на проверенной поверхности | Frozen second implementation + 942/942 post-freeze agreement |
+| NEX глобально минимален? | Утверждение не делается | Данных недостаточно |
+| `C` известно? | Нет | Receiver-neutral `S` и `B | A` не определены |
 
 ---
 
-# Правило дальнейшего ведения
+# Правило поддержки
 
-Согласно ADR-0012 любое будущее изменение, создающее materially significant measurement, research decision, baseline/source, independent conformance result, formal proof/counterexample, stage-level conclusion, revised `S/B/P/C` evidence или falsification/qualification предыдущей hypothesis, должно обновлять английскую рукопись и этот русский mirror в том же PR, если только PR явно не объясняет отсутствие research-text changes.
+Согласно ADR-0012, рукопись является частью исследовательского процесса. Новое воспроизводимое измерение, значимое архитектурное решение, внешний baseline, independent conformance result, proof/counterexample, stage-level conclusion, изменение модели `S/B/P/C` или опровержение/существенное уточнение гипотезы должны обновлять английскую рукопись и её русское зеркало в том же PR, если в PR явно не зафиксировано обоснование отсутствия такого обновления.

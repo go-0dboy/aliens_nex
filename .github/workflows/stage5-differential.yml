@@ -1,0 +1,79 @@
+name: stage5-differential
+
+on:
+  pull_request:
+    paths:
+      - 'independent/python/**'
+      - 'stage5/independent-checkpoints/**'
+      - 'stage5/differential/**'
+      - 'stage5/verify_independent_checkpoint.py'
+      - 'stage5/build_packet.py'
+      - 'reference/go/**'
+      - 'benchmarks/**'
+      - 'conformance/**'
+      - 'docs/STAGE-5.md'
+      - 'docs/STATUS.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+      - '.github/workflows/stage5-differential.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'independent/python/**'
+      - 'stage5/independent-checkpoints/**'
+      - 'stage5/differential/**'
+      - 'stage5/verify_independent_checkpoint.py'
+      - 'stage5/build_packet.py'
+      - 'reference/go/**'
+      - 'benchmarks/**'
+      - 'conformance/**'
+      - 'docs/STAGE-5.md'
+      - 'docs/STATUS.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+      - '.github/workflows/stage5-differential.yml'
+
+jobs:
+  independent-checkpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify frozen source hashes
+        run: python stage5/verify_independent_checkpoint.py
+      - name: Materialize frozen packet
+        run: python stage5/build_packet.py --output independent/python/packet
+      - name: Run independent implementation verification
+        working-directory: independent/python
+        run: python verify.py
+
+  differential:
+    needs: independent-checkpoint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Verify Go reference
+        working-directory: reference/go
+        run: sh verify.sh
+      - name: Verify frozen independent source hashes
+        run: python stage5/verify_independent_checkpoint.py
+      - name: Materialize frozen packet
+        run: python stage5/build_packet.py --output independent/python/packet
+      - name: Run differential conformance
+        run: python stage5/differential/run.py --report stage5-differential-report.json
+      - name: Upload differential report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nex-stage5-differential-report-v0.1
+          path: stage5-differential-report.json
+          if-no-files-found: warn
