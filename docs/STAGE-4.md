@@ -1,7 +1,9 @@
 # Stage 4 — Empirical validation and benchmarking
 
-**Status:** Implementation complete; pending merge review  
-**Branch:** `stage4/empirical-validation`
+**Status:** Complete  
+**Completed:** 2026-09-18  
+**Completed by:** PR `#6 stage4: complete empirical validation and benchmarking`  
+**Merge commit:** `ebffde6c8669f65dfcba98d31d261d59b48d4dd0`
 
 Stage 4 starts only after NEX-1 v0.1 has executable wire decoding, static validation, and dynamic semantics. Its purpose is not to add language features. Its purpose is to measure the current design, make the main compactness claims falsifiable, and create evidence for future Core revisions.
 
@@ -263,4 +265,4 @@ Stage 4 is complete when:
 - a final decision record states what evidence supports keeping/changing/defering each studied design question;
 - no prohibited Stage 5+/system/frontend work entered the stage.
 
-All Definition-of-Done items are implemented on the Stage 4 branch. Final completion is pending merge review and post-merge verification on `main`.
+All Definition-of-Done items were satisfied by PR #6. The completed branch passed clean-checkout CI on head `871d0bc44dbf18854d5e58b15191799b11b834af` in run `35377200520`, then was squash-merged to `main` as `ebffde6c8669f65dfcba98d31d261d59b48d4dd0`.
