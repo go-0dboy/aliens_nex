@@ -14,9 +14,9 @@ import (
 )
 
 type wireReport struct {
-	Bits                 int                     `json:"bits"`
-	ASTNodes             int                     `json:"ast_nodes"`
-	WireByConstructor    nex.ConstructorWireBits `json:"wire_bits_by_constructor"`
+	Bits              int                     `json:"bits"`
+	ASTNodes          int                     `json:"ast_nodes"`
+	WireByConstructor nex.ConstructorWireBits `json:"wire_bits_by_constructor"`
 }
 
 type typeReport struct {
@@ -54,13 +54,13 @@ type strategyReport struct {
 }
 
 type accountingReport struct {
-	SpecUTF8Bytes          int  `json:"spec_utf8_bytes_proxy"`
-	SpecRawUTF8Bits        int  `json:"spec_raw_utf8_bits_proxy"`
-	SpecProxyAcceptedAsS   bool `json:"spec_proxy_accepted_as_S"`
-	ReferenceGoUTF8Bytes   int  `json:"reference_go_utf8_bytes_proxy"`
-	ReferenceProxyEqualsB  bool `json:"reference_proxy_equals_B"`
-	BootstrapKnown         bool `json:"bootstrap_known"`
-	TotalCComputable       bool `json:"total_C_computable"`
+	SpecUTF8Bytes         int  `json:"spec_utf8_bytes_proxy"`
+	SpecRawUTF8Bits       int  `json:"spec_raw_utf8_bits_proxy"`
+	SpecProxyAcceptedAsS  bool `json:"spec_proxy_accepted_as_S"`
+	ReferenceGoUTF8Bytes  int  `json:"reference_go_utf8_bytes_proxy"`
+	ReferenceProxyEqualsB bool `json:"reference_proxy_equals_B"`
+	BootstrapKnown        bool `json:"bootstrap_known"`
+	TotalCComputable      bool `json:"total_C_computable"`
 }
 
 type report struct {
