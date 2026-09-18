@@ -32,6 +32,20 @@ It passed clean-checkout GitHub Actions run:
 
 There were no open review threads or PR comments at the merge gate. The PR was mergeable and was squash-merged only after the full current head, including the dissertation/governance additions, had passed CI.
 
+The squash merge commit on `main` is:
+
+```text
+ebffde6c8669f65dfcba98d31d261d59b48d4dd0
+```
+
+Post-merge push verification on that exact `main` commit also passed:
+
+```text
+35377892126  reference-go  success
+```
+
+The commits after the verified merge are documentation-only Stage 4 closure and Stage 5 planning; they do not modify `reference/go`, benchmark corpora, conformance data, or NEX-1 v0.1 semantics.
+
 ### Final Stage 4 evidence snapshot
 
 Frozen accepted corpus v0.3:
@@ -90,7 +104,7 @@ The highest-value unresolved evidence is now:
 
 ## Stage 5 — Planned; not started
 
-The accepted planning document is `docs/STAGE-5.md`.
+The planning document is `docs/STAGE-5.md`.
 
 Working title:
 
