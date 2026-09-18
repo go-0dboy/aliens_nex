@@ -1,5 +1,7 @@
 # aliens_nex
 
+[Русская версия](README.ru.md)
+
 Experimental repository for **NEX-1**: a minimal, architecture-neutral, statically typed language for compact transmission of programs between systems that do not share a programming language, processor architecture, ABI, operating system, or textual notation.
 
 ## Current status
@@ -9,16 +11,19 @@ The project is at the specification stage.
 The normative draft is:
 
 - [NEX-1 Core v0.1 specification](docs/NEX-1-v0.1.md)
+- [Russian translation of NEX-1 Core v0.1](docs/NEX-1-v0.1.ru.md)
 
 Project working documents:
 
-- [Architecture](docs/ARCHITECTURE.md)
+- [Architecture](docs/ARCHITECTURE.md) / [Russian translation](docs/ARCHITECTURE.ru.md)
 - [Domain language and invariants](docs/DOMAIN.md)
 - [Development workflow](docs/WORKFLOW.md)
 - [Testing and conformance](docs/TESTING.md)
 - [Current continuation status](docs/STATUS.md)
 - [Architecture Decision Records](docs/adr/README.md)
 - [AI agent instructions](AGENTS.md)
+
+English is the canonical documentation language. The project overview, language specification, and architecture overview have maintained Russian mirrors according to ADR-0003.
 
 NEX-1 v0.1 currently defines:
 
