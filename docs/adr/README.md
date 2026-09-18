@@ -30,6 +30,7 @@ An ADR is therefore required for any decision that materially changes one or mor
 - [ADR-0008: Use an environment-based weak call-by-name reference evaluator](0008-environment-based-call-by-name-reference-evaluator.md)
 - [ADR-0009: Keep evaluator resource limits separate from NEX semantics and validity](0009-separate-evaluation-resource-limits-from-semantics.md)
 - [ADR-0010: Freeze the measurement contract and benchmark corpus before optimization](0010-freeze-measurement-contract-before-optimization.md)
+- [ADR-0011: Hold NEX-1 v0.1 stable after the Stage 4 evidence gate](0011-stage4-evidence-gate.md)
 
 ## Status values
 
@@ -82,7 +83,7 @@ An ADR MUST distinguish among:
 
 A hypothesis MUST NOT be rewritten later as a fact merely because it has been repeated in project documentation.
 
-External research used materially by an ADR should be registered in `docs/SOURCES.md` and referenced by its stable `SRC-xxxx` identifier where useful.
+External research used materially by an ADR should be registered in `docs/SOURCES.md` and referenced by its stable source ID where useful.
 
 ## Review rule
 
