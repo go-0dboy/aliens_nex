@@ -1,0 +1,44 @@
+name: stage5-closeout
+
+on:
+  pull_request:
+    paths:
+      - 'stage5/bootstrap/**'
+      - 'stage5/receiver-assumptions/**'
+      - 'docs/experiments/stage5-bootstrap-feasibility.md'
+      - 'docs/experiments/stage5-final-decision.md'
+      - 'docs/adr/0014-condition-bootstrap-cost-on-receiver-assumptions.md'
+      - 'docs/adr/0015-stage5-decision-gate.md'
+      - 'docs/STAGE-5.md'
+      - 'docs/STATUS.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+  push:
+    branches: [ main ]
+    paths:
+      - 'stage5/bootstrap/**'
+      - 'stage5/receiver-assumptions/**'
+      - 'docs/experiments/stage5-bootstrap-feasibility.md'
+      - 'docs/experiments/stage5-final-decision.md'
+      - 'docs/adr/0014-condition-bootstrap-cost-on-receiver-assumptions.md'
+      - 'docs/adr/0015-stage5-decision-gate.md'
+      - 'docs/STAGE-5.md'
+      - 'docs/STATUS.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate receiver assumptions
+        run: python stage5/validate_receiver_assumptions.py
+      - name: Validate bootstrap feasibility result
+        run: python stage5/bootstrap/validate_attempt.py
