@@ -49,6 +49,10 @@ func natValue(n *big.Int) *Value {
 	return &Value{Kind: ValueNat, Nat: cloneNat(n)}
 }
 
+func unitValue() *Value {
+	return &Value{Kind: ValueUnit}
+}
+
 func closureValue(body *Term, env Environment) *Value {
 	return &Value{Kind: ValueClosure, Closure: &Closure{Body: body, Env: cloneEnvironment(env)}}
 }
