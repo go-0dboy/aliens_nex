@@ -56,12 +56,12 @@ type programReport struct {
 }
 
 type aggregateReport struct {
-	Programs      int                   `json:"programs"`
-	WireBits      int                   `json:"wire_bits"`
-	ASTNodes      int                   `json:"ast_nodes"`
-	Constructors  nex.ConstructorCounts `json:"constructors"`
-	Transitions   uint64                `json:"reference_evaluation_transitions"`
-	MaxEvalDepth  uint32                `json:"reference_max_evaluation_depth"`
+	Programs     int                   `json:"programs"`
+	WireBits     int                   `json:"wire_bits"`
+	ASTNodes     int                   `json:"ast_nodes"`
+	Constructors nex.ConstructorCounts `json:"constructors"`
+	Transitions  uint64                `json:"reference_evaluation_transitions"`
+	MaxEvalDepth uint32                `json:"reference_max_evaluation_depth"`
 }
 
 type report struct {
