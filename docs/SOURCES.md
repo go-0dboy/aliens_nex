@@ -122,6 +122,24 @@ These sources are relevant to alternatives already discussed or likely to be ben
 
 ---
 
+## Implementation platform sources
+
+### SRC-0010 — Go reference implementation platform
+
+**The Go Project, official language and standard-library documentation.**
+
+- Type: official living language specification and standard-library documentation
+- Language specification: https://go.dev/ref/spec
+- Arbitrary-precision integers: https://go.dev/src/math/big/doc.go
+- Testing/fuzzing package: https://pkg.go.dev/testing
+- Current release reviewed by NEX: Go 1.27, released 2026-08-19
+- Last reviewed by NEX: 2026-09-18
+- Used by NEX for: selecting Go as the first reference-implementation host; relying on static host typing, standard-library arbitrary-precision `big.Int`, and built-in unit/fuzz testing without third-party codec dependencies.
+- Current project impact: ADR-0005 chooses Go for `reference/go/`; the module intentionally declares Go 1.23 compatibility while using only stable facilities documented by current upstream Go.
+- Important limitation: Go's runtime, garbage collector, integer implementation, package model, or execution semantics do not define NEX. Go is only a reference implementation vehicle.
+
+---
+
 ## How to cite sources inside project documents
 
 When useful, project documents may refer to stable IDs, for example:
