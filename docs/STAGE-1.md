@@ -1,7 +1,9 @@
 # Stage 1 — Wire foundation
 
-**Status:** In progress  
-**Branch:** `stage1/wire-foundation`
+**Status:** Complete  
+**Completed:** 2026-09-18  
+**Completed by:** PR `#3 stage1: implement NEX wire foundation`  
+**Merge commit:** `e9bf6ff0bbc19fd36c27451572d7b617ebabc9f8`
 
 Stage 1 proves the canonical NEX-1 v0.1 wire grammar before type inference or evaluation is implemented.
 
@@ -16,7 +18,8 @@ Stage 1 contains only:
 5. exact-input and prefix-input decoder APIs;
 6. deterministic malformed-input errors;
 7. implementation resource limits reported separately from malformed input;
-8. round-trip and fuzz/property tests.
+8. round-trip and fuzz/property tests;
+9. repeatable repository verification through GitHub Actions.
 
 Stage 1 explicitly excludes type inference, de Bruijn scope validation, evaluator semantics, frontends, optimizer passes, machine/system profiles, and self-hosting.
 
@@ -57,6 +60,15 @@ Location:
 reference/go/
 ```
 
+Verification entry point:
+
+```text
+cd reference/go
+sh verify.sh
+```
+
+The same command is executed by `.github/workflows/wire-foundation.yml` after a clean GitHub checkout.
+
 ## Conformance artifact
 
 Language-neutral vectors live in:
@@ -65,17 +77,31 @@ Language-neutral vectors live in:
 conformance/wire-v0.1.json
 ```
 
-They contain:
+At Stage 1 completion the corpus contains:
 
-- `U(n)` vectors, including values above 64-bit range;
-- term AST + canonical bit strings;
-- invalid exact-input vectors with expected error class.
+- 17 `U(n)` integer vectors, including code-length boundaries and a value above 64-bit range;
+- 12 canonical term vectors covering all six constructors and nested combinations;
+- 15 invalid exact-input vectors covering truncation and trailing data.
 
 A future second implementation must consume the same vectors rather than copying expected values into its own test source.
 
-## Definition of done
+## Verification evidence
 
-Stage 1 is complete when all of the following are true:
+The final Stage 1 branch passed:
+
+```text
+gofmt check    PASS
+go vet ./...   PASS
+go test ./...  PASS
+```
+
+GitHub Actions run `35348259779` executed from a clean checkout and completed successfully.
+
+A final one-second `FuzzTermRoundTrip` run completed 27,289 generated executions without a failure. This is empirical test evidence, not a formal proof of correctness.
+
+## Definition of done — result
+
+All Stage 1 completion conditions were satisfied:
 
 - `U(n)` vectors pass;
 - term golden vectors pass;
@@ -85,13 +111,28 @@ Stage 1 is complete when all of the following are true:
 - `DecodeOne` reports consumed bit count correctly;
 - `DecodeExact` rejects trailing bits;
 - conformance vectors are implementation-independent;
-- `go test ./...` and `go vet ./...` pass for the reference implementation;
-- no type inference or evaluator logic has leaked into the wire package;
-- `docs/STATUS.md` records verified results and remaining limitations.
+- reference verification is repeatable from the repository;
+- CI repeats the verification from a clean checkout;
+- no type inference or evaluator logic leaked into the wire package;
+- the final PR diff was reviewed against the Stage 1 scope.
+
+## Remaining limitations
+
+Stage 1 does not claim:
+
+- a formal proof of decoder correctness;
+- independent confirmation by a second implementation;
+- de Bruijn scope validity;
+- primitive/profile semantic validity;
+- type correctness;
+- evaluator correctness;
+- comparative size superiority over BLC, SKI/Jot, WebAssembly, or stack bytecode.
+
+Those claims require later stages or separate experiments.
 
 ## Next layer after Stage 1
 
-Only after this stage is accepted should Stage 2 begin:
+Stage 2 may now be planned around static validation:
 
 ```text
 de Bruijn scope validation
@@ -99,3 +140,5 @@ de Bruijn scope validation
   -> substitutions/unification
   -> Algorithm W
 ```
+
+Stage 2 should be specified and reviewed before its implementation begins.
