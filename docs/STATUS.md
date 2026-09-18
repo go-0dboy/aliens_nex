@@ -2,13 +2,14 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Current stage:** `Stage 2 — Static validation — Complete`  
+**Current stage:** `Stage 3 — Dynamic semantics and evaluator — In progress`  
 **Stage 0 completed by:** PR `#1 docs: establish ADRs and project workflow`  
 **Research source registry completed by:** PR `#2 docs: add research source registry`  
 **Stage 1 completed by:** PR `#3 stage1: implement NEX wire foundation`  
 **Stage 1 merge commit:** `e9bf6ff0bbc19fd36c27451572d7b617ebabc9f8`  
 **Stage 2 completed by:** PR `#4 stage2: complete static validation and principal type inference`  
-**Stage 2 merge commit:** `cefe889d90a275897de31aa23c4b9742a388ec8f`
+**Stage 2 merge commit:** `cefe889d90a275897de31aa23c4b9742a388ec8f`  
+**Active Stage 3 branch:** `stage3/dynamic-semantics`
 
 ## Stage 0 — Complete
 
@@ -16,29 +17,13 @@ Stage 0 established the project specification, ADR/workflow system, bilingual co
 
 ## Stage 1 — Wire foundation — Complete
 
-Stage 1 is defined and closed in `docs/STAGE-1.md`.
-
-The repository has an executable, tested, and CI-verified canonical wire layer for the six v0.1 term constructors, arbitrary-precision `U(n)`, exact/prefix decoding, implementation-independent conformance vectors, and implementation resource limits separated from wire validity.
+Stage 1 is defined and closed in `docs/STAGE-1.md`. The repository has an executable, tested, CI-verified canonical wire layer for the six v0.1 term constructors, arbitrary-precision `U(n)`, exact/prefix decoding, independent conformance vectors, and implementation resource limits separated from wire validity.
 
 ## Stage 2 — Static validation — Complete
 
 Stage 2 is defined and closed in `docs/STAGE-2.md`.
 
-Completed functionality:
-
-```text
-2.1 de Bruijn scope validation
-2.2 type AST + type schemes
-2.3 substitutions + free type variables
-2.4 unification + occurs check
-2.5 authoritative Core primitive table + primitive validity
-2.6 fresh instantiation + let-generalization
-2.7 Algorithm W style principal type inference
-2.8 language-neutral static conformance
-2.9 property fuzzing + clean-checkout CI + final diff review
-```
-
-The reference static-validation pipeline is now:
+The reference pipeline now provides:
 
 ```text
 Term
@@ -48,69 +33,80 @@ Term
   -> principal TypeScheme
 ```
 
-No evaluation occurs in this pipeline.
+`conformance/static-v0.1.json` contains 15 scope vectors and 19 type vectors. Stage 2's final clean-checkout/fuzz verification passed before and after merge.
 
-### Type annotations decision
+ADR-0007 keeps ordinary term-level type annotations out of canonical v0.1 terms while requiring a future measured comparison against compact explicit/hybrid type information.
 
-ADR-0007 keeps ordinary term-level type annotations out of canonical NEX-1 v0.1 terms. Frontends may accept annotations but erase them before canonical Core output.
+## Stage 3 — Dynamic semantics and evaluator — In progress
 
-This is not claimed globally optimal. A future experiment must compare erased HM inference against compact explicit/hybrid type information using total information cost:
+Stage 3 is defined in `docs/STAGE-3.md`.
 
-```text
-specification + bootstrap implementation + transmitted programs
-```
-
-### Conformance state
-
-`conformance/static-v0.1.json` contains:
+Accepted work order:
 
 ```text
-15 scope vectors
-19 type vectors
+3.0 dynamic-semantics contract audit and specification clarification
+3.1 runtime Value / Environment / Thunk / Closure model
+3.2 weak call-by-name Var/Lam/App/Let/Nat evaluator
+3.3 primitive application spine and authoritative runtime arity
+3.4 unit/natural primitive execution
+3.5 product/sum primitive execution
+3.6 fix and bounded handling of nontermination in tests
+3.7 language-neutral evaluation conformance
+3.8 resource controls, properties/fuzzing, clean-checkout CI
+3.9 final scope/diff review and completion
 ```
 
-The type vectors record canonical principal schemes or deterministic static error classes independently of Go internal type-variable IDs.
+### Stage 3.0 findings
 
-### Stage 2 verification evidence
+The existing v0.1 text already selects weak call-by-name, but four details were insufficiently explicit for an executable oracle:
 
-Verified clean-checkout checkpoints include:
+1. `Let(value, body)` had typing rules but no explicit dynamic rule;
+2. WHNF/result categories and partially applied primitives were not formalized;
+3. primitive argument-forcing behavior was only partly stated (`ifz` selected branch) rather than complete for products/sums/partial application;
+4. evaluator resource exhaustion was not explicitly separated from divergence and Core validity.
+
+The Stage 3 branch now records the proposed/accepted clarifications in `docs/STAGE-3.md`, ADR-0008, and ADR-0009. The canonical English specification and Russian mirror MUST be synchronized with this contract before Stage 3 is merged.
+
+### Stage 3 runtime decision
+
+ADR-0008 selects a first reference evaluator that is:
 
 ```text
-2.1 CI 35349955837  success
-2.2 CI 35350348515  success
-2.3 CI 35350580401  success
-2.4 CI 35350747002  success
-2.8 CI 35359948801  success
-final gate 35360079519  success
-final PR head 35360245915  success
+weak call-by-name
++ environment based
++ closure based
++ explicit non-memoizing thunks
 ```
 
-The final verification runs:
+The runtime environment is ordered nearest de Bruijn binder first. `Let` and lambda arguments are delayed. Pair fields and sum payloads are delayed. Call-by-need sharing remains a permitted later optimization, not the first oracle.
+
+### Stage 3 resource decision
+
+ADR-0009 separates evaluator fuel/depth/memory refusal from language validity and semantic results. A finite resource refusal cannot prove divergence, and cross-implementation conformance will not depend on an exact internal step count.
+
+### Stage 3 research basis
+
+The source registry now includes:
 
 ```text
-gofmt check
-go vet ./...
-go test ./...
-1s FuzzSubstitutionComposition
-1s FuzzUnifyProducesEqualAppliedTypes
-1s FuzzInferenceSuccessfulSchemeIsClosedAndStable
+SRC-0011 Plotkin 1975   call-by-name / call-by-value distinction
+SRC-0012 Launchbury 1993 lazy semantics with sharing
+SRC-0013 Sestoft 1997  lazy abstract-machine derivation
 ```
 
-The final Stage 2 diff was reviewed against the stage scope guard. No evaluator, reduction, primitive execution, source parser, optimizer, system profile, compiler, or self-hosting code entered Stage 2.
+These sources inform evaluation strategy/implementation alternatives; they do not define NEX-specific primitive forcing rules.
 
 ## Remaining project-wide unverified claims
 
 Still intentionally unverified:
 
-- formal/exhaustive proof of decoder or type-inference correctness;
+- formal/exhaustive proof of decoder, inference, or evaluator correctness;
 - conformance agreement with a second independent implementation;
-- evaluator semantics and runtime behavior;
+- Stage 3 runtime implementation and evaluation conformance;
 - self-hosting feasibility;
 - total-information-cost comparison against BLC, SKI/Jot, WebAssembly, stack bytecode, or an explicit-type NEX variant;
 - any claim that NEX is globally optimal or the smallest possible language.
 
 ## Next recommended step
 
-Design Stage 3 before implementation. Stage 3 should define and verify evaluator semantics for already validated v0.1 Core terms, beginning with evaluation strategy, runtime value/thunk/environment representation, primitive forcing rules, deterministic execution/error/resource behavior, and implementation-independent evaluation conformance vectors.
-
-Do not begin frontend, optimizer, machine profiles, compiler, or self-hosting work until the Stage 3 evaluator boundary is explicitly defined.
+Finish Stage 3.0 by synchronizing the canonical English and Russian v0.1 evaluation sections with the accepted forcing/WHNF/resource contract. Then implement only Stage 3.1 and 3.2 first: runtime values/environments/thunks/closures and the lambda/let evaluator core. Do not add primitive execution until those layers have independent tests and clean CI.
