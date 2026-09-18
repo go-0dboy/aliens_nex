@@ -57,6 +57,18 @@ func closureValue(body *Term, env Environment) *Value {
 	return &Value{Kind: ValueClosure, Closure: &Closure{Body: body, Env: cloneEnvironment(env)}}
 }
 
+func pairValue(left, right *Thunk) *Value {
+	return &Value{Kind: ValuePair, Left: left, Right: right}
+}
+
+func inlValue(payload *Thunk) *Value {
+	return &Value{Kind: ValueInl, Payload: payload}
+}
+
+func inrValue(payload *Thunk) *Value {
+	return &Value{Kind: ValueInr, Payload: payload}
+}
+
 func primitiveValue(id uint64, args []*Thunk) *Value {
 	copied := append([]*Thunk(nil), args...)
 	return &Value{Kind: ValuePrimitive, Primitive: &PrimitiveApplication{ID: id, Args: copied}}
