@@ -14,7 +14,8 @@ Use:
 - `docs/ARCHITECTURE.md` for current component boundaries;
 - `docs/adr/` for durable design decisions and rejected/deferred alternatives;
 - `docs/TESTING.md` for verification strategy;
-- `docs/STATUS.md` for the current continuation point.
+- `docs/STATUS.md` for the current continuation point;
+- `docs/RESEARCH-DISSERTATION.md` for the cumulative scholarly synthesis of research questions, evidence, measurements, limitations, and conclusions.
 
 If a term has two plausible meanings, resolve it in documentation before allowing both meanings to spread through code.
 
@@ -32,6 +33,7 @@ Problem
   -> Diff review
   -> Refactor only if justified
   -> Status checkpoint
+  -> Research synthesis checkpoint when evidence changed
 ```
 
 ### Problem
@@ -83,6 +85,25 @@ Update `docs/STATUS.md` with:
 - blockers;
 - exactly one next recommended step.
 
+### Research synthesis checkpoint
+
+Per ADR-0012, ask after every meaningful evidence checkpoint:
+
+```text
+Did this work create or materially change a defensible research result,
+conclusion, limitation, baseline, source, decision, falsification,
+independent conformance result, or S/B/P/C accounting claim?
+    |
+    +-- no  -> no dissertation edit is required
+    |
+    +-- yes -> update docs/RESEARCH-DISSERTATION.md
+               and docs/RESEARCH-DISSERTATION.ru.md in the same PR
+```
+
+This checkpoint is mandatory at stage-completion gates and after benchmark/measurement results that affect interpretation.
+
+The dissertation update should not merely append a success statement. It must preserve the research meaning of the result, including negative/null findings, experimental conditions, limitations, and whether the evidence confirms, contradicts, or leaves a hypothesis unresolved.
+
 ## 3. One change, one reason
 
 A pull request should have one dominant reason to exist.
@@ -123,18 +144,27 @@ For compiler/language work, useful feedback includes:
 - cross-implementation conformance tests;
 - size/performance benchmark reports.
 
+For research conclusions, useful feedback additionally includes:
+
+- frozen corpora and explicitly versioned measurement inputs;
+- machine-generated aggregate reports;
+- externally sourced baselines with documented translation assumptions;
+- negative or resource-limit checkpoints that are preserved rather than discarded;
+- independent implementations or formal proofs where feasible.
+
 ## 6. AI-assisted work rules
 
 AI agents working in this repository MUST:
 
-1. inspect the current branch/HEAD, relevant docs, ADRs, tests, and CI before changing code;
+1. inspect the current branch/HEAD, relevant docs, ADRs, tests, CI, and current dissertation before changing code;
 2. not repeat work already present in the repository;
 3. distinguish verified facts from hypotheses;
-4. not invent passing tests, benchmark numbers, or implementation status;
+4. not invent passing tests, benchmark numbers, implementation status, bibliographic claims, or quotations;
 5. not silently change an Accepted ADR;
 6. avoid broad refactors unless the task specifically requires one;
 7. prefer concrete diffs and verification results over long speculative explanations;
-8. leave a continuation checkpoint after each meaningful stage.
+8. leave a continuation checkpoint after each meaningful stage;
+9. update the dissertation when ADR-0012's evidence trigger applies.
 
 AI agents SHOULD surface contradictions early instead of coding around them.
 
@@ -149,9 +179,10 @@ A code change is done only when all applicable items are true:
 - type/lint/build checks pass when present;
 - documentation matches actual behavior;
 - ADR is added or updated when architecture changed;
-- `docs/STATUS.md` identifies the next state accurately.
+- `docs/STATUS.md` identifies the next state accurately;
+- the living dissertation has been updated when the change produced research-significant evidence under ADR-0012.
 
-A research result is done only when the measurement procedure and limitations are recorded alongside the result.
+A research result is done only when the measurement procedure and limitations are recorded alongside the result, and when material conclusions are integrated into the living dissertation rather than left only in a PR/chat/status note.
 
 ## 8. Communication style
 
@@ -164,4 +195,4 @@ Not verified:
 Next:
 ```
 
-Do not replace verification with a long narrative. Detailed reasoning belongs in ADRs when it affects future design.
+Do not replace verification with a long narrative. Detailed reasoning belongs in ADRs when it affects future design; cumulative research interpretation belongs in the dissertation.
