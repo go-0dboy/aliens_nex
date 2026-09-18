@@ -53,6 +53,11 @@ func closureValue(body *Term, env Environment) *Value {
 	return &Value{Kind: ValueClosure, Closure: &Closure{Body: body, Env: cloneEnvironment(env)}}
 }
 
+func primitiveValue(id uint64, args []*Thunk) *Value {
+	copied := append([]*Thunk(nil), args...)
+	return &Value{Kind: ValuePrimitive, Primitive: &PrimitiveApplication{ID: id, Args: copied}}
+}
+
 func cloneEnvironment(env Environment) Environment {
 	if len(env) == 0 {
 		return nil
