@@ -27,7 +27,6 @@ type evaluator struct {
 }
 
 // EvaluateClosed evaluates a statically valid closed Core term to weak-head form.
-// Stage 3.2 implements Var/Lam/App/Let/Nat only; demanded Prim execution is added later.
 func EvaluateClosed(term *Term, limits EvalLimits) (*Value, error) {
 	if _, err := InferClosed(term); err != nil {
 		return nil, err
@@ -86,15 +85,19 @@ func (e *evaluator) eval(term *Term, env Environment, depth uint32) (*Value, err
 		if err != nil {
 			return nil, err
 		}
-		if fn.Kind == ValuePrimitive {
-			return nil, ErrPrimitiveExecutionDeferred
-		}
-		if fn.Kind != ValueClosure || fn.Closure == nil || fn.Closure.Body == nil {
+		arg := &Thunk{Term: term.B, Env: cloneEnvironment(env)}
+		switch fn.Kind {
+		case ValueClosure:
+			if fn.Closure == nil || fn.Closure.Body == nil {
+				return nil, ErrEvalInvariant
+			}
+			bodyEnv := extendEnvironment(fn.Closure.Env, arg)
+			return e.eval(fn.Closure.Body, bodyEnv, depth+1)
+		case ValuePrimitive:
+			return e.applyPrimitive(fn.Primitive, arg)
+		default:
 			return nil, ErrEvalInvariant
 		}
-		arg := &Thunk{Term: term.B, Env: cloneEnvironment(env)}
-		bodyEnv := extendEnvironment(fn.Closure.Env, arg)
-		return e.eval(fn.Closure.Body, bodyEnv, depth+1)
 
 	case KindLet:
 		if term.A == nil || term.B == nil {
@@ -111,7 +114,14 @@ func (e *evaluator) eval(term *Term, env Environment, depth uint32) (*Value, err
 		return natValue(term.Value), nil
 
 	case KindPrim:
-		return nil, ErrPrimitiveExecutionDeferred
+		primitive, err := LookupCorePrimitive(term.Value)
+		if err != nil {
+			return nil, err
+		}
+		if primitive.Arity == 0 {
+			return nil, ErrPrimitiveExecutionDeferred
+		}
+		return primitiveValue(primitive.ID, nil), nil
 
 	default:
 		return nil, ErrEvalInvariant
@@ -123,4 +133,22 @@ func (e *evaluator) force(thunk *Thunk, depth uint32) (*Value, error) {
 		return nil, ErrEvalInvariant
 	}
 	return e.eval(thunk.Term, thunk.Env, depth)
+}
+
+func (e *evaluator) applyPrimitive(application *PrimitiveApplication, arg *Thunk) (*Value, error) {
+	if application == nil || arg == nil {
+		return nil, ErrEvalInvariant
+	}
+	primitive, err := LookupCorePrimitive(NaturalUint64(application.ID))
+	if err != nil {
+		return nil, err
+	}
+	if len(application.Args) >= int(primitive.Arity) {
+		return nil, ErrEvalInvariant
+	}
+	args := append(append([]*Thunk(nil), application.Args...), arg)
+	if len(args) < int(primitive.Arity) {
+		return primitiveValue(application.ID, args), nil
+	}
+	return nil, ErrPrimitiveExecutionDeferred
 }
