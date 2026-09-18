@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"path/filepath"
 
 	"github.com/go-0dboy/aliens_nex/reference/go/nex"
 )
@@ -26,6 +27,7 @@ type corpus struct {
 	Schema        string `json:"schema"`
 	CorpusVersion string `json:"corpus_version"`
 	Status        string `json:"status"`
+	Extends       string `json:"extends,omitempty"`
 	Programs      []struct {
 		ID             string      `json:"id"`
 		Description    string      `json:"description"`
@@ -81,16 +83,9 @@ func main() {
 		fatalf("-corpus is required")
 	}
 
-	data, err := os.ReadFile(*corpusPath)
+	c, err := loadCorpus(*corpusPath)
 	if err != nil {
-		fatalf("read corpus: %v", err)
-	}
-	var c corpus
-	if err := json.Unmarshal(data, &c); err != nil {
-		fatalf("parse corpus: %v", err)
-	}
-	if c.Schema != "nex-benchmark-corpus-v0.1" {
-		fatalf("unsupported corpus schema %q", c.Schema)
+		fatalf("load corpus: %v", err)
 	}
 	if len(c.Programs) == 0 {
 		fatalf("corpus has no programs")
@@ -164,6 +159,50 @@ func main() {
 	if _, err := os.Stdout.Write(append(out, '\n')); err != nil {
 		fatalf("write report: %v", err)
 	}
+}
+
+func loadCorpus(path string) (corpus, error) {
+	return loadCorpusSeen(path, make(map[string]bool))
+}
+
+func loadCorpusSeen(path string, seen map[string]bool) (corpus, error) {
+	absolute, err := filepath.Abs(path)
+	if err != nil {
+		return corpus{}, err
+	}
+	if seen[absolute] {
+		return corpus{}, fmt.Errorf("corpus inheritance cycle at %s", path)
+	}
+	seen[absolute] = true
+	defer delete(seen, absolute)
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return corpus{}, err
+	}
+	var c corpus
+	if err := json.Unmarshal(data, &c); err != nil {
+		return corpus{}, err
+	}
+	switch c.Schema {
+	case "nex-benchmark-corpus-v0.1", "nex-benchmark-corpus-v0.2":
+	default:
+		return corpus{}, fmt.Errorf("unsupported corpus schema %q", c.Schema)
+	}
+	if c.Extends == "" {
+		return c, nil
+	}
+
+	basePath := c.Extends
+	if !filepath.IsAbs(basePath) {
+		basePath = filepath.Join(filepath.Dir(path), basePath)
+	}
+	base, err := loadCorpusSeen(basePath, seen)
+	if err != nil {
+		return corpus{}, fmt.Errorf("load base corpus %q: %w", c.Extends, err)
+	}
+	c.Programs = append(base.Programs, c.Programs...)
+	return c, nil
 }
 
 func termFromJSON(j *jsonTerm) (*nex.Term, error) {
