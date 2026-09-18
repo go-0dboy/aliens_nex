@@ -2,6 +2,25 @@
 
 This file defines comparison formatting needed by the Stage 5 independent-conformance experiment. It does **not** add NEX language semantics.
 
+## 0. Conformance JSON term fixtures
+
+JSON is only the fixture representation used by the conformance packet. It is not NEX source syntax and is not the canonical wire format.
+
+Map packet JSON objects to the abstract six-constructor `Term` grammar exactly as follows:
+
+```text
+{"kind":"Var",  "value":"K"} -> Var(K)
+{"kind":"Lam",  "a":TERM}      -> Lam(TERM)
+{"kind":"App",  "a":F, "b":X} -> App(F,X)
+{"kind":"Let",  "a":V, "b":B} -> Let(V,B)
+{"kind":"Nat",  "value":"N"} -> Nat(N)
+{"kind":"Prim", "value":"P"} -> Prim(P)
+```
+
+`value` fields are decimal strings denoting non-negative mathematical integers and must not be restricted to the host machine integer width.
+
+Unknown `kind` values or missing constructor fields are malformed **fixture data**. They are not NEX wire-error cases unless an explicit wire vector describes the corresponding bit stream.
+
 ## 1. Principal type scheme text
 
 `conformance/static-v0.1.json` stores expected principal types as text. NEX-1 v0.1 defines principal types up to renaming of type variables, but the normative specification does not otherwise require a host implementation to use the same internal type-variable IDs.
