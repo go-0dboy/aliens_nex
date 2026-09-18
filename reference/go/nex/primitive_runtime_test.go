@@ -29,9 +29,7 @@ func TestUnsaturatedPrimitiveIsFunctionWHNF(t *testing.T) {
 }
 
 func TestPartialPrimitiveApplicationKeepsArgumentDelayed(t *testing.T) {
-	// pair (fix id) is only a partial application. fix execution remains deferred until
-	// Stage 3.6, so success proves the stored pair argument was not forced.
-	term := App(Prim(NaturalUint64(4)), deferredFixIdentityTerm())
+	term := App(Prim(NaturalUint64(4)), divergingFixTerm())
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
 		t.Fatal(err)
