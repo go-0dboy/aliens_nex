@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Current stage:** `Stage 4 — Empirical validation and benchmarking — In progress`  
+**Current stage:** `Stage 4 — Empirical validation and benchmarking — Implementation complete; pending merge review`  
 **Stage 0 completed by:** PR `#1 docs: establish ADRs and project workflow`  
 **Research source registry completed by:** PR `#2 docs: add research source registry`  
 **Stage 1 completed by:** PR `#3 stage1: implement NEX wire foundation`  
@@ -12,7 +12,7 @@
 **Stage 3 completed by:** PR `#5 stage3: complete dynamic semantics and reference evaluator`  
 **Stage 3 merge commit:** `166cdc03282ea500263fdca7185f006f9b17a702`  
 **Active Stage 4 branch:** `stage4/empirical-validation`  
-**Active Stage 4 pull request:** `#6 stage4: establish empirical measurement foundation`
+**Active Stage 4 pull request:** `#6`
 
 ## Stages 0–3 — Complete
 
@@ -20,96 +20,45 @@ Stage 0 established the specification/process baseline. Stage 1 implemented cano
 
 Detailed completion records remain in `docs/STAGE-1.md`, `docs/STAGE-2.md`, and `docs/STAGE-3.md`.
 
-## Stage 4 — Empirical validation and benchmarking — In progress
+## Stage 4 — Implementation complete; pending merge review
 
-Stage 4 is defined in `docs/STAGE-4.md`.
+Stage 4 is defined in `docs/STAGE-4.md`. ADR-0010 froze the measurement contract/corpus discipline before optimization; ADR-0011 records the evidence-based decision gate.
 
-Accepted work order:
+### 4.0 — measurement contract — Complete
 
-```text
-4.0 measurement contract
-4.1 frozen canonical benchmark corpus
-4.2 NEX metrics/instrumentation
-4.3 internal NEX design experiments
-4.4 erased-HM versus explicit/hybrid type-information experiment
-4.5 external baselines
-4.6 call-by-name versus call-by-need experiment
-4.7 bootstrap accounting model
-4.8 reproducible experimental report
-4.9 evidence-based decision gate
-```
-
-ADR-0010 requires the measurement contract and corpus to be fixed before optimization comparisons. Portable exact metrics, reference-only runtime metrics, and bootstrap/specification proxies remain separately labelled.
-
-### Stage 4.0 — measurement contract — Complete
-
-The project explicitly separates:
+The project separates:
 
 ```text
 P  exact transmitted-program cost
 R  host/reference implementation proxy
-B  actual bootstrap transmission cost (currently unknown)
-S  specification transmission cost (not yet one accepted scalar)
+B  actual bootstrap transmission cost (unknown)
+S  specification transmission cost (no accepted receiver-neutral scalar yet)
+C  S + B + P
 ```
 
-`R` MUST NOT be substituted for `B`. Benchmark encodings are classified as `direct`, `canonical-translation`, or `hand-optimized`.
+`R` MUST NOT be substituted for `B`.
 
-### Stage 4.1 — benchmark corpora — Extended corpus frozen
+### 4.1 — frozen benchmark corpora — Complete
 
-`benchmarks/corpus-v0.1.json` is the immutable 10-program foundation corpus.
+- `benchmarks/corpus-v0.1.json`: immutable 10-program foundation corpus.
+- `corpus-v0.2.json`: preserved negative checkpoint; `factorial-5` exceeded the default 1,000,000-transition non-memoizing CBN budget. This is resource refusal, not invalidity or proof of divergence.
+- `benchmarks/corpus-v0.3.json`: accepted frozen extended corpus, 17 programs total.
 
-An attempted extended `corpus-v0.2.json` is intentionally preserved because it exposed a real reference-runtime cost: `factorial-5` exceeded the default non-memoizing call-by-name budget of 1,000,000 transitions. This is an implementation resource refusal, not a Core validity failure or proof of divergence.
+Clean-checkout CI `35368707827` parsed, type-checked, evaluated, and measured accepted v0.3.
 
-`benchmarks/corpus-v0.3.json` is the accepted extended corpus for Stage 4.3. It inherits v0.1 unchanged and adds seven workloads, for 17 programs total:
-
-```text
-right sum/case path
-let-polymorphic reuse
-small recognizer
-recursive multiplication
-factorial-4
-fibonacci-5
-repeated expensive let binding
-```
-
-Corpus lineage and the preserved v0.2 result are documented in `benchmarks/README.md`.
-
-Clean-checkout CI `35368707827` successfully parsed, type-checked, evaluated, and measured all accepted v0.3 programs.
-
-### Stage 4.2 — NEX metrics/instrumentation — Complete foundation
+### 4.2 — instrumentation — Complete
 
 Implemented:
 
-- `nex.MeasureTerm` for exact wire-bit, AST-node, constructor-count, and per-constructor wire-bit attribution;
-- `EvaluateClosedWithStats` for explicitly reference-only evaluator transition/depth counters;
-- shared `reference/go/bench` loading/parsing for frozen corpora so later experiments consume the same canonical Terms;
-- `reference/go/cmd/nexbench` for inherited frozen corpora and deterministic machine-readable reports;
-- `reference/go/verify.sh` clean-checkout reproduction of accepted measurements plus all existing tests/fuzz checks.
+- exact wire/AST/constructor metrics and per-constructor wire-bit attribution;
+- reference-only evaluator transition/depth statistics;
+- shared frozen-corpus loader/parser;
+- deterministic benchmark/report CLIs;
+- clean-checkout reproduction in `reference/go/verify.sh`.
 
-Portable exact fields include:
+### 4.3 — internal NEX experiments — Complete
 
-```text
-wire_bits
-ast_nodes
-Var/Lam/App/Let/Nat/Prim counts
-wire_bits_by_constructor
-observable result
-```
-
-Reference-only fields include:
-
-```text
-evaluation transitions
-max evaluation depth
-```
-
-### Stage 4.3 — internal NEX design experiments — Complete first controlled set
-
-`reference/go/cmd/nexexperiment` measures unchanged NEX-1 v0.1 encodings; it does not modify normative semantics.
-
-#### Extended-corpus wire profile
-
-Clean-checkout CI `35369320807` measured v0.3 as:
+Frozen v0.3 aggregate:
 
 ```text
 programs   17
@@ -128,122 +77,143 @@ Lam    84 bits   6.1%
 Let    33 bits   2.4%
 ```
 
-Therefore the early hypothesis that `App` would dominate transmitted bits is not supported by this corpus. Primitive references are the largest measured contributor in v0.3. This is a corpus result, not a universal claim.
+The early hypothesis that `App` would dominate this corpus is not supported; primitive references are the largest measured contributor. This is corpus-specific evidence.
 
-#### Let versus duplication
+`Let` shows a real break-even point. For a 5-bit payload: 2 repeats cost +4 bits with `Let`, 3 repeats +2, 4 tie, 8 save 8. For the tested 14-bit payload, two repeats already save 5 bits.
 
-For a 5-bit closed payload:
-
-```text
-2 repeats: Let costs 4 bits more
-3 repeats: Let costs 2 bits more
-4 repeats: exact tie
-8 repeats: Let saves 8 bits
-```
-
-For the 14-bit one-`succ` payload, two repeats already make `Let` save 5 bits, and savings increase with payload size/repetition count.
-
-Conclusion: `Let` has a measurable break-even point; it is not intrinsically always smaller or always larger.
-
-#### Direct Nat versus succ-chain construction
-
-For `Nat(0)`, direct literal and zero-step construction tie at 5 bits. For every tested value `1..255`, the direct literal is smaller. Representative endpoint:
+Direct natural literals strongly outperform the tested `succ`-chain construction. Representative endpoint:
 
 ```text
 Nat(255)          21 bits
 succ-chain(255) 2300 bits
-saved            2279 bits
 ```
 
-This strongly supports direct canonical natural literals for the tested construction baseline, while not yet comparing against alternative numeric coding schemes.
+Clean-checkout CI `35369320807` reproduced the full v0.3 profile and experiment outputs.
 
-Clean-checkout CI `35369168189` verified the internal experiment generator and all prior tests/fuzz properties. CI `35369320807` additionally exposed the full v0.3 aggregate report.
+### 4.4 — erased HM versus hybrid root type — Complete first experiment
 
-### Stage 4.4 — erased HM versus hybrid root type information — First experiment complete
-
-`docs/experiments/stage4-type-information.md` defines an explicitly non-normative hybrid envelope. It leaves the canonical NEX-1 v0.1 term unchanged and appends/transmits only the inferred closed principal top-level `TypeScheme` using an experimental compact prefix code.
-
-This experiment measures only transmitted-program delta `Delta_P`. It does **not** claim that a root type replaces internal HM inference or that bootstrap cost `B` is reduced.
-
-Clean-checkout CI `35370010741` measured the frozen v0.3 corpus:
+The non-normative root-principal-type envelope measured:
 
 ```text
-erased NEX term bits        1371
-root principal-type bits     134
-hybrid total bits           1505
-Delta_P                      134 bits
-aggregate overhead           9.77%
+erased term bits       1371
+root type bits          134
+hybrid total           1505
+program overhead       +9.77%
 ```
 
-The overhead is highly workload-dependent:
+Small polymorphic functions have large relative overhead (`identity` +240%, `constant` +222.2%, `composition` +200%); most larger `N`-result programs add only 4 type bits.
+
+This measures `Delta P` only. No reduction in receiver-neutral `S+B` has been implemented or measured, and a root principal type does not replace internal HM inference.
+
+Clean-checkout CI `35370010741` reproduced the experiment.
+
+### 4.5 — external / structural baselines — Complete first reproducible set
+
+On the identical pure-lambda subset (`identity`, `constant`, `composition`):
 
 ```text
-identity      5 + 12 type bits  = +240%
-constant      9 + 20 type bits  = +222.2%
-composition  23 + 46 type bits  = +200%
-```
-
-Most benchmark programs whose inferred top-level type is simply `N` require only a 4-bit experimental root-type payload, so their relative overhead falls as the term grows (for example `factorial-4`: 239 + 4 bits, about +1.67%).
-
-Measured conclusion: transmitting this particular root principal-type envelope costs +9.77% over erased terms on v0.3. Unmeasured question: whether any explicit/hybrid verification design can save enough real bootstrap information to compensate for that program overhead. A distinct checker/verification design is required before making that claim.
-
-### Stage 4.5 — external / structural baselines — Complete first reproducible set
-
-`docs/experiments/stage4-baselines.md` defines the comparison rules before interpreting results.
-
-BLC and Jot are compared only on the identical pure-lambda subset (`identity`, `constant`, `composition`), so the comparison does not silently charge BLC/Jot for Church encodings of NEX `Nat`/`Prim`. Jot uses one deterministic standard bracket-abstraction path (`lambda -> SK -> Barker Jot`) and is **not** a shortest-program claim. The tiny stack baseline is project-defined, reuses NEX `U(n)` and primitive IDs, and therefore measures a structural encoding alternative rather than an independent bootstrap.
-
-Clean-checkout CI `35372182772` generated:
-
-```text
-Pure lambda subset, 3 programs
 NEX                         37 bits
 BLC                         30 bits
 Jot via fixed SK translation 288 bits
 ```
 
-Per-program pure-lambda values:
+BLC is 7 bits smaller on this narrow shared subset. The Jot number is only for the documented deterministic bracket-abstraction translation and is not a shortest-Jot claim.
+
+On full v0.3:
 
 ```text
-identity      NEX 5   BLC 4   Jot 20
-constant      NEX 9   BLC 7   Jot 41
-composition   NEX 23  BLC 19  Jot 227
+NEX canonical wire  1371 bits
+tiny postfix stack  1529 bits
+delta                +158 bits (+11.52%)
 ```
 
-Measured conclusion: BLC is 7 bits smaller than NEX on this narrow identical pure-lambda subset. The Jot figure demonstrates the cost of the chosen deterministic bracket-abstraction translation only; it is not evidence about optimal Jot encodings.
+The tiny-stack baseline reuses NEX integer/primitive conventions and therefore is a structural comparison, not an independent total-bootstrap comparison.
 
-For the full frozen v0.3 corpus:
+Clean-checkout CI `35372182772` reproduced these values.
+
+### 4.6 — call-by-name versus call-by-need — Complete first experiment
+
+Normative weak CBN was not changed. A separate experimental memoizing evaluator was added and required to match the same observable WHNF on every accepted program.
+
+All 17 v0.3 programs agreed observationally.
+
+Reference-only aggregate:
 
 ```text
-NEX canonical wire     1371 bits
-tiny postfix stack     1529 bits
-delta                   +158 bits
-delta percent           +11.52%
+CBN transitions          226151
+call-by-need transitions   2484
+saved                    223667
+reduction                 98.90%
+memo hits                   237
+programs with fewer transitions 6/17
 ```
 
-Measured conclusion: this particular 3-bit postfix structural baseline is larger than NEX on v0.3. Because it reuses NEX integer and primitive conventions, this does not establish a total-information-cost advantage over an independently bootstrapped stack machine.
+Representative heavy workloads:
 
-## Remaining Stage 4 work
+```text
+factorial-4         209315 -> 895
+fibonacci-5           7424 -> 512
+let-reuse-expensive    8710 -> 560
+```
 
-Still pending:
+This is implementation/runtime evidence, not a transmission-cost result. Call-by-need changes no program bits and may increase bootstrap/runtime machinery.
 
-- 4.6 call-by-name versus call-by-need comparison;
-- 4.7 bootstrap accounting model;
-- 4.8 generated final experimental report;
-- 4.9 evidence-based decision gate.
+Clean-checkout CI `35372634610` reproduced the strategy comparison.
 
-## Remaining project-wide unverified claims
+### 4.7 — total-information accounting — Complete model
 
-Still intentionally unverified:
+Machine-readable accounting keeps unknowns explicit.
+
+For v0.3:
+
+```text
+P exact                         1371 bits
+canonical spec Markdown        23440 UTF-8 bytes
+raw Markdown proxy            187520 bits
+selected Go reference Core     43013 UTF-8 bytes
+B bootstrap                    unknown
+C total                        not numerically computable
+```
+
+The Markdown size is only an `S` proxy; it is not accepted as receiver-neutral specification cost. Go source size is `R`, not `B`. Unknown `B` is not treated as zero.
+
+Clean-checkout CI `35373159387` reproduced the accounting output.
+
+### 4.8 — consolidated reproducible report — Complete
+
+`reference/go/cmd/nexreport` recomputes the principal Stage 4 results from frozen corpus data and experiment/reference functions in one command. It does not copy numbers from documentation.
+
+Clean-checkout CI `35373511054` generated `nex-stage4-experimental-report-v0.1` and also reran all previous tests, experiment CLIs, and fuzz/property checks successfully.
+
+### 4.9 — evidence-based decision gate — Complete
+
+ADR-0011 records the decisions supported by current evidence:
+
+- keep NEX-1 v0.1 wire/Core stable;
+- keep direct `Nat`;
+- keep `Let` while acknowledging its local break-even behavior;
+- keep erased HM for v0.1; explicit/hybrid verification remains deferred until a real alternative checker/bootstrap exists;
+- keep weak call-by-name normative; call-by-need remains an allowed optimization when observable results are preserved;
+- prioritize primitive-reference/profile encoding in future compactness experiments because `Prim` is the largest measured v0.3 wire contributor;
+- do not claim NEX is globally smallest or superior to BLC;
+- keep total-information superiority unresolved until an actual receiver-neutral bootstrap artifact makes `B` measurable.
+
+## Stage 4 scope review
+
+Stage 4 did not add new normative NEX-1 v0.1 term constructors, mutable memory/system calls, product frontend/parser work, native/bytecode compiler, machine profile, or self-hosting implementation. Experimental encoders/evaluators remain isolated from normative v0.1 semantics.
+
+## Remaining project-wide unknowns
+
+Still intentionally unresolved:
 
 - formal/exhaustive proof of decoder, type-inference, or evaluator correctness;
-- conformance agreement with a second independent implementation;
-- bootstrap/self-hosting feasibility and size;
-- total-information-cost comparison against external baselines or a real explicit-type checker/bootstrap;
-- whether the v0.3 constructor distribution generalizes to other program populations;
-- practical CBN-versus-call-by-need cost on the accepted corpus;
+- agreement with a second independent implementation;
+- actual receiver-neutral bootstrap artifact and cost `B`;
+- receiver-neutral specification transmission cost `S`;
+- broader-corpus generalization of v0.3 constructor distribution;
+- independent total-cost comparisons against external architectures;
 - any claim that NEX is globally optimal or the smallest possible language.
 
 ## Next recommended step
 
-Proceed to Stage 4.6 without changing normative NEX-1 v0.1 semantics. Implement an explicitly experimental call-by-need evaluator with sharing/memoization, require observable agreement with the reference call-by-name evaluator on the accepted corpus, and compare transitions / repeated thunk forcing as reference-only implementation metrics.
+Review PR #6 as the completed Stage 4 implementation. If accepted, merge it, mark Stage 4 `Complete` on `main`, and only then design the next stage around the highest-value unresolved evidence: independent conformance implementation and a receiver-neutral bootstrap experiment. Do not begin a normative NEX-1 v0.2 redesign before that discussion.
