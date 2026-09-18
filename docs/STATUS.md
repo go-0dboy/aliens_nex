@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Current stage:** `Stage 2 — Static validation — In progress`  
+**Current stage:** `Stage 2 — Static validation — Implementation complete; pending merge review`  
 **Stage 0 completed by:** PR `#1 docs: establish ADRs and project workflow`  
 **Research source registry completed by:** PR `#2 docs: add research source registry`  
 **Stage 1 completed by:** PR `#3 stage1: implement NEX wire foundation`  
@@ -18,114 +18,126 @@ Stage 0 established the project specification, ADR/workflow system, bilingual co
 
 Stage 1 is defined and closed in `docs/STAGE-1.md`. The repository has an executable, tested, and CI-verified canonical wire layer with arbitrary-precision `U(n)`, exact/prefix decoding, independent conformance vectors, and implementation resource limits separated from wire validity.
 
-## Stage 2 — Static validation — In progress
+## Stage 2 — Static validation — Implementation complete; pending merge review
 
 Stage 2 is defined in `docs/STAGE-2.md`.
 
 ADR-0007 fixes the v0.1 type-annotation baseline: ordinary canonical Core terms omit type annotations and use inference, while compact explicit/hybrid type information remains a required future total-cost benchmark rather than a rejected alternative.
 
-### 2.1 — de Bruijn scope validation — verified
-
-- `ValidateClosed(term)` enforces closed zero-based de Bruijn scope;
-- `Lam` binds its body;
-- `Let(value, body)` is non-recursive and binds only `body`;
-- language-neutral positive/negative scope vectors exist.
-
-Checkpoint CI `35349955837`: success.
-
-### 2.2 — type/type-scheme representation — verified
-
-- all v0.1 monotype constructors and rank-1 schemes represented;
-- malformed in-memory type shapes rejected;
-- canonical rendering renames internal variables by first occurrence.
-
-Checkpoint CI `35350348515`: success.
-
-### 2.3 — substitutions and free type variables — verified
-
-- FTV for type/scheme/environment;
-- substitution application and composition;
-- quantified variables protected;
-- substitution cycles rejected;
-- composition property fuzz exists.
-
-Checkpoint CI `35350580401`: success.
-
-### 2.4 — unification + occurs check — verified
-
-- structural unification for every v0.1 monotype constructor;
-- distinct mismatch and occurs-check diagnostics;
-- unification equality property fuzz exists.
-
-Checkpoint CI `35350747002`: success.
-
-### 2.5 — Core primitive table and primitive validity — implemented
-
-- one authoritative table contains IDs `0..10`, names, and type schemes;
-- reserved/future/profile IDs are rejected by Core-only validation when no profile is selected;
-- an initial CI failure exposed a test expectation that incorrectly treated source-style type-variable names as significant for `inr`; the implementation was retained and the canonicalized expectation was corrected.
-
-### 2.6 — instantiation and generalization — implemented
-
-- each polymorphic scheme use is freshly instantiated;
-- instantiation uses direct alpha-renaming rather than general substitution, avoiding false cycles when template IDs and fresh IDs coincide;
-- let-generalization quantifies variables free in the inferred type but not the outer environment;
-- lambda bindings remain monomorphic.
-
-### 2.7 — Algorithm W style inference — implemented
-
-`InferClosed(term)` performs, in order:
+Completed on PR #4:
 
 ```text
-closed-scope validation
-  -> Core primitive validity
-  -> HM-style inference
-  -> top-level generalization
-  -> principal type scheme
+2.1 de Bruijn scope validation
+2.2 type AST + type schemes
+2.3 substitutions + free type variables
+2.4 unification + occurs check
+2.5 authoritative Core primitive table + primitive validity
+2.6 fresh instantiation + let-generalization
+2.7 Algorithm W style inference
+2.8 language-neutral principal-type/error conformance
+2.9 property fuzzing + clean-checkout CI + diff review
 ```
 
-Inference exists for `Var`, `Lam`, `App`, `Let`, `Nat`, and `Prim`. No evaluation is performed.
+### Static-validation pipeline
 
-Tests include identity, constant function, `succ`, products, `fix`, successful polymorphic-let reuse, monomorphic lambda rejection, occurs-check failure, function/type mismatch, scope error preservation, and unknown primitive preservation.
+The reference implementation now provides:
 
-### 2.8 — language-neutral type conformance — implemented
+```text
+Term
+  -> ValidateClosed
+  -> ValidateCorePrimitives
+  -> InferClosed
+  -> principal TypeScheme
+```
 
-`conformance/static-v0.1.json` now contains:
+No evaluation occurs in this pipeline.
+
+### Primitive metadata
+
+One authoritative table contains Core primitive IDs `0..10`, names, and type schemes. Core-only static validation rejects reserved/future/profile primitive IDs when no external profile is selected.
+
+An early 2.5 CI failure exposed an incorrect **test expectation** for canonical `inr` type-variable names. The primitive scheme itself matched the specification; the expected canonical rendering was corrected to respect first occurrence.
+
+### Instantiation/generalization
+
+- quantified variables receive fresh identities on every scheme use;
+- instantiation is direct alpha-renaming, avoiding false substitution cycles when template and fresh IDs coincide;
+- let-bound inferred types are generalized over variables not free in the outer environment;
+- lambda-bound variables remain monomorphic;
+- polymorphic recursion is not introduced.
+
+### Algorithm W
+
+Inference covers exactly the six v0.1 Core constructors:
+
+```text
+Var
+Lam
+App
+Let
+Nat
+Prim
+```
+
+Tests prove, among other examples:
+
+- identity and constant principal schemes;
+- `succ : N -> N` constraints;
+- products and `fix`;
+- one let-bound identity reused at both `N` and `1`;
+- the analogous lambda-bound parameter is rejected as monomorphic;
+- `x x` is rejected by occurs check;
+- calling a natural as a function is rejected;
+- scope and unknown-primitive errors remain distinct from type errors.
+
+### Language-neutral conformance
+
+`conformance/static-v0.1.json` contains:
 
 ```text
 15 scope vectors
 19 type vectors
 ```
 
-Type vectors include principal types and deterministic static error classes independent of the Go implementation.
+The type vectors record either canonical principal type schemes or deterministic static error classes. They do not depend on Go internal type-variable IDs.
 
-Checkpoint CI for the type-conformance state: run `35359948801` — success.
+### Verification evidence
 
-### 2.9 — property/fuzz + final review — in progress
+Previously verified checkpoints:
 
-`reference/go/verify.sh` now performs:
+```text
+2.1 CI 35349955837  success
+2.2 CI 35350348515  success
+2.3 CI 35350580401  success
+2.4 CI 35350747002  success
+2.8 CI 35359948801  success
+```
+
+Final Stage 2 clean-checkout gate:
+
+```text
+CI 35360079519  success
+```
+
+That final gate executed:
 
 ```text
 gofmt check
 go vet ./...
 go test ./...
-1s substitution-composition fuzz
-1s unification-property fuzz
-1s inference-stability fuzz
+1s FuzzSubstitutionComposition
+1s FuzzUnifyProducesEqualAppliedTypes
+1s FuzzInferenceSuccessfulSchemeIsClosedAndStable
 ```
 
-The final clean-checkout CI run for this full Stage 2 verification is the remaining gate before the branch can be declared ready for merge.
-
-## Stage 2 scope guard
-
-No evaluator, beta reduction, primitive execution, source parser, optimizer, machine/system profile, bytecode/native compiler, or self-hosting implementation belongs in this stage.
+The final branch diff was reviewed against `docs/STAGE-2.md`. It contains static-validation code, conformance, tests, CI/documentation, and ADR material only. No evaluator, reduction, primitive execution, source parser, optimizer, system profile, compiler, or self-hosting code is present.
 
 ## Remaining project-wide unverified claims
 
 Still intentionally unverified:
 
-- formal/exhaustive proof of decoder or inference correctness;
-- conformance with a second independent implementation;
+- formal/exhaustive proof of decoder or type-inference correctness;
+- conformance agreement with a second independent implementation;
 - evaluator behavior;
 - self-hosting feasibility;
 - total-information-cost comparison against BLC, SKI/Jot, WebAssembly, stack bytecode, or an explicit-type NEX variant;
@@ -133,4 +145,4 @@ Still intentionally unverified:
 
 ## Next recommended step
 
-Wait for the final Stage 2 clean-checkout CI gate, perform a complete PR #4 diff review against `docs/STAGE-2.md`, and if both are clean present PR #4 for merge review. Do not begin evaluator/runtime work before Stage 2 is accepted.
+Review PR #4 as the Stage 2 completion candidate. If accepted, merge it and mark Stage 2 complete on `main` before defining Stage 3 evaluator semantics. Do not begin evaluator/runtime implementation before that merge decision.
