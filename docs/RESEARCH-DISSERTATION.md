@@ -5,7 +5,7 @@
 **Document type:** living dissertation-style research manuscript  
 **Canonical language:** English  
 **Russian mirror:** `RESEARCH-DISSERTATION.ru.md`  
-**Evidence horizon:** Stages 0–4 complete; Stage 5 independent reconstruction through differential conformance (5.0–5.6) complete; Stage 5.7 receiver-assumption model implemented, 2026-09-18  
+**Evidence horizon:** Stages 0–4 complete; Stage 5 independent reconstruction through differential conformance (5.0–5.6) complete; Stage 5.7 receiver-assumption model verified on the first clean-checkout PR checkpoint, 2026-09-18  
 **Project:** NEX / `aliens_nex`
 
 > This manuscript is a scholarly research synthesis maintained inside the project repository. It is not yet formatted for the submission requirements of a particular university, national dissertation authority, or citation style. The normative language definition remains `docs/NEX-1-v0.1.md`; architecture and research-method decisions remain governed by Accepted ADRs.
@@ -30,7 +30,9 @@ Stage 5 asks whether the specification and language-neutral conformance artifact
 
 Stage 5.7 then addresses a deeper accounting problem: an executable bootstrap bit length is not meaningful without saying what the receiver already knows. ADR-0014 therefore conditions specification/bootstrap claims on an explicit receiver prior `A`. The first versioned model defines `A0` (an exact finite ordered binary frame), `A1` (`A0` plus a stated discrete mathematical metalanguage), `A2(U)` (`A1` plus one exact fixed universal binary abstract machine `U` and its self-delimiting program/data convention), and `A_host(H)` as a terrestrial engineering control that is ineligible for receiver-neutral claims. The project consequently uses `B | A`, `S | A`, and `C | A` rather than treating `B` as an unconditional scalar. It also introduces a no-double-counting rule: if one transmitted artifact inseparably serves both specification and executable-bootstrap roles, its bits are reported once as `SB | A` rather than once as `S` and again as `B`.
 
-This model does not yet provide a numerical bootstrap cost. In particular, Stage 5.7 does not choose the universal machine parameter `U`, does not assign a bit price to receiver priors, and does not rank stronger-prior profiles against weaker-prior profiles by transmitted bits alone. The principal unresolved task is therefore Stage 5.8: freeze at least one concrete bootstrap candidate under one declared profile and measure the actual transmitted ledger without circularly omitting its interpreter. Until then, total `C | A` remains numerically unresolved and this work makes no claim that NEX is globally minimal or globally superior to alternative calculi.
+The Stage 5.7 model is machine-readable and passed its dedicated clean-checkout validator on PR #9 together with the existing independence and differential regression gates. The validator confirms four effective atoms in `A0`, seven in `A1`, nine in `A2(U)`, and eight in the non-neutral `A_host(H)` control. This verification establishes the consistency of the versioned assumption registry; it does not provide a numerical bootstrap cost.
+
+In particular, Stage 5.7 does not choose the universal machine parameter `U`, does not assign a bit price to receiver priors, and does not rank stronger-prior profiles against weaker-prior profiles by transmitted bits alone. The principal unresolved task is therefore Stage 5.8: freeze at least one concrete bootstrap candidate under one declared profile and measure the actual transmitted ledger without circularly omitting its interpreter. Until then, total `C | A` remains numerically unresolved and this work makes no claim that NEX is globally minimal or globally superior to alternative calculi.
 
 **Keywords:** minimal programming language, architecture-neutral computation, binary lambda calculus, de Bruijn indices, Hindley–Milner, program encoding, bootstrap, conditional information cost, receiver assumptions, call-by-name, call-by-need, independent implementation, differential conformance, reproducible research.
 
@@ -658,7 +660,17 @@ A key methodological result is that cross-profile bit totals are not directly ra
 
 A second methodological result is the no-double-counting ledger. If a compact artifact both defines NEX and executes it, the same bits cannot be charged separately to `S` and `B`; the inseparable segment is reported as `SB | A`.
 
-Thus RQ8 now has a partial answer: explicit receiver profiles and admissible accounting notation have been defined, but no executable bootstrap has yet been measured under them.
+The first clean-checkout PR #9 checkpoint validated this model and preserved all prior independent-conformance evidence:
+
+```text
+stage5-receiver-assumptions  35387833962  success
+stage5-independence          35387833785  success
+stage5-differential          35387833852  success
+```
+
+The dedicated validator reports 4, 7, 9, and 8 effective assumption atoms for `A0`, `A1`, `A2(U)`, and `A_host(H)` respectively. This validates the registry's structural invariants; it does not measure prior information content.
+
+Thus RQ8 now has a partial answer: explicit receiver profiles and admissible accounting notation have been defined and clean-checkout verified, but no executable bootstrap has yet been measured under them.
 
 ---
 
@@ -694,7 +706,7 @@ Thus RQ8 now has a partial answer: explicit receiver profiles and admissible acc
 
 ## RQ8 — receiver-neutral bootstrap under assumptions
 
-**Partially answered methodologically; numerical answer still open.** Stage 5.7 defines `A0`, `A1`, parameterized `A2(U)`, and non-neutral `A_host(H)`, together with `B | A`, `S | A`, and `SB | A` accounting. Stage 5.8 must instantiate at least one concrete artifact and, for an `A2` experiment, one exact `U` before a bit count can be accepted.
+**Partially answered methodologically; numerical answer still open.** Stage 5.7 defines and clean-checkout verifies `A0`, `A1`, parameterized `A2(U)`, and non-neutral `A_host(H)`, together with `B | A`, `S | A`, and `SB | A` accounting. Stage 5.8 must instantiate at least one concrete artifact and, for an `A2` experiment, one exact `U` before a bit count can be accepted.
 
 ---
 
@@ -766,7 +778,7 @@ Conformance, fuzzing, frozen checkpoints, differential testing, and the receiver
 12. A second implementation reconstructed without translating the reference implementation.
 13. A hash-frozen pre-comparison checkpoint separating independent reconstruction from later differential analysis.
 14. A 942-case post-freeze differential result with 942 portable matches, zero semantic mismatch, and zero resource asymmetry.
-15. A machine-readable versioned receiver-assumption ladder `A0 ⊂ A1 ⊂ A2(U)` with a non-neutral host control `A_host(H)`.
+15. A machine-readable and clean-checkout-validated receiver-assumption ladder `A0 ⊂ A1 ⊂ A2(U)` with a non-neutral host control `A_host(H)`.
 16. Conditional bootstrap/specification notation `B | A`, `S | A`, `C | A` that prevents undeclared receiver priors from disappearing from claims.
 17. A no-double-counting transmitted-bit ledger with an explicit joint `SB | A` category when specification and executable bootstrap are inseparable.
 18. A living dissertation process that preserves positive, negative, and unresolved findings as research evidence changes.
@@ -850,7 +862,7 @@ NEX-1 v0.1 now has a canonical wire representation, principal rank-1 type recons
 
 Stage 5 added independent reconstruction evidence. A frozen packet was given to a separate implementation context before the Go source was available. That reconstruction independently passed all packet vectors and was frozen by content hash. Only then was the Go reference opened. The subsequent deterministic 942-case differential comparison produced 942 portable matches, no semantic mismatch, and no resource asymmetry. This result does not prove NEX globally correct, minimal, or optimal, but it materially strengthens the claim that the current NEX-1 v0.1 specification/conformance package is independently reconstructable over the tested semantic surface.
 
-Stage 5.7 then makes explicit something the original `C = S + B + P` shorthand left implicit: bootstrap size is conditional on what the receiver already knows. The project now distinguishes a minimal digital transport boundary `A0`, an explicit mathematical metalanguage prior `A1`, a parameterized universal-machine prior `A2(U)`, and terrestrial host controls. The physical layer below `A0` is outside the current model rather than free; stronger priors cannot be treated as costless winners; and overlapping specification/bootstrap bits must be charged once through a joint `SB | A` segment.
+Stage 5.7 then makes explicit something the original `C = S + B + P` shorthand left implicit: bootstrap size is conditional on what the receiver already knows. The project now distinguishes a minimal digital transport boundary `A0`, an explicit mathematical metalanguage prior `A1`, a parameterized universal-machine prior `A2(U)`, and terrestrial host controls. The physical layer below `A0` is outside the current model rather than free; stronger priors cannot be treated as costless winners; and overlapping specification/bootstrap bits must be charged once through a joint `SB | A` segment. The first clean-checkout PR #9 checkpoint validates the registry while preserving all prior independence/differential gates.
 
 The dominant remaining unknown is therefore concrete rather than rhetorical: can an actual finite bootstrap artifact be frozen and counted under one of these profiles without circular accounting? Until Stage 5.8 supplies such an artifact, the project will not claim a numerical total `C | A` or global superiority. Preserving that uncertainty is part of the research method by which stronger future claims can become reproducible and falsifiable.
 
@@ -1013,7 +1025,7 @@ Stable source identifiers correspond to `docs/SOURCES.md`. Primary/official sour
 - Stage 5 independent/differential final PR CI: `35385704921`, `35385705027`, `35385705162` — success.
 - Stage 5 independent/differential post-merge CI: `35386452647`, `35386452451`, `35386452447` — success.
 - Differential report: 942/942 portable matches, zero mismatches, zero resource asymmetries.
-- Stage 5.7 receiver-assumption CI: pending PR verification at this evidence horizon.
+- Stage 5.7 first receiver-assumption PR checkpoint: `35387833962`, `35387833785`, `35387833852` — success.
 
 ---
 
