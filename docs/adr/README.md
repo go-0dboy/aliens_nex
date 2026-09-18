@@ -24,6 +24,8 @@ An ADR is therefore required for any decision that materially changes one or mor
 - [ADR-0002: NEX-1 Core v0.1 design basis](0002-nex-core-v0.1-design-basis.md)
 - [ADR-0003: English canonical documentation with Russian mirrors](0003-documentation-language-policy.md)
 - [ADR-0004: Maintain a research source registry](0004-research-source-registry.md)
+- [ADR-0005: Use Go for the first reference implementation](0005-go-reference-implementation.md)
+- [ADR-0006: Keep decoder resource limits separate from wire validity](0006-decoder-resource-limits.md)
 
 ## Status values
 
