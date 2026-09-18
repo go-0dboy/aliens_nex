@@ -1,0 +1,73 @@
+name: stage6-teaching-plan
+
+on:
+  pull_request:
+    paths:
+      - 'stage6/**'
+      - 'docs/STAGE-6.md'
+      - 'docs/STATUS.md'
+      - 'docs/ARCHITECTURE.md'
+      - 'docs/ARCHITECTURE.ru.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+      - 'docs/adr/0017-separate-teaching-protocol-from-core.md'
+      - 'docs/adr/README.md'
+      - 'README.md'
+      - 'README.ru.md'
+      - '.github/workflows/stage6-teaching-plan.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'stage6/**'
+      - 'docs/STAGE-6.md'
+      - 'docs/STATUS.md'
+      - 'docs/ARCHITECTURE.md'
+      - 'docs/ARCHITECTURE.ru.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+      - 'docs/adr/0017-separate-teaching-protocol-from-core.md'
+      - 'docs/adr/README.md'
+      - 'README.md'
+      - 'README.ru.md'
+      - '.github/workflows/stage6-teaching-plan.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-plan:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile Stage 6 validator
+        run: python -m py_compile stage6/validate_plan.py
+
+      - name: Validate Stage 6 planning contract
+        run: python stage6/validate_plan.py
+
+      - name: Verify receiver-assumption models
+        run: python stage5/validate_receiver_assumptions.py
+
+      - name: Verify frozen Stage 5 packet is still reproducible
+        run: python stage5/build_packet.py --verify
+
+      - name: Verify frozen Stage 5 independent checkpoint
+        run: python stage5/verify_independent_checkpoint.py
+
+      - name: Verify negative bootstrap audit remains intact
+        run: python stage5/bootstrap/validate_attempt.py
+
+  reference-regression:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+      - name: Verify Go reference and frozen Stage 4 evidence
+        working-directory: reference/go
+        run: sh verify.sh
