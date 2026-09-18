@@ -1,0 +1,6 @@
+[project]
+name = "nex1-independent"
+version = "0.1.0"
+description = "Independent Python implementation of NEX-1 Core v0.1 from the frozen conformance packet"
+requires-python = ">=3.12"
+dependencies = []

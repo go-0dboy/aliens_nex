@@ -1,0 +1,31 @@
+{
+  "schema": "nex-stage5-independent-checkpoint-v0.1",
+  "checkpoint_id": "python-independent-v0.1",
+  "archive_name": "nex1-independent-python-v0.1.zip",
+  "archive_sha256": "783e4186f9a8c024f00a732deae33b547c81ed4d7639c610a1e8bc5997eb3fbe",
+  "archive_comment": "a594b73b711998df04b45eec296086d5577fba2f",
+  "packet_id": "nex1-independent-conformance-packet-v0.1",
+  "frozen_source_commit": "4f9c50aed13cdbdf72c9ce6510521477d49c05a5",
+  "import_policy": "All implementation, tests, and author-written research notes are imported byte-for-byte from the received ZIP. The packet/ subtree is not duplicated in Git; CI materializes the already-frozen packet into independent/python/packet before verification.",
+  "files": [
+    {"path":"independent/python/.gitignore","bytes":33,"sha256":"fa5b2d4433b835933b22140e01833a4972a0ee8532d76951286e3dd071994af0"},
+    {"path":"independent/python/AMBIGUITIES.md","bytes":1988,"sha256":"a895d0ce6994c2278dba27330dc9e37198c27159df836d7e9b9796400332888e"},
+    {"path":"independent/python/IMPLEMENTATION-NOTES.md","bytes":2832,"sha256":"d616c2c00993b713687cce81010aede91f3732529e1757d05c00b039046e502f"},
+    {"path":"independent/python/INDEPENDENCE-DECLARATION.md","bytes":2095,"sha256":"ed34de8074175e0b7e7bf12dd83f8a1c552a512554ae44705efd00709a10f199"},
+    {"path":"independent/python/README.md","bytes":1502,"sha256":"e976ca30c70495acef8129e15d9301a1ff5ffacfe6b8830830e3ebe0376c05f8"},
+    {"path":"independent/python/nex/__init__.py","bytes":117,"sha256":"cbd73b8e07700ef9657cfe075ff398e7278fa1417d95098f33a101f058576f57"},
+    {"path":"independent/python/nex/eval.py","bytes":9398,"sha256":"5036d5e24550b742afa0ce2719c65ca27f24adb162dfa46a6a7715e1602fd840"},
+    {"path":"independent/python/nex/fixtures.py","bytes":1363,"sha256":"158e8bc96c266a051f8796e3c31b81c739186a4a15e81cd80ff5ac723082a7c7"},
+    {"path":"independent/python/nex/scope.py","bytes":959,"sha256":"31631f379655bce7e1b6bbfa166e2bd4d8b394dc3e414899b377db12ce66d858"},
+    {"path":"independent/python/nex/term.py","bytes":979,"sha256":"f5838407c60fffbefe00ac311d233a5ca94e2d336263df0977a64dd2bc5ae2c4"},
+    {"path":"independent/python/nex/typesys.py","bytes":8969,"sha256":"85703e51fbb01b4504616e39811a41f43ff4fda929c190e674938c2cdae8e63b"},
+    {"path":"independent/python/nex/wire.py","bytes":7047,"sha256":"38239f7ed19fa9f43cd37c762ba9ed76784121c9433d6eb231e1b0901f96d6c1"},
+    {"path":"independent/python/pyproject.toml","bytes":203,"sha256":"3051cc1ec70dfeafbf7c8ebba6262a9a847613da8d77faaa93feada60e79d562"},
+    {"path":"independent/python/tests/test_eval.py","bytes":1819,"sha256":"d855cd85e39970dbfcb07497edcbc79d7c51d36c0f7a656cb8880f065e4217ad"},
+    {"path":"independent/python/tests/test_packet_and_errors.py","bytes":1496,"sha256":"34f768576261918525ac87079d735c040f913ad3b8daf57c68cc501603478ae0"},
+    {"path":"independent/python/tests/test_scope.py","bytes":1346,"sha256":"5eff61afc9991b356ecdc16e7eda3d27687cd49fcda2477b1a5e7fff80842da1"},
+    {"path":"independent/python/tests/test_typesys.py","bytes":2397,"sha256":"f1b2bb905b65714bc0f82f9860152bc5363bc07dfaa8a52ff8454d4b1cb537f7"},
+    {"path":"independent/python/tests/test_wire.py","bytes":4684,"sha256":"ed59c7020e82697d98425b0201a94023d553174994afffcfbeed0dcdd36b0767"},
+    {"path":"independent/python/verify.py","bytes":3632,"sha256":"df0abc8ac0cd46220bf474fc019498a908cd6bbf2d15f8082ed326e009cfa247"}
+  ]
+}
