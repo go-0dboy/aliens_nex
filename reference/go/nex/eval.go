@@ -7,9 +7,8 @@ import (
 )
 
 var (
-	ErrEvalResourceLimit          = errors.New("evaluation resource limit exceeded")
-	ErrEvalInvariant              = errors.New("invalid evaluator state")
-	ErrPrimitiveExecutionDeferred = errors.New("primitive execution is not implemented in this evaluator stage")
+	ErrEvalResourceLimit = errors.New("evaluation resource limit exceeded")
+	ErrEvalInvariant     = errors.New("invalid evaluator state")
 )
 
 type EvalLimits struct {
@@ -163,6 +162,17 @@ func (e *evaluator) applyPrimitive(application *PrimitiveApplication, arg *Thunk
 
 func (e *evaluator) executePrimitive(id uint64, args []*Thunk, depth uint32) (*Value, error) {
 	switch id {
+	case 0: // fix
+		fn, err := e.force(args[0], depth+1)
+		if err != nil {
+			return nil, err
+		}
+		recursive := &Thunk{
+			Term: App(Prim(NaturalUint64(0)), args[0].Term),
+			Env:  cloneEnvironment(args[0].Env),
+		}
+		return e.applyValue(fn, recursive, depth+1)
+
 	case 1: // succ
 		n, err := e.forceNat(args[0], depth+1)
 		if err != nil {
@@ -248,7 +258,7 @@ func (e *evaluator) executePrimitive(id uint64, args []*Thunk, depth uint32) (*V
 		return unitValue(), nil
 
 	default:
-		return nil, ErrPrimitiveExecutionDeferred
+		return nil, ErrEvalInvariant
 	}
 }
 
