@@ -40,7 +40,7 @@ semantic mismatches     0
 resource asymmetries    0
 ```
 
-The post-Stage-5 audit inspected the generator and records the case composition explicitly:
+The post-Stage-5 audit records the case composition explicitly:
 
 ```text
 17   frozen corpus programs
@@ -49,23 +49,25 @@ The post-Stage-5 audit inspected the generator and records the case composition 
 500  randomized term shapes tested at wire level
 ```
 
-Therefore the accepted claim is:
+Accepted claim:
 
 > strong differential-conformance evidence of reconstructability on the tested surface.
 
 This is not a formal proof of specification completeness or semantic correctness. Independent implementations can share correlated failures, and differential testing cannot expose an error common to every compared implementation [SRC-0024, SRC-0027].
 
+The portable `Function` observation is deliberately coarse. Future exhaustive work should test returned functions through application contexts as well as top-level WHNF labels.
+
 ## 5.7 — receiver-assumption model
 
-The historical Stage 5.7 artifact remains:
+The historical Stage 5.7 artifact remains frozen:
 
 ```text
 stage5/receiver-assumptions/assumptions-v0.1.json
 ```
 
-It introduced the central rule that `S`, `B`, and `C` are conditional on explicit receiver assumptions and that transmitted bits cannot be double-counted.
+It introduced the central rule that specification/bootstrap/total cost are conditional on explicit receiver assumptions and that transmitted bits cannot be double-counted.
 
-The post-Stage-5 literature audit found that historical `A1` was too strong because it included the ability to interpret recursively defined rules without fixing the rule language itself. The historical file remains frozen; the current corrected taxonomy is:
+The post-Stage-5 audit found historical `A1` too strong because it included the ability to interpret recursively defined rules without fixing a rule language. The current corrected taxonomy is:
 
 ```text
 stage5/receiver-assumptions/assumptions-v0.2.json
@@ -74,16 +76,16 @@ stage5/receiver-assumptions/assumptions-v0.2.json
 with:
 
 ```text
-A0       exact finite ordered binary frame
-A1       A0 + elementary naturals / finite-sequence mathematics
-A1(R)    A1 + exact formal rule calculus R and binary serialization
-A2(U)    A1 + exact universal binary machine U and framing
-A_host(H)  non-neutral terrestrial host control
+A0        exact finite ordered binary frame
+A1        A0 + elementary naturals / finite-sequence mathematics
+A1(R)     A1 + exact formal rule calculus R and binary serialization
+A2(U)     A1 + exact universal binary machine U and framing
+A_host(H) non-neutral terrestrial host control
 ```
 
-`A1(R)` and `A2(U)` are separate stronger branches. `stage5/validate_receiver_assumptions.py` validates both the historical v0.1 artifact and the corrected current v0.2 model.
+`A1(R)` and `A2(U)` are separate stronger branches. Even the mathematics in `A1` is an explicitly declared experimental prior rather than a claim about actual extraterrestrial cognition.
 
-Exact accounting is now stated most strictly as:
+Exact accounting is stated as:
 
 ```text
 C | A = |M_A|
@@ -100,8 +102,6 @@ and when specification/bootstrap are inseparable:
 ```text
 C | A = (SB | A) + (P | A,SB)
 ```
-
-No cross-profile numerical winner may be claimed without accounting for the differing priors.
 
 ## 5.8 — bootstrap feasibility audit
 
@@ -141,7 +141,7 @@ all frozen author-written files      52,859 bytes
 
 These values are explicitly **not** `B`.
 
-The corrected `A1/A1(R)` boundary reinforces the negative result rather than overturning it: the missing formal rule calculus was a real unresolved dependency.
+The corrected `A1/A1(R)` boundary reinforces the negative result: the missing formal rule calculus was a real unresolved dependency.
 
 ## 5.9 — decision gate
 
@@ -173,10 +173,11 @@ ADR-0015 closes Stage 5 with a negative complete-bootstrap result.
 ### Still unknown
 
 - a complete accepted `B | A`, `SB | A`, or total `C | A`;
-- sensitivity to the selected rule calculus `R` or universal machine `U`;
+- sensitivity to selected rule calculus `R` or universal machine `U`;
 - NEX-specific formal type safety;
-- formal equivalence of the allowed call-by-need implementation to NEX weak CBN semantics;
-- total-cost erased-HM versus explicit/hybrid typing once complete bootstrap artifacts exist.
+- formal equivalence of allowed call-by-need to NEX weak CBN semantics;
+- total-cost erased-HM versus explicit/hybrid typing once complete bootstrap artifacts exist;
+- a finite teaching sequence that can establish NEX competence for an unknown receiver.
 
 ## Definition of done
 
@@ -194,15 +195,22 @@ ADR-0015 closes Stage 5 with a negative complete-bootstrap result.
 
 ## Post-Stage-5 audit status
 
-The 2026-09-19 literature re-audit is recorded in ADR-0016 and `docs/RESEARCH-AUDIT-2026-09-19*.md`. It does not reopen Stage 5 or rewrite its historical artifacts; it narrows claim wording and advances the receiver-assumption taxonomy to v0.2.
+The 2026-09-19 literature re-audit is recorded in ADR-0016 and `docs/RESEARCH-AUDIT-2026-09-19*.md`. It does not reopen Stage 5 or rewrite frozen historical artifacts; it narrows claim wording, advances the receiver-assumption taxonomy to v0.2, and uses Lincos/CosmicOS/related work as design evidence for the next stage.
 
-## Next research direction
+## Handoff to Stage 6
 
-Before an incompatible Core redesign, the audit recommends a combined formal/exhaustive evidence stage:
+The comparison with Lincos, DeVito–Oehrle, Lingua Cosmica, and especially CosmicOS reveals that Stage 5's bootstrap question was only part of the original communication problem. A receiver needs not only an executable basis but a **teaching sequence** from which the intended computational meaning can be reconstructed and checked.
 
-1. prove NEX-specific preservation/canonical forms/progress-or-safety properties;
-2. prove or mechanize call-by-need observational preservation for the exact NEX Core;
-3. add bounded exhaustive small-term cross-implementation testing and hold-out/external workloads;
-4. construct one actual dependency-closed bootstrap under `A1(R)` or `A2(U)`.
+The handoff is therefore:
 
-Only after these gaps are reduced should total-cost redesign claims be treated as more than exploratory.
+```text
+receiver prior A
+    -> NEX teaching/bootstrap message T
+    -> reconstructed NEX-1 competence
+    -> conformance/self-test
+    -> canonical NEX program transmission P
+```
+
+Stage 6 should make `T` the primary research object while keeping NEX-1 v0.1 stable. Formal metatheory, bounded-exhaustive differential testing, function application contexts, and hold-out workloads remain supporting workstreams.
+
+The exact Stage 6 contract belongs in its own document/ADR and must not be backfilled into the completed Stage 5 experiment.
