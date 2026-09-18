@@ -8,10 +8,12 @@
 ## Proven / present in repository
 
 - NEX-1 Core v0.1 draft specification exists in `docs/NEX-1-v0.1.md`.
+- Russian mirrors exist for the project overview, NEX-1 v0.1 specification, and architecture overview.
+- ADR-0003 defines English as canonical documentation and requires maintained Russian mirrors for those primary documents.
 - The repository README identifies the total-information-cost design objective.
 - ADR process and initial architectural rationale are present on `docs/adr-workflow`.
 - Development, testing, domain-language, architecture, AI-agent, and continuation guidance are present on the same branch.
-- PR #1 contains documentation/process changes only; it does not modify the NEX-1 v0.1 specification or implementation code.
+- PR #1 contains documentation/process changes only; it does not modify NEX-1 v0.1 semantics or implementation code.
 
 ## Current architectural baseline
 
