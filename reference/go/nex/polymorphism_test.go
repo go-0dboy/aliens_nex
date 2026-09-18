@@ -23,6 +23,18 @@ func TestInstantiateUsesFreshVariablesPerUse(t *testing.T) {
 	}
 }
 
+func TestInstantiateMayReuseTemplateNumberAsFreshID(t *testing.T) {
+	scheme := TypeScheme{Quantified: []TypeVarID{0}, Body: TFunc(TVar(0), TVar(0))}
+	got, err := Instantiate(scheme, NewFreshTypeVars(0))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := TFunc(TVar(0), TVar(0))
+	if !EqualType(got, want) {
+		t.Fatalf("Instantiate() = %#v, want %#v", got, want)
+	}
+}
+
 func TestInstantiateMonomorphicSchemeClonesType(t *testing.T) {
 	scheme := MonoScheme(TFunc(TNat(), TNat()))
 	got, err := Instantiate(scheme, NewFreshTypeVars(0))
