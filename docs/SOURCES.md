@@ -140,6 +140,43 @@ These sources are relevant to alternatives already discussed or likely to be ben
 
 ---
 
+## Dynamic-semantics sources
+
+### SRC-0011 — Call-by-name / call-by-value operational distinction
+
+**Gordon D. Plotkin (1975), _Call-by-name, call-by-value and the lambda-calculus_.**
+
+- Type: primary research paper
+- DOI: https://doi.org/10.1016/0304-3975(75)90017-1
+- Publisher record: https://www.sciencedirect.com/science/article/pii/0304397575900171
+- Used by NEX for: foundational operational distinction between call-by-name and call-by-value and the fact that evaluation strategy can change observable termination/equality behavior.
+- Current project impact: supports keeping the Stage 3 reference evaluator aligned with the already accepted weak call-by-name NEX-1 v0.1 semantics rather than silently switching to call-by-value.
+- Important limitation: Plotkin's calculi do not define NEX's `Let`, primitive table, product/sum forcing rules, wire format, or exact runtime representation; those remain NEX decisions.
+
+### SRC-0012 — Natural semantics for lazy evaluation with sharing
+
+**John Launchbury (1993), _A Natural Semantics for Lazy Evaluation_.**
+
+- Type: primary research paper
+- DOI: https://doi.org/10.1145/158511.158618
+- ACM record: https://dl.acm.org/doi/10.1145/158511.158618
+- Used by NEX for: a formal model of non-strict evaluation with sharing/heap-like bindings.
+- Current project impact: provides theoretical grounding for a future call-by-need/memoizing implementation that may optimize the reference call-by-name evaluator while preserving observable Core results.
+- Important limitation: Stage 3's first reference evaluator intentionally does **not** adopt Launchbury-style sharing as its normative model; NEX primitive forcing and conformance rules are project-specific.
+
+### SRC-0013 — Lazy abstract machine / implementation precedent
+
+**Peter Sestoft (1997), _Deriving a lazy abstract machine_.**
+
+- Type: primary research paper
+- DOI: https://doi.org/10.1017/S0956796897002712
+- Publisher record: https://www.cambridge.org/core/journals/journal-of-functional-programming/article/deriving-a-lazy-abstract-machine/A1CF974BD4A92A2A9B47287F55B68DB6
+- Used by NEX for: implementation precedent connecting environment/closure-style abstract machines, call-by-name ancestry, and a call-by-need machine with sharing, constructors, and base values.
+- Current project impact: informs the Stage 3 choice to keep the first evaluator environment-based while deferring sharing/memoization to a later optimized implementation.
+- Important limitation: NEX does not adopt Sestoft's machine state, stack format, instruction set, or cost model as normative semantics.
+
+---
+
 ## How to cite sources inside project documents
 
 When useful, project documents may refer to stable IDs, for example:
