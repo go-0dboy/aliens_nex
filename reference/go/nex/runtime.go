@@ -38,10 +38,10 @@ type Value struct {
 	Kind ValueKind
 	Nat  *big.Int
 
-	Closure  *Closure
-	Left     *Thunk
-	Right    *Thunk
-	Payload  *Thunk
+	Closure   *Closure
+	Left      *Thunk
+	Right     *Thunk
+	Payload   *Thunk
 	Primitive *PrimitiveApplication
 }
 
