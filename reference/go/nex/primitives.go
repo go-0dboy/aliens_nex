@@ -24,24 +24,25 @@ func (e *UnknownPrimitiveError) Unwrap() error { return ErrUnknownPrimitive }
 type CorePrimitive struct {
 	ID     uint64
 	Name   string
+	Arity  uint8
 	Scheme TypeScheme
 }
 
 // corePrimitives is the authoritative NEX-1 v0.1 Core primitive metadata table.
-// Type inference and future runtime work must derive primitive metadata from this table
-// rather than maintaining independent ID/type definitions.
+// Type inference and runtime work derive primitive metadata from this table rather
+// than maintaining independent ID/type/arity definitions.
 var corePrimitives = []CorePrimitive{
-	{ID: 0, Name: "fix", Scheme: TypeScheme{Quantified: []TypeVarID{0}, Body: TFunc(TFunc(TVar(0), TVar(0)), TVar(0))}},
-	{ID: 1, Name: "succ", Scheme: MonoScheme(TFunc(TNat(), TNat()))},
-	{ID: 2, Name: "pred", Scheme: MonoScheme(TFunc(TNat(), TNat()))},
-	{ID: 3, Name: "ifz", Scheme: TypeScheme{Quantified: []TypeVarID{0}, Body: TFunc(TNat(), TFunc(TVar(0), TFunc(TVar(0), TVar(0))))}},
-	{ID: 4, Name: "pair", Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TVar(0), TFunc(TVar(1), TProduct(TVar(0), TVar(1))))}},
-	{ID: 5, Name: "fst", Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TProduct(TVar(0), TVar(1)), TVar(0))}},
-	{ID: 6, Name: "snd", Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TProduct(TVar(0), TVar(1)), TVar(1))}},
-	{ID: 7, Name: "inl", Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TVar(0), TSum(TVar(0), TVar(1)))}},
-	{ID: 8, Name: "inr", Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TVar(1), TSum(TVar(0), TVar(1)))}},
-	{ID: 9, Name: "case", Scheme: TypeScheme{Quantified: []TypeVarID{0, 1, 2}, Body: TFunc(TSum(TVar(0), TVar(1)), TFunc(TFunc(TVar(0), TVar(2)), TFunc(TFunc(TVar(1), TVar(2)), TVar(2))))}},
-	{ID: 10, Name: "unit", Scheme: MonoScheme(TUnit())},
+	{ID: 0, Name: "fix", Arity: 1, Scheme: TypeScheme{Quantified: []TypeVarID{0}, Body: TFunc(TFunc(TVar(0), TVar(0)), TVar(0))}},
+	{ID: 1, Name: "succ", Arity: 1, Scheme: MonoScheme(TFunc(TNat(), TNat()))},
+	{ID: 2, Name: "pred", Arity: 1, Scheme: MonoScheme(TFunc(TNat(), TNat()))},
+	{ID: 3, Name: "ifz", Arity: 3, Scheme: TypeScheme{Quantified: []TypeVarID{0}, Body: TFunc(TNat(), TFunc(TVar(0), TFunc(TVar(0), TVar(0))))}},
+	{ID: 4, Name: "pair", Arity: 2, Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TVar(0), TFunc(TVar(1), TProduct(TVar(0), TVar(1))))}},
+	{ID: 5, Name: "fst", Arity: 1, Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TProduct(TVar(0), TVar(1)), TVar(0))}},
+	{ID: 6, Name: "snd", Arity: 1, Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TProduct(TVar(0), TVar(1)), TVar(1))}},
+	{ID: 7, Name: "inl", Arity: 1, Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TVar(0), TSum(TVar(0), TVar(1)))}},
+	{ID: 8, Name: "inr", Arity: 1, Scheme: TypeScheme{Quantified: []TypeVarID{0, 1}, Body: TFunc(TVar(1), TSum(TVar(0), TVar(1)))}},
+	{ID: 9, Name: "case", Arity: 3, Scheme: TypeScheme{Quantified: []TypeVarID{0, 1, 2}, Body: TFunc(TSum(TVar(0), TVar(1)), TFunc(TFunc(TVar(0), TVar(2)), TFunc(TFunc(TVar(1), TVar(2)), TVar(2))))}},
+	{ID: 10, Name: "unit", Arity: 0, Scheme: MonoScheme(TUnit())},
 }
 
 func CorePrimitives() []CorePrimitive {
@@ -50,6 +51,7 @@ func CorePrimitives() []CorePrimitive {
 		out[i] = CorePrimitive{
 			ID:     primitive.ID,
 			Name:   primitive.Name,
+			Arity:  primitive.Arity,
 			Scheme: cloneScheme(primitive.Scheme),
 		}
 	}
@@ -65,7 +67,7 @@ func LookupCorePrimitive(id *big.Int) (CorePrimitive, error) {
 		return CorePrimitive{}, &UnknownPrimitiveError{ID: cloneNat(id)}
 	}
 	primitive := corePrimitives[value]
-	return CorePrimitive{ID: primitive.ID, Name: primitive.Name, Scheme: cloneScheme(primitive.Scheme)}, nil
+	return CorePrimitive{ID: primitive.ID, Name: primitive.Name, Arity: primitive.Arity, Scheme: cloneScheme(primitive.Scheme)}, nil
 }
 
 func ValidateCorePrimitives(term *Term) error {
