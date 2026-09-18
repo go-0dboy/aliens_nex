@@ -4,7 +4,8 @@
 **Baseline branch:** `main`  
 **Current stage:** `Stage 0 — Complete`  
 **Completed by:** PR `#1 docs: establish ADRs and project workflow`  
-**Stage 0 merge commit:** `6183546a8fe6a26e6092bd65b87d8916594899ad`
+**Stage 0 merge commit:** `6183546a8fe6a26e6092bd65b87d8916594899ad`  
+**Active pre-Stage-1 documentation PR:** `#2 docs: add research source registry`
 
 ## Stage 0 — Complete
 
@@ -25,6 +26,18 @@ Completed:
 - this `STATUS.md` file defines the continuation checkpoint between work sessions.
 
 No reference implementation was part of Stage 0.
+
+## Pre-Stage-1 research traceability
+
+PR #2 adds the research-source infrastructure requested before implementation starts:
+
+- `docs/SOURCES.md` as the canonical external source registry;
+- stable `SRC-xxxx` identifiers;
+- current foundational sources and their exact use/limitations in NEX;
+- ADR-0004 requiring source-registry maintenance;
+- AI-agent rules requiring new material external dependencies to be registered in the same change.
+
+This PR does not change NEX-1 Core semantics and does not start Stage 1 implementation.
 
 ## Current architectural baseline
 
@@ -53,7 +66,7 @@ No reference implementation exists yet. Therefore the following remain hypothese
 
 ## Stage 1 — Wire foundation
 
-The next stage is deliberately narrow:
+The next implementation stage remains deliberately narrow:
 
 ```text
 U(n) integer codec
@@ -76,4 +89,4 @@ The purpose of Stage 1 is to prove that the canonical wire grammar is implementa
 
 ## Next recommended step
 
-Create a dedicated Stage 1 implementation branch and PR for the `U(n)` codec, canonical `Term` encoder/decoder, and initial golden/conformance vectors only.
+Review and merge PR #2. Then create a dedicated Stage 1 implementation branch and PR for the `U(n)` codec, canonical `Term` encoder/decoder, and initial golden/conformance vectors only.

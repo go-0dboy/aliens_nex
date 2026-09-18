@@ -19,6 +19,7 @@ Project working documents:
 - [Domain language and invariants](docs/DOMAIN.md)
 - [Development workflow](docs/WORKFLOW.md)
 - [Testing and conformance](docs/TESTING.md)
+- [Research sources registry](docs/SOURCES.md)
 - [Current continuation status](docs/STATUS.md)
 - [Architecture Decision Records](docs/adr/README.md)
 - [AI agent instructions](AGENTS.md)
@@ -50,6 +51,8 @@ This is why the project does not simply reduce everything to SKI combinators or 
 ## Project memory and decisions
 
 The repository is the project source of truth. Durable architectural reasoning belongs in ADRs, including rejected and deferred alternatives. Chat history is not relied on as architectural memory.
+
+External technical sources that materially influence specifications, ADRs, algorithms, standards choices, or benchmark baselines are tracked in `docs/SOURCES.md` under ADR-0004.
 
 Implementation work follows the feedback loop defined in `docs/WORKFLOW.md`:
 
@@ -102,7 +105,7 @@ NEX-1 is an experimental design built from established ideas including:
 - PCF-style typed general recursion;
 - separation of portable computation from host/environment embedding.
 
-Primary references are listed in the specification.
+The maintained research bibliography and usage notes are in [docs/SOURCES.md](docs/SOURCES.md). Primary references are also cited where relevant in the specification and ADRs.
 
 ## Repository policy at this stage
 
