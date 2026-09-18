@@ -15,6 +15,10 @@ func requireNatValue(t *testing.T, value *Value, want uint64) {
 	}
 }
 
+func deferredFixIdentityTerm() *Term {
+	return App(Prim(NaturalUint64(0)), Lam(Var(NaturalUint64(0))))
+}
+
 func TestEvaluateClosedNat(t *testing.T) {
 	value, err := EvaluateClosed(Nat(NaturalUint64(42)), DefaultEvalLimits)
 	if err != nil {
@@ -62,12 +66,11 @@ func TestEvaluateLetBinding(t *testing.T) {
 }
 
 func TestIgnoredLambdaArgumentIsNotEvaluated(t *testing.T) {
-	// Prim(unit) is statically valid but primitive execution is intentionally deferred
-	// until Stage 3.3+. If call-by-name tried to evaluate this ignored argument, the
-	// current evaluator would return ErrPrimitiveExecutionDeferred instead of 7.
+	// fix is deliberately not executed until Stage 3.6. If call-by-name tried to
+	// evaluate this ignored argument, evaluation would return ErrPrimitiveExecutionDeferred.
 	term := App(
 		Lam(Nat(NaturalUint64(7))),
-		Prim(NaturalUint64(10)),
+		deferredFixIdentityTerm(),
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
@@ -78,7 +81,7 @@ func TestIgnoredLambdaArgumentIsNotEvaluated(t *testing.T) {
 
 func TestUnusedLetValueIsNotEvaluated(t *testing.T) {
 	term := Let(
-		Prim(NaturalUint64(10)),
+		deferredFixIdentityTerm(),
 		Nat(NaturalUint64(7)),
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
@@ -89,7 +92,7 @@ func TestUnusedLetValueIsNotEvaluated(t *testing.T) {
 }
 
 func TestLambdaBodyIsNotEvaluatedUntilApplication(t *testing.T) {
-	term := Lam(Prim(NaturalUint64(10)))
+	term := Lam(deferredFixIdentityTerm())
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
 		t.Fatal(err)
@@ -99,10 +102,10 @@ func TestLambdaBodyIsNotEvaluatedUntilApplication(t *testing.T) {
 	}
 }
 
-func TestDemandedPrimitiveIsDeferredAtStage32(t *testing.T) {
-	_, err := EvaluateClosed(Prim(NaturalUint64(10)), DefaultEvalLimits)
+func TestDemandedFixIsDeferredUntilStage36(t *testing.T) {
+	_, err := EvaluateClosed(deferredFixIdentityTerm(), DefaultEvalLimits)
 	if !errors.Is(err, ErrPrimitiveExecutionDeferred) {
-		t.Fatalf("EvaluateClosed(unit) error = %v, want ErrPrimitiveExecutionDeferred", err)
+		t.Fatalf("EvaluateClosed(fix id) error = %v, want ErrPrimitiveExecutionDeferred", err)
 	}
 }
 
