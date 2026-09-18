@@ -87,18 +87,7 @@ func (e *evaluator) eval(term *Term, env Environment, depth uint32) (*Value, err
 			return nil, err
 		}
 		arg := &Thunk{Term: term.B, Env: cloneEnvironment(env)}
-		switch fn.Kind {
-		case ValueClosure:
-			if fn.Closure == nil || fn.Closure.Body == nil {
-				return nil, ErrEvalInvariant
-			}
-			bodyEnv := extendEnvironment(fn.Closure.Env, arg)
-			return e.eval(fn.Closure.Body, bodyEnv, depth+1)
-		case ValuePrimitive:
-			return e.applyPrimitive(fn.Primitive, arg, depth+1)
-		default:
-			return nil, ErrEvalInvariant
-		}
+		return e.applyValue(fn, arg, depth+1)
 
 	case KindLet:
 		if term.A == nil || term.B == nil {
@@ -134,6 +123,24 @@ func (e *evaluator) force(thunk *Thunk, depth uint32) (*Value, error) {
 		return nil, ErrEvalInvariant
 	}
 	return e.eval(thunk.Term, thunk.Env, depth)
+}
+
+func (e *evaluator) applyValue(fn *Value, arg *Thunk, depth uint32) (*Value, error) {
+	if fn == nil || arg == nil {
+		return nil, ErrEvalInvariant
+	}
+	switch fn.Kind {
+	case ValueClosure:
+		if fn.Closure == nil || fn.Closure.Body == nil {
+			return nil, ErrEvalInvariant
+		}
+		bodyEnv := extendEnvironment(fn.Closure.Env, arg)
+		return e.eval(fn.Closure.Body, bodyEnv, depth+1)
+	case ValuePrimitive:
+		return e.applyPrimitive(fn.Primitive, arg, depth+1)
+	default:
+		return nil, ErrEvalInvariant
+	}
 }
 
 func (e *evaluator) applyPrimitive(application *PrimitiveApplication, arg *Thunk, depth uint32) (*Value, error) {
@@ -182,6 +189,60 @@ func (e *evaluator) executePrimitive(id uint64, args []*Thunk, depth uint32) (*V
 			return e.force(args[1], depth+1)
 		}
 		return e.force(args[2], depth+1)
+
+	case 4: // pair
+		return pairValue(args[0], args[1]), nil
+
+	case 5: // fst
+		pair, err := e.force(args[0], depth+1)
+		if err != nil {
+			return nil, err
+		}
+		if pair == nil || pair.Kind != ValuePair || pair.Left == nil || pair.Right == nil {
+			return nil, ErrEvalInvariant
+		}
+		return e.force(pair.Left, depth+1)
+
+	case 6: // snd
+		pair, err := e.force(args[0], depth+1)
+		if err != nil {
+			return nil, err
+		}
+		if pair == nil || pair.Kind != ValuePair || pair.Left == nil || pair.Right == nil {
+			return nil, ErrEvalInvariant
+		}
+		return e.force(pair.Right, depth+1)
+
+	case 7: // inl
+		return inlValue(args[0]), nil
+
+	case 8: // inr
+		return inrValue(args[0]), nil
+
+	case 9: // case
+		sum, err := e.force(args[0], depth+1)
+		if err != nil {
+			return nil, err
+		}
+		if sum == nil || sum.Payload == nil {
+			return nil, ErrEvalInvariant
+		}
+
+		var selected *Thunk
+		switch sum.Kind {
+		case ValueInl:
+			selected = args[1]
+		case ValueInr:
+			selected = args[2]
+		default:
+			return nil, ErrEvalInvariant
+		}
+
+		fn, err := e.force(selected, depth+1)
+		if err != nil {
+			return nil, err
+		}
+		return e.applyValue(fn, sum.Payload, depth+1)
 
 	case 10: // unit
 		return unitValue(), nil
