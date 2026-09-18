@@ -2,83 +2,73 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Current stage:** `Stage 1 — Wire foundation — Complete`  
+**Current stage:** `Stage 2 — Static validation — Implementation complete; pending merge review`  
 **Stage 0 completed by:** PR `#1 docs: establish ADRs and project workflow`  
 **Research source registry completed by:** PR `#2 docs: add research source registry`  
 **Stage 1 completed by:** PR `#3 stage1: implement NEX wire foundation`  
-**Stage 1 merge commit:** `e9bf6ff0bbc19fd36c27451572d7b617ebabc9f8`
+**Stage 1 merge commit:** `e9bf6ff0bbc19fd36c27451572d7b617ebabc9f8`  
+**Active Stage 2 branch:** `stage2/static-validation`  
+**Active Stage 2 pull request:** `#4 stage2: establish static validation foundations`
 
 ## Stage 0 — Complete
 
-Stage 0 established the project baseline before implementation work began:
-
-- NEX-1 Core v0.1 draft specification;
-- Russian mirrors for the project overview, specification, and architecture;
-- ADR process and initial design decisions;
-- domain vocabulary and invariants;
-- architecture, workflow, testing strategy, and AI-agent rules;
-- durable continuation status.
-
-PR #2 subsequently added `docs/SOURCES.md`, ADR-0004, and mandatory source-registry maintenance before Stage 1 implementation began.
+Stage 0 established the project specification, ADR/workflow system, bilingual core documentation, source registry, architecture, testing strategy, and durable project memory.
 
 ## Stage 1 — Wire foundation — Complete
 
-Stage 1 is defined and closed in `docs/STAGE-1.md`.
+Stage 1 is defined and closed in `docs/STAGE-1.md`. The repository has an executable, tested, and CI-verified canonical wire layer with arbitrary-precision `U(n)`, exact/prefix decoding, independent conformance vectors, and implementation resource limits separated from wire validity.
 
-Completed:
+## Stage 2 — Static validation — Implementation complete; pending merge review
 
-- ADR-0005 selects Go for the dependency-free first reference implementation;
-- ADR-0006 separates resource-limit refusal from malformed NEX syntax;
-- `reference/go/` contains the first executable reference codec;
-- `U(n)` supports arbitrary-precision naturals through `math/big.Int`;
-- the six canonical constructors `Var`, `Lam`, `App`, `Let`, `Nat`, `Prim` have an in-memory representation;
-- `EncodeTerm`, `DecodeOne`, and `DecodeExact` implement the v0.1 constructor prefixes;
-- decoder limits cover integer bit length, term depth, and node count without redefining wire validity;
-- `conformance/wire-v0.1.json` is language-independent;
-- `.github/workflows/wire-foundation.yml` repeats repository verification from a clean checkout;
-- no Stage 2 functionality was included in the Stage 1 implementation.
+Stage 2 is defined in `docs/STAGE-2.md`.
 
-## Verified Stage 1 results
+ADR-0007 fixes the v0.1 type-annotation baseline: ordinary canonical Core terms omit type annotations and use inference, while compact explicit/hybrid type information remains a required future total-cost benchmark rather than a rejected alternative.
 
-Reference verification:
+Completed on PR #4:
 
 ```text
-gofmt check    PASS
-go vet ./...   PASS
-go test ./...  PASS
+2.1 de Bruijn scope validation
+2.2 type AST + type schemes
+2.3 substitutions + free type variables
+2.4 unification + occurs check
+2.5 authoritative Core primitive table + primitive validity
+2.6 fresh instantiation + let-generalization
+2.7 Algorithm W style inference
+2.8 language-neutral principal-type/error conformance
+2.9 property fuzzing + clean-checkout CI + diff review
 ```
 
-GitHub Actions run `35348259779` completed successfully from a clean checkout.
+### Static-validation pipeline
 
-Final conformance corpus:
+The reference implementation now provides:
 
 ```text
-17 integer vectors
-12 term vectors
-15 invalid exact-input vectors
+Term
+  -> ValidateClosed
+  -> ValidateCorePrimitives
+  -> InferClosed
+  -> principal TypeScheme
 ```
 
-A final one-second `FuzzTermRoundTrip` run completed 27,289 generated executions without a failure. This is empirical coverage, not a formal proof.
+No evaluation occurs in this pipeline.
 
-The final PR diff was reviewed against `docs/STAGE-1.md` and contained no type inference, evaluator, frontend, optimizer, memory/system profile, or self-hosting functionality.
+### Primitive metadata
 
-## Remaining unverified claims
+One authoritative table contains Core primitive IDs `0..10`, names, and type schemes. Core-only static validation rejects reserved/future/profile primitive IDs when no external profile is selected.
 
-The following remain intentionally unverified or out of scope:
+An early 2.5 CI failure exposed an incorrect **test expectation** for canonical `inr` type-variable names. The primitive scheme itself matched the specification; the expected canonical rendering was corrected to respect first occurrence.
 
-- formal/exhaustive proof of decoder correctness;
-- conformance agreement with a second independent implementation;
-- de Bruijn scope validity;
-- primitive/profile semantic validity;
-- static type correctness;
-- evaluator behavior;
-- self-hosting feasibility;
-- comparative encoded size versus BLC, SKI/Jot, WebAssembly, or stack bytecode;
-- any claim that NEX is globally optimal or the smallest possible language.
+### Instantiation/generalization
 
-## Architectural baseline after Stage 1
+- quantified variables receive fresh identities on every scheme use;
+- instantiation is direct alpha-renaming, avoiding false substitution cycles when template and fresh IDs coincide;
+- let-bound inferred types are generalized over variables not free in the outer environment;
+- lambda-bound variables remain monomorphic;
+- polymorphic recursion is not introduced.
 
-NEX-1 Core v0.1 currently has an executable and tested wire layer for:
+### Algorithm W
+
+Inference covers exactly the six v0.1 Core constructors:
 
 ```text
 Var
@@ -89,24 +79,70 @@ Nat
 Prim
 ```
 
-with canonical `U(n)` integer coding, exact/prefix decoding, independent conformance vectors, and explicit implementation resource limits.
+Tests prove, among other examples:
 
-The project can now begin static semantic validation without changing the established wire foundation unless a new ADR explicitly supersedes an existing decision.
+- identity and constant principal schemes;
+- `succ : N -> N` constraints;
+- products and `fix`;
+- one let-bound identity reused at both `N` and `1`;
+- the analogous lambda-bound parameter is rejected as monomorphic;
+- `x x` is rejected by occurs check;
+- calling a natural as a function is rejected;
+- scope and unknown-primitive errors remain distinct from type errors.
+
+### Language-neutral conformance
+
+`conformance/static-v0.1.json` contains:
+
+```text
+15 scope vectors
+19 type vectors
+```
+
+The type vectors record either canonical principal type schemes or deterministic static error classes. They do not depend on Go internal type-variable IDs.
+
+### Verification evidence
+
+Previously verified checkpoints:
+
+```text
+2.1 CI 35349955837  success
+2.2 CI 35350348515  success
+2.3 CI 35350580401  success
+2.4 CI 35350747002  success
+2.8 CI 35359948801  success
+```
+
+Final Stage 2 clean-checkout gate:
+
+```text
+CI 35360079519  success
+```
+
+That final gate executed:
+
+```text
+gofmt check
+go vet ./...
+go test ./...
+1s FuzzSubstitutionComposition
+1s FuzzUnifyProducesEqualAppliedTypes
+1s FuzzInferenceSuccessfulSchemeIsClosedAndStable
+```
+
+The final branch diff was reviewed against `docs/STAGE-2.md`. It contains static-validation code, conformance, tests, CI/documentation, and ADR material only. No evaluator, reduction, primitive execution, source parser, optimizer, system profile, compiler, or self-hosting code is present.
+
+## Remaining project-wide unverified claims
+
+Still intentionally unverified:
+
+- formal/exhaustive proof of decoder or type-inference correctness;
+- conformance agreement with a second independent implementation;
+- evaluator behavior;
+- self-hosting feasibility;
+- total-information-cost comparison against BLC, SKI/Jot, WebAssembly, stack bytecode, or an explicit-type NEX variant;
+- any claim that NEX is globally optimal or the smallest possible language.
 
 ## Next recommended step
 
-Do not begin Stage 2 implementation immediately.
-
-First define and review a dedicated Stage 2 plan covering:
-
-```text
-de Bruijn scope validation
-  -> type representation
-  -> substitutions and free type variables
-  -> unification with occurs check
-  -> primitive type schemes
-  -> Algorithm W / let-generalization
-  -> type conformance vectors
-```
-
-Any new external theory or implementation baseline used during Stage 2 must be registered in `docs/SOURCES.md` according to ADR-0004.
+Review PR #4 as the Stage 2 completion candidate. If accepted, merge it and mark Stage 2 complete on `main` before defining Stage 3 evaluator semantics. Do not begin evaluator/runtime implementation before that merge decision.
