@@ -4,45 +4,18 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"math/big"
 	"os"
-	"path/filepath"
 
+	"github.com/go-0dboy/aliens_nex/reference/go/bench"
 	"github.com/go-0dboy/aliens_nex/reference/go/nex"
 )
-
-type jsonTerm struct {
-	Kind  string    `json:"kind"`
-	Value string    `json:"value,omitempty"`
-	A     *jsonTerm `json:"a,omitempty"`
-	B     *jsonTerm `json:"b,omitempty"`
-}
-
-type observation struct {
-	Kind  string `json:"kind"`
-	Value string `json:"value,omitempty"`
-}
-
-type corpus struct {
-	Schema        string `json:"schema"`
-	CorpusVersion string `json:"corpus_version"`
-	Status        string `json:"status"`
-	Extends       string `json:"extends,omitempty"`
-	Programs      []struct {
-		ID             string      `json:"id"`
-		Description    string      `json:"description"`
-		Classification string      `json:"classification"`
-		Term           jsonTerm    `json:"term"`
-		Expected       observation `json:"expected"`
-	} `json:"programs"`
-}
 
 type portableReport struct {
 	WireBits          int                     `json:"wire_bits"`
 	ASTNodes          int                     `json:"ast_nodes"`
 	Constructors      nex.ConstructorCounts   `json:"constructors"`
 	WireByConstructor nex.ConstructorWireBits `json:"wire_bits_by_constructor"`
-	Observation       observation             `json:"observation"`
+	Observation       bench.Observation       `json:"observation"`
 }
 
 type referenceReport struct {
@@ -85,18 +58,15 @@ func main() {
 		fatalf("-corpus is required")
 	}
 
-	c, err := loadCorpus(*corpusPath)
+	corpus, err := bench.LoadCorpus(*corpusPath)
 	if err != nil {
 		fatalf("load corpus: %v", err)
 	}
-	if len(c.Programs) == 0 {
-		fatalf("corpus has no programs")
-	}
 
-	r := report{
+	reportValue := report{
 		Schema:        "nex-benchmark-report-v0.1",
-		CorpusVersion: c.CorpusVersion,
-		CorpusStatus:  c.Status,
+		CorpusVersion: corpus.CorpusVersion,
+		CorpusStatus:  corpus.Status,
 		Notes: []string{
 			"portable_exact values are architecture-neutral properties of the canonical NEX term/wire encoding",
 			"wire_bits_by_constructor attributes each bit to the local constructor encoding that emitted it and sums exactly to wire_bits",
@@ -105,36 +75,31 @@ func main() {
 		},
 	}
 
-	seen := make(map[string]bool)
-	for _, p := range c.Programs {
-		if p.ID == "" || seen[p.ID] {
-			fatalf("invalid or duplicate program id %q", p.ID)
-		}
-		seen[p.ID] = true
-		term, err := termFromJSON(&p.Term)
+	for _, program := range corpus.Programs {
+		term, err := bench.TermFromJSON(&program.Term)
 		if err != nil {
-			fatalf("%s: parse term: %v", p.ID, err)
+			fatalf("%s: parse term: %v", program.ID, err)
 		}
 		metrics, err := nex.MeasureTerm(term)
 		if err != nil {
-			fatalf("%s: measure term: %v", p.ID, err)
+			fatalf("%s: measure term: %v", program.ID, err)
 		}
 		value, stats, err := nex.EvaluateClosedWithStats(term, nex.DefaultEvalLimits)
 		if err != nil {
-			fatalf("%s: evaluate: %v", p.ID, err)
+			fatalf("%s: evaluate: %v", program.ID, err)
 		}
-		observed, err := observe(value)
+		observed, err := bench.Observe(value)
 		if err != nil {
-			fatalf("%s: observe: %v", p.ID, err)
+			fatalf("%s: observe: %v", program.ID, err)
 		}
-		if observed != p.Expected {
-			fatalf("%s: observation %#v != expected %#v", p.ID, observed, p.Expected)
+		if observed != program.Expected {
+			fatalf("%s: observation %#v != expected %#v", program.ID, observed, program.Expected)
 		}
 
-		pr := programReport{
-			ID:             p.ID,
-			Description:    p.Description,
-			Classification: p.Classification,
+		programResult := programReport{
+			ID:             program.ID,
+			Description:    program.Description,
+			Classification: program.Classification,
 			Portable: portableReport{
 				WireBits:          metrics.WireBits,
 				ASTNodes:          metrics.ASTNodes,
@@ -147,15 +112,15 @@ func main() {
 				MaxEvaluationDepth:    stats.MaxDepth,
 			},
 		}
-		r.Programs = append(r.Programs, pr)
-		addAggregate(&r.Aggregate, pr)
+		reportValue.Programs = append(reportValue.Programs, programResult)
+		addAggregate(&reportValue.Aggregate, programResult)
 	}
 
 	var out []byte
 	if *pretty {
-		out, err = json.MarshalIndent(r, "", "  ")
+		out, err = json.MarshalIndent(reportValue, "", "  ")
 	} else {
-		out, err = json.Marshal(r)
+		out, err = json.Marshal(reportValue)
 	}
 	if err != nil {
 		fatalf("encode report: %v", err)
@@ -165,159 +130,25 @@ func main() {
 	}
 }
 
-func loadCorpus(path string) (corpus, error) {
-	return loadCorpusSeen(path, make(map[string]bool))
-}
-
-func loadCorpusSeen(path string, seen map[string]bool) (corpus, error) {
-	absolute, err := filepath.Abs(path)
-	if err != nil {
-		return corpus{}, err
-	}
-	if seen[absolute] {
-		return corpus{}, fmt.Errorf("corpus inheritance cycle at %s", path)
-	}
-	seen[absolute] = true
-	defer delete(seen, absolute)
-
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return corpus{}, err
-	}
-	var c corpus
-	if err := json.Unmarshal(data, &c); err != nil {
-		return corpus{}, err
-	}
-	switch c.Schema {
-	case "nex-benchmark-corpus-v0.1", "nex-benchmark-corpus-v0.2":
-	default:
-		return corpus{}, fmt.Errorf("unsupported corpus schema %q", c.Schema)
-	}
-	if c.Extends == "" {
-		return c, nil
-	}
-
-	basePath := c.Extends
-	if !filepath.IsAbs(basePath) {
-		basePath = filepath.Join(filepath.Dir(path), basePath)
-	}
-	base, err := loadCorpusSeen(basePath, seen)
-	if err != nil {
-		return corpus{}, fmt.Errorf("load base corpus %q: %w", c.Extends, err)
-	}
-	c.Programs = append(base.Programs, c.Programs...)
-	return c, nil
-}
-
-func termFromJSON(j *jsonTerm) (*nex.Term, error) {
-	if j == nil {
-		return nil, fmt.Errorf("missing term")
-	}
-	switch j.Kind {
-	case "Var":
-		v, err := natural(j.Value)
-		if err != nil {
-			return nil, err
-		}
-		return nex.Var(v), nil
-	case "Lam":
-		a, err := termFromJSON(j.A)
-		if err != nil {
-			return nil, err
-		}
-		return nex.Lam(a), nil
-	case "App":
-		a, err := termFromJSON(j.A)
-		if err != nil {
-			return nil, err
-		}
-		b, err := termFromJSON(j.B)
-		if err != nil {
-			return nil, err
-		}
-		return nex.App(a, b), nil
-	case "Let":
-		a, err := termFromJSON(j.A)
-		if err != nil {
-			return nil, err
-		}
-		b, err := termFromJSON(j.B)
-		if err != nil {
-			return nil, err
-		}
-		return nex.Let(a, b), nil
-	case "Nat":
-		v, err := natural(j.Value)
-		if err != nil {
-			return nil, err
-		}
-		return nex.Nat(v), nil
-	case "Prim":
-		v, err := natural(j.Value)
-		if err != nil {
-			return nil, err
-		}
-		return nex.Prim(v), nil
-	default:
-		return nil, fmt.Errorf("unknown term kind %q", j.Kind)
-	}
-}
-
-func natural(s string) (*big.Int, error) {
-	if s == "" {
-		return nil, fmt.Errorf("missing natural value")
-	}
-	v, ok := new(big.Int).SetString(s, 10)
-	if !ok || v.Sign() < 0 {
-		return nil, fmt.Errorf("invalid natural %q", s)
-	}
-	return v, nil
-}
-
-func observe(value *nex.Value) (observation, error) {
-	if value == nil {
-		return observation{}, fmt.Errorf("nil runtime value")
-	}
-	switch value.Kind {
-	case nex.ValueNat:
-		if value.Nat == nil {
-			return observation{}, fmt.Errorf("Nat missing payload")
-		}
-		return observation{Kind: "Nat", Value: value.Nat.String()}, nil
-	case nex.ValueClosure, nex.ValuePrimitive:
-		return observation{Kind: "Function"}, nil
-	case nex.ValueUnit:
-		return observation{Kind: "Unit"}, nil
-	case nex.ValuePair:
-		return observation{Kind: "Pair"}, nil
-	case nex.ValueInl:
-		return observation{Kind: "Inl"}, nil
-	case nex.ValueInr:
-		return observation{Kind: "Inr"}, nil
-	default:
-		return observation{}, fmt.Errorf("unknown value kind %d", value.Kind)
-	}
-}
-
-func addAggregate(a *aggregateReport, p programReport) {
-	a.Programs++
-	a.WireBits += p.Portable.WireBits
-	a.ASTNodes += p.Portable.ASTNodes
-	a.Constructors.Var += p.Portable.Constructors.Var
-	a.Constructors.Lam += p.Portable.Constructors.Lam
-	a.Constructors.App += p.Portable.Constructors.App
-	a.Constructors.Let += p.Portable.Constructors.Let
-	a.Constructors.Nat += p.Portable.Constructors.Nat
-	a.Constructors.Prim += p.Portable.Constructors.Prim
-	a.WireByConstructor.Var += p.Portable.WireByConstructor.Var
-	a.WireByConstructor.Lam += p.Portable.WireByConstructor.Lam
-	a.WireByConstructor.App += p.Portable.WireByConstructor.App
-	a.WireByConstructor.Let += p.Portable.WireByConstructor.Let
-	a.WireByConstructor.Nat += p.Portable.WireByConstructor.Nat
-	a.WireByConstructor.Prim += p.Portable.WireByConstructor.Prim
-	a.Transitions += p.Reference.EvaluationTransitions
-	if p.Reference.MaxEvaluationDepth > a.MaxEvalDepth {
-		a.MaxEvalDepth = p.Reference.MaxEvaluationDepth
+func addAggregate(aggregate *aggregateReport, program programReport) {
+	aggregate.Programs++
+	aggregate.WireBits += program.Portable.WireBits
+	aggregate.ASTNodes += program.Portable.ASTNodes
+	aggregate.Constructors.Var += program.Portable.Constructors.Var
+	aggregate.Constructors.Lam += program.Portable.Constructors.Lam
+	aggregate.Constructors.App += program.Portable.Constructors.App
+	aggregate.Constructors.Let += program.Portable.Constructors.Let
+	aggregate.Constructors.Nat += program.Portable.Constructors.Nat
+	aggregate.Constructors.Prim += program.Portable.Constructors.Prim
+	aggregate.WireByConstructor.Var += program.Portable.WireByConstructor.Var
+	aggregate.WireByConstructor.Lam += program.Portable.WireByConstructor.Lam
+	aggregate.WireByConstructor.App += program.Portable.WireByConstructor.App
+	aggregate.WireByConstructor.Let += program.Portable.WireByConstructor.Let
+	aggregate.WireByConstructor.Nat += program.Portable.WireByConstructor.Nat
+	aggregate.WireByConstructor.Prim += program.Portable.WireByConstructor.Prim
+	aggregate.Transitions += program.Reference.EvaluationTransitions
+	if program.Reference.MaxEvaluationDepth > aggregate.MaxEvalDepth {
+		aggregate.MaxEvalDepth = program.Reference.MaxEvaluationDepth
 	}
 }
 
