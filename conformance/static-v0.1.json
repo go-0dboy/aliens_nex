@@ -2,120 +2,41 @@
   "schema": "nex-static-conformance-v0.1",
   "core_version": "NEX-1 Core v0.1",
   "scope_vectors": [
-    {
-      "name": "nat0-closed",
-      "term": {"kind": "Nat", "value": "0"},
-      "valid": true
-    },
-    {
-      "name": "prim0-closed",
-      "term": {"kind": "Prim", "value": "0"},
-      "valid": true
-    },
-    {
-      "name": "identity",
-      "term": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
-      "valid": true
-    },
-    {
-      "name": "constant-function",
-      "term": {"kind": "Lam", "a": {"kind": "Lam", "a": {"kind": "Var", "value": "1"}}},
-      "valid": true
-    },
-    {
-      "name": "inner-identity",
-      "term": {"kind": "Lam", "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}},
-      "valid": true
-    },
-    {
-      "name": "closed-application",
-      "term": {
-        "kind": "App",
-        "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
-        "b": {"kind": "Nat", "value": "0"}
-      },
-      "valid": true
-    },
-    {
-      "name": "let-binder-visible-in-body",
-      "term": {
-        "kind": "Let",
-        "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
-        "b": {"kind": "Var", "value": "0"}
-      },
-      "valid": true
-    },
-    {
-      "name": "let-value-can-see-outer-lambda",
-      "term": {
-        "kind": "Lam",
-        "a": {
-          "kind": "Let",
-          "a": {"kind": "Var", "value": "0"},
-          "b": {"kind": "Var", "value": "1"}
-        }
-      },
-      "valid": true
-    },
-    {
-      "name": "let-binder-survives-inner-lambda",
-      "term": {
-        "kind": "Let",
-        "a": {"kind": "Nat", "value": "0"},
-        "b": {"kind": "Lam", "a": {"kind": "Var", "value": "1"}}
-      },
-      "valid": true
-    },
-    {
-      "name": "free-var0",
-      "term": {"kind": "Var", "value": "0"},
-      "valid": false,
-      "error": "out_of_scope"
-    },
-    {
-      "name": "lambda-var1",
-      "term": {"kind": "Lam", "a": {"kind": "Var", "value": "1"}},
-      "valid": false,
-      "error": "out_of_scope"
-    },
-    {
-      "name": "application-free-argument",
-      "term": {
-        "kind": "App",
-        "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
-        "b": {"kind": "Var", "value": "0"}
-      },
-      "valid": false,
-      "error": "out_of_scope"
-    },
-    {
-      "name": "let-is-not-recursive",
-      "term": {
-        "kind": "Let",
-        "a": {"kind": "Var", "value": "0"},
-        "b": {"kind": "Var", "value": "0"}
-      },
-      "valid": false,
-      "error": "out_of_scope"
-    },
-    {
-      "name": "let-body-var1-without-outer-binder",
-      "term": {
-        "kind": "Let",
-        "a": {"kind": "Nat", "value": "0"},
-        "b": {"kind": "Var", "value": "1"}
-      },
-      "valid": false,
-      "error": "out_of_scope"
-    },
-    {
-      "name": "huge-index-out-of-scope",
-      "term": {
-        "kind": "Lam",
-        "a": {"kind": "Var", "value": "340282366920938463463374607431768211455"}
-      },
-      "valid": false,
-      "error": "out_of_scope"
-    }
+    {"name":"nat0-closed","term":{"kind":"Nat","value":"0"},"valid":true},
+    {"name":"prim0-closed","term":{"kind":"Prim","value":"0"},"valid":true},
+    {"name":"identity","term":{"kind":"Lam","a":{"kind":"Var","value":"0"}},"valid":true},
+    {"name":"constant-function","term":{"kind":"Lam","a":{"kind":"Lam","a":{"kind":"Var","value":"1"}}},"valid":true},
+    {"name":"inner-identity","term":{"kind":"Lam","a":{"kind":"Lam","a":{"kind":"Var","value":"0"}}},"valid":true},
+    {"name":"closed-application","term":{"kind":"App","a":{"kind":"Lam","a":{"kind":"Var","value":"0"}},"b":{"kind":"Nat","value":"0"}},"valid":true},
+    {"name":"let-binder-visible-in-body","term":{"kind":"Let","a":{"kind":"Lam","a":{"kind":"Var","value":"0"}},"b":{"kind":"Var","value":"0"}},"valid":true},
+    {"name":"let-value-can-see-outer-lambda","term":{"kind":"Lam","a":{"kind":"Let","a":{"kind":"Var","value":"0"},"b":{"kind":"Var","value":"1"}}},"valid":true},
+    {"name":"let-binder-survives-inner-lambda","term":{"kind":"Let","a":{"kind":"Nat","value":"0"},"b":{"kind":"Lam","a":{"kind":"Var","value":"1"}}},"valid":true},
+    {"name":"free-var0","term":{"kind":"Var","value":"0"},"valid":false,"error":"out_of_scope"},
+    {"name":"lambda-var1","term":{"kind":"Lam","a":{"kind":"Var","value":"1"}},"valid":false,"error":"out_of_scope"},
+    {"name":"application-free-argument","term":{"kind":"App","a":{"kind":"Lam","a":{"kind":"Var","value":"0"}},"b":{"kind":"Var","value":"0"}},"valid":false,"error":"out_of_scope"},
+    {"name":"let-is-not-recursive","term":{"kind":"Let","a":{"kind":"Var","value":"0"},"b":{"kind":"Var","value":"0"}},"valid":false,"error":"out_of_scope"},
+    {"name":"let-body-var1-without-outer-binder","term":{"kind":"Let","a":{"kind":"Nat","value":"0"},"b":{"kind":"Var","value":"1"}},"valid":false,"error":"out_of_scope"},
+    {"name":"huge-index-out-of-scope","term":{"kind":"Lam","a":{"kind":"Var","value":"340282366920938463463374607431768211455"}},"valid":false,"error":"out_of_scope"}
+  ],
+  "type_vectors": [
+    {"name":"nat","term":{"kind":"Nat","value":"0"},"valid":true,"type":"N"},
+    {"name":"unit","term":{"kind":"Prim","value":"10"},"valid":true,"type":"1"},
+    {"name":"identity","term":{"kind":"Lam","a":{"kind":"Var","value":"0"}},"valid":true,"type":"forall T0. (T0 -> T0)"},
+    {"name":"constant","term":{"kind":"Lam","a":{"kind":"Lam","a":{"kind":"Var","value":"1"}}},"valid":true,"type":"forall T0 T1. (T0 -> (T1 -> T0))"},
+    {"name":"succ-function","term":{"kind":"Lam","a":{"kind":"App","a":{"kind":"Prim","value":"1"},"b":{"kind":"Var","value":"0"}}},"valid":true,"type":"(N -> N)"},
+    {"name":"succ-applied","term":{"kind":"App","a":{"kind":"Prim","value":"1"},"b":{"kind":"Nat","value":"5"}},"valid":true,"type":"N"},
+    {"name":"pair-nat-unit","term":{"kind":"App","a":{"kind":"App","a":{"kind":"Prim","value":"4"},"b":{"kind":"Nat","value":"0"}},"b":{"kind":"Prim","value":"10"}},"valid":true,"type":"(N * 1)"},
+    {"name":"inl-nat","term":{"kind":"App","a":{"kind":"Prim","value":"7"},"b":{"kind":"Nat","value":"0"}},"valid":true,"type":"forall T0. (N + T0)"},
+    {"name":"inr-unit","term":{"kind":"App","a":{"kind":"Prim","value":"8"},"b":{"kind":"Prim","value":"10"}},"valid":true,"type":"forall T0. (T0 + 1)"},
+    {"name":"fix","term":{"kind":"Prim","value":"0"},"valid":true,"type":"forall T0. ((T0 -> T0) -> T0)"},
+    {"name":"ifz-naturals","term":{"kind":"App","a":{"kind":"App","a":{"kind":"App","a":{"kind":"Prim","value":"3"},"b":{"kind":"Nat","value":"0"}},"b":{"kind":"Nat","value":"1"}},"b":{"kind":"Nat","value":"2"}},"valid":true,"type":"N"},
+    {"name":"let-polymorphic-id","term":{"kind":"Let","a":{"kind":"Lam","a":{"kind":"Var","value":"0"}},"b":{"kind":"App","a":{"kind":"App","a":{"kind":"Prim","value":"4"},"b":{"kind":"App","a":{"kind":"Var","value":"0"},"b":{"kind":"Nat","value":"0"}}},"b":{"kind":"App","a":{"kind":"Var","value":"0"},"b":{"kind":"Prim","value":"10"}}}},"valid":true,"type":"(N * 1)"},
+    {"name":"free-variable","term":{"kind":"Var","value":"0"},"valid":false,"error":"out_of_scope"},
+    {"name":"unknown-core-primitive","term":{"kind":"Prim","value":"11"},"valid":false,"error":"unknown_primitive"},
+    {"name":"profile-primitive-without-profile","term":{"kind":"Prim","value":"32"},"valid":false,"error":"unknown_primitive"},
+    {"name":"natural-as-function","term":{"kind":"App","a":{"kind":"Nat","value":"0"},"b":{"kind":"Nat","value":"1"}},"valid":false,"error":"type_mismatch"},
+    {"name":"succ-unit","term":{"kind":"App","a":{"kind":"Prim","value":"1"},"b":{"kind":"Prim","value":"10"}},"valid":false,"error":"type_mismatch"},
+    {"name":"self-application","term":{"kind":"Lam","a":{"kind":"App","a":{"kind":"Var","value":"0"},"b":{"kind":"Var","value":"0"}}},"valid":false,"error":"occurs_check"},
+    {"name":"lambda-parameter-not-polymorphic","term":{"kind":"Lam","a":{"kind":"App","a":{"kind":"App","a":{"kind":"Prim","value":"4"},"b":{"kind":"App","a":{"kind":"Var","value":"0"},"b":{"kind":"Nat","value":"0"}}},"b":{"kind":"App","a":{"kind":"Var","value":"0"},"b":{"kind":"Prim","value":"10"}}}},"valid":false,"error":"type_mismatch"}
   ]
 }
