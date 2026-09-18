@@ -24,8 +24,10 @@ func (f *FreshTypeVars) FreshID() TypeVarID {
 	return id
 }
 
-// Instantiate replaces each quantified variable in a type scheme with a distinct
-// fresh monotype variable. Every scheme use must be instantiated independently.
+// Instantiate alpha-renames every quantified variable to a distinct fresh variable.
+// This is intentionally not implemented through general substitution: a scheme may use
+// template IDs such as T0 while the fresh supply also starts at T0, and alpha-renaming
+// must treat that as a valid identity choice rather than a substitution cycle.
 func Instantiate(scheme TypeScheme, fresh *FreshTypeVars) (*Type, error) {
 	if err := ValidateScheme(scheme); err != nil {
 		return nil, err
@@ -33,11 +35,33 @@ func Instantiate(scheme TypeScheme, fresh *FreshTypeVars) (*Type, error) {
 	if fresh == nil {
 		fresh = NewFreshTypeVars(0)
 	}
-	sub := make(Substitution, len(scheme.Quantified))
+	renaming := make(map[TypeVarID]TypeVarID, len(scheme.Quantified))
 	for _, id := range scheme.Quantified {
-		sub[id] = fresh.Fresh()
+		renaming[id] = fresh.FreshID()
 	}
-	return ApplyType(sub, scheme.Body)
+	return instantiateType(scheme.Body, renaming), nil
+}
+
+func instantiateType(t *Type, renaming map[TypeVarID]TypeVarID) *Type {
+	switch t.Kind {
+	case TypeVar:
+		if id, ok := renaming[t.Var]; ok {
+			return TVar(id)
+		}
+		return TVar(t.Var)
+	case TypeUnit:
+		return TUnit()
+	case TypeNat:
+		return TNat()
+	case TypeFunc:
+		return TFunc(instantiateType(t.A, renaming), instantiateType(t.B, renaming))
+	case TypeProduct:
+		return TProduct(instantiateType(t.A, renaming), instantiateType(t.B, renaming))
+	case TypeSum:
+		return TSum(instantiateType(t.A, renaming), instantiateType(t.B, renaming))
+	default:
+		return cloneType(t)
+	}
 }
 
 // Generalize quantifies exactly the variables free in typ but not free in env.
