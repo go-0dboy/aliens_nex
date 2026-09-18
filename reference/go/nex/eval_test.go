@@ -15,7 +15,8 @@ func requireNatValue(t *testing.T, value *Value, want uint64) {
 	}
 }
 
-func deferredFixIdentityTerm() *Term {
+func divergingFixTerm() *Term {
+	// fix (\self -> self)
 	return App(Prim(NaturalUint64(0)), Lam(Var(NaturalUint64(0))))
 }
 
@@ -66,11 +67,9 @@ func TestEvaluateLetBinding(t *testing.T) {
 }
 
 func TestIgnoredLambdaArgumentIsNotEvaluated(t *testing.T) {
-	// fix is deliberately not executed until Stage 3.6. If call-by-name tried to
-	// evaluate this ignored argument, evaluation would return ErrPrimitiveExecutionDeferred.
 	term := App(
 		Lam(Nat(NaturalUint64(7))),
-		deferredFixIdentityTerm(),
+		divergingFixTerm(),
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
@@ -81,7 +80,7 @@ func TestIgnoredLambdaArgumentIsNotEvaluated(t *testing.T) {
 
 func TestUnusedLetValueIsNotEvaluated(t *testing.T) {
 	term := Let(
-		deferredFixIdentityTerm(),
+		divergingFixTerm(),
 		Nat(NaturalUint64(7)),
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
@@ -92,7 +91,7 @@ func TestUnusedLetValueIsNotEvaluated(t *testing.T) {
 }
 
 func TestLambdaBodyIsNotEvaluatedUntilApplication(t *testing.T) {
-	term := Lam(deferredFixIdentityTerm())
+	term := Lam(divergingFixTerm())
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
 		t.Fatal(err)
@@ -102,10 +101,10 @@ func TestLambdaBodyIsNotEvaluatedUntilApplication(t *testing.T) {
 	}
 }
 
-func TestDemandedFixIsDeferredUntilStage36(t *testing.T) {
-	_, err := EvaluateClosed(deferredFixIdentityTerm(), DefaultEvalLimits)
-	if !errors.Is(err, ErrPrimitiveExecutionDeferred) {
-		t.Fatalf("EvaluateClosed(fix id) error = %v, want ErrPrimitiveExecutionDeferred", err)
+func TestDemandedDivergingFixHitsResourceLimit(t *testing.T) {
+	_, err := EvaluateClosed(divergingFixTerm(), EvalLimits{MaxTransitions: 40, MaxDepth: 1_000})
+	if !errors.Is(err, ErrEvalResourceLimit) {
+		t.Fatalf("EvaluateClosed(diverging fix) error = %v, want ErrEvalResourceLimit", err)
 	}
 }
 
