@@ -1,0 +1,58 @@
+name: stage5-independence
+
+on:
+  pull_request:
+    paths:
+      - 'stage5/**'
+      - 'docs/NEX-1-v0.1.md'
+      - 'conformance/**'
+      - 'docs/adr/0002-nex-core-v0.1-design-basis.md'
+      - 'docs/adr/0006-decoder-resource-limits.md'
+      - 'docs/adr/0007-erased-type-annotations-v0.1.md'
+      - 'docs/adr/0009-separate-evaluation-resource-limits-from-semantics.md'
+      - 'docs/adr/0013-stage5-independence-protocol.md'
+      - '.github/workflows/stage5-independence.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'stage5/**'
+      - 'docs/NEX-1-v0.1.md'
+      - 'conformance/**'
+      - 'docs/adr/0002-nex-core-v0.1-design-basis.md'
+      - 'docs/adr/0006-decoder-resource-limits.md'
+      - 'docs/adr/0007-erased-type-annotations-v0.1.md'
+      - 'docs/adr/0009-separate-evaluation-resource-limits-from-semantics.md'
+      - 'docs/adr/0013-stage5-independence-protocol.md'
+      - '.github/workflows/stage5-independence.yml'
+
+jobs:
+  verify-packet:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile packet builder
+        run: python -m py_compile stage5/build_packet.py
+
+      - name: Verify frozen packet
+        run: python stage5/build_packet.py --verify
+
+      - name: Materialize standalone packet
+        run: python stage5/build_packet.py --output /tmp/nex1-independent-conformance-packet-v0.1
+
+      - name: Validate generated manifest JSON
+        run: python -m json.tool /tmp/nex1-independent-conformance-packet-v0.1/PACKET-MANIFEST.generated.json > /dev/null
+
+      - name: Upload frozen packet artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nex1-independent-conformance-packet-v0.1
+          path: /tmp/nex1-independent-conformance-packet-v0.1
+          if-no-files-found: error
