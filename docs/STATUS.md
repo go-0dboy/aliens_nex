@@ -11,7 +11,8 @@
 **Stage 2 merge commit:** `cefe889d90a275897de31aa23c4b9742a388ec8f`  
 **Stage 3 completed by:** PR `#5 stage3: complete dynamic semantics and reference evaluator`  
 **Stage 3 merge commit:** `166cdc03282ea500263fdca7185f006f9b17a702`  
-**Active Stage 4 branch:** `stage4/empirical-validation`
+**Active Stage 4 branch:** `stage4/empirical-validation`  
+**Active Stage 4 pull request:** `#6 stage4: establish empirical measurement foundation`
 
 ## Stages 0–3 — Complete
 
@@ -38,9 +39,80 @@ Accepted work order:
 4.9 evidence-based decision gate
 ```
 
-ADR-0010 requires the measurement contract and corpus to be fixed before optimization comparisons. Portable exact metrics, reference-only runtime metrics, and bootstrap/specification proxies must remain separately labelled.
+ADR-0010 requires the measurement contract and corpus to be fixed before optimization comparisons. Portable exact metrics, reference-only runtime metrics, and bootstrap/specification proxies remain separately labelled.
 
-The current Stage 4 objective is to make NEX's compactness claims measurable and falsifiable without changing NEX-1 v0.1 semantics or wire format.
+### Stage 4.0 — measurement contract — Complete
+
+The project now explicitly separates:
+
+```text
+P  exact transmitted-program cost
+R  host/reference implementation proxy
+B  actual bootstrap transmission cost (currently unknown)
+S  specification transmission cost (not yet one accepted scalar)
+```
+
+`R` MUST NOT be substituted for `B`. Benchmark encodings are classified as `direct`, `canonical-translation`, or `hand-optimized`, and corpus versions become immutable after publication of comparative/optimization results.
+
+### Stage 4.1 — benchmark corpus — Foundation frozen
+
+`benchmarks/corpus-v0.1.json` is the first frozen foundation corpus. It contains 10 direct NEX programs covering:
+
+```text
+identity
+constant function
+composition
+succ / ifz
+let binding
+pair projection
+sum/case
+terminating fix recursion
+recursive addition
+```
+
+Every record contains the canonical `Term` and expected observable WHNF. The corpus is consumed directly by the benchmark tool; results are not copied manually into tests.
+
+An extended corpus version is still required before Stage 4.3 design experiments. Existing v0.1 records MUST NOT be edited in place to accommodate later benchmark results.
+
+### Stage 4.2 — NEX metrics/instrumentation — Foundation implemented
+
+Implemented:
+
+- `nex.MeasureTerm` for exact wire-bit, AST-node, and constructor-count measurements;
+- `EvaluateClosedWithStats` for explicitly reference-only evaluator transition/depth counters;
+- `reference/go/cmd/nexbench` to parse the frozen corpus, measure terms, evaluate them, validate expected results, aggregate metrics, and emit deterministic machine-readable JSON;
+- clean-checkout verification of the corpus/tool from `reference/go/verify.sh`.
+
+Portable exact report fields:
+
+```text
+wire_bits
+ast_nodes
+Var/Lam/App/Let/Nat/Prim counts
+observable result
+```
+
+Reference-only report fields:
+
+```text
+evaluation transitions
+max evaluation depth
+```
+
+The first CI attempt (`35367316312`) failed only because the new CLI had not been gofmt-formatted. After formatting, clean-checkout CI `35367555762` completed successfully, including parsing, type-checking, evaluating, and measuring all 10 corpus programs.
+
+## Remaining Stage 4 work
+
+Still pending:
+
+- freeze an extended corpus before Stage 4.3 comparisons;
+- internal NEX encoding experiments;
+- erased-HM versus explicit/hybrid type-information experiment;
+- reproducible BLC / SKI-Jot / tiny typed stack baselines;
+- call-by-name versus call-by-need comparison;
+- bootstrap accounting model;
+- generated final experimental report;
+- evidence-based decision gate.
 
 ## Remaining project-wide unverified claims
 
@@ -55,4 +127,4 @@ Still intentionally unverified:
 
 ## Next recommended step
 
-Implement Stage 4.1–4.2 without altering v0.1 semantics: freeze the first benchmark corpus, build deterministic exact NEX metrics from canonical terms, add explicitly labelled reference-evaluator counters, and make CI reproduce the report/checks from a clean checkout.
+Complete Stage 4.1 before any design optimization: create and freeze the extended corpus version with larger representative programs, then use the already verified `nexbench` path as the single source for Stage 4.3 measurements. Do not change NEX-1 v0.1 semantics or wire encoding in response to early benchmark numbers.
