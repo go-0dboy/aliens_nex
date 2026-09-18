@@ -4,7 +4,7 @@ NEX uses Architecture Decision Records (ADRs) to preserve not only final decisio
 
 ## Why ADRs exist here
 
-NEX is a research-oriented language project. Choices such as SKI, Binary Lambda Calculus, Hindley-Milner, System F, PCF, recursive types, explicit memory, DAG transport, bootstrap machines, and receiver priors can look attractive in isolation. ADRs prevent repeated debates and silent architectural drift.
+NEX is a research-oriented language project. Choices such as SKI, Binary Lambda Calculus, Hindley-Milner, System F, PCF, recursive types, explicit memory, DAG transport, bootstrap machines, receiver priors, and teaching protocols can look attractive in isolation. ADRs prevent repeated debates and silent architectural drift.
 
 An ADR is required for decisions that materially change or reinterpret one or more of:
 
@@ -15,7 +15,7 @@ An ADR is required for decisions that materially change or reinterpret one or mo
 - primitive set;
 - execution/profile boundary;
 - compatibility rules;
-- bootstrap/accounting architecture;
+- bootstrap/teaching/accounting architecture;
 - repository-wide development/research process;
 - a material research claim when later evidence narrows or corrects it.
 
@@ -37,6 +37,7 @@ An ADR is required for decisions that materially change or reinterpret one or mo
 - [ADR-0014: Condition bootstrap cost on explicit receiver assumptions](0014-condition-bootstrap-cost-on-receiver-assumptions.md)
 - [ADR-0015: Close Stage 5 with a negative complete-bootstrap result](0015-stage5-decision-gate.md)
 - [ADR-0016: Correct research claims after the post-Stage-5 literature re-audit](0016-post-stage5-literature-reaudit-corrections.md)
+- [ADR-0017: Separate the NEX teaching/bootstrap protocol from the stable NEX-1 Core](0017-separate-teaching-protocol-from-core.md)
 
 ## Status values
 
@@ -90,6 +91,8 @@ External research used materially by an ADR belongs in `docs/SOURCES.md` under a
 A change that contradicts an Accepted ADR MUST either:
 
 - add a new ADR that supersedes or corrects the relevant part; or
-- update the older ADR only to add a clearly dated clarification pointing to the later decision.
+- update the older ADR only to add a clearly dated clarification pointing to the later decision, unless the older file is part of a frozen experiment packet whose byte identity must be preserved.
+
+Frozen experimental source snapshots MUST NOT be rewritten merely to improve current wording. A later ADR records the correction instead.
 
 Silent architectural or research-claim drift is not allowed.
