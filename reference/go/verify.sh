@@ -13,6 +13,7 @@ go test ./...
 
 go run ./cmd/nexbench -corpus ../../benchmarks/corpus-v0.1.json -pretty=false >/tmp/nex-benchmark-v0.1.json
 go run ./cmd/nexbench -corpus ../../benchmarks/corpus-v0.3.json -pretty=false >/tmp/nex-benchmark-v0.3.json
+cat /tmp/nex-benchmark-v0.3.json
 go run ./cmd/nexexperiment -pretty=false | tee /tmp/nex-internal-experiments-v0.1.json
 
 go test -run '^$' -fuzz=FuzzSubstitutionComposition -fuzztime=1s ./nex
