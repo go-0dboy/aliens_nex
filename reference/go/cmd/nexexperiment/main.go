@@ -27,10 +27,10 @@ type natCase struct {
 }
 
 type report struct {
-	Schema          string    `json:"schema"`
-	LetExperiments  []letCase `json:"let_vs_duplication"`
-	NatExperiments  []natCase `json:"nat_literal_vs_succ_chain"`
-	Interpretation  []string  `json:"interpretation_rules"`
+	Schema         string    `json:"schema"`
+	LetExperiments []letCase `json:"let_vs_duplication"`
+	NatExperiments []natCase `json:"nat_literal_vs_succ_chain"`
+	Interpretation []string  `json:"interpretation_rules"`
 }
 
 func main() {
