@@ -1,6 +1,6 @@
 # Stage 4.7 — Total-information accounting model
 
-Status: experimental accounting model; does not provide a complete value for total transmission cost.
+Status: experimental accounting model; refined after the Stage 5 literature re-audit.
 
 ## Objective
 
@@ -10,109 +10,102 @@ Keep the project goal
 C = S + B + P
 ```
 
-measurable without substituting convenient host-language quantities for unknown transmission costs.
+useful without substituting convenient host-language quantities for unknown transmitted information.
 
-The terms are deliberately separated:
+The terms are:
 
 ```text
-P  transmitted program payload
+P  canonical program payload under an established NEX wire contract
 S  transmitted specification / semantic contract
-B  bootstrap required to reconstruct/check/execute the representation
-R  host reference implementation proxy (diagnostic only; not a term in C)
+B  transmitted bootstrap needed to reconstruct/check/execute the representation
+R  host reference implementation proxy, diagnostic only
 ```
 
-## P — exact program payload
+## Post-Stage-5 clarification
 
-For a fixed corpus and encoding, `P` is exact.
+`C = S + B + P` is a conceptual ledger, not an unconditional machine-free information scalar. Description length is meaningful only relative to an explicit interpretation/description framework [SRC-0016, SRC-0017, SRC-0019].
 
-For NEX-1 v0.1 this is the sum of canonical wire bit lengths emitted by the normative encoder. Stage 4 uses frozen corpus versions so `P` cannot be silently changed after seeing a comparison result.
-
-## S — specification proxy, not yet an accepted transmission cost
-
-No architecture-neutral transmission encoding for the NEX specification itself has been defined.
-
-Stage 4 therefore records a transparent proxy only:
+The preferred exact form is therefore:
 
 ```text
-UTF-8 byte count of docs/NEX-1-v0.1.md
-raw UTF-8 bits = bytes * 8
+C | A = |M_A|
 ```
 
-This is useful for tracking/documenting magnitude, but it is **not** accepted as `S` in the objective function. Markdown, English prose, UTF-8, URLs, formatting, and terrestrial notation are not assumptions the intended receiver may share.
+where `M_A` is one concrete transmitted object under declared receiver assumptions `A`.
+
+If that object can be partitioned into disjoint transmitted roles:
+
+```text
+C | A = (S | A) + (B | A,S) + (P | A,S,B)
+```
+
+If specification and executable bootstrap are inseparable:
+
+```text
+C | A = (SB | A) + (P | A,SB)
+```
+
+Every transmitted bit is counted exactly once.
+
+## P — exact conditional program payload
+
+For a fixed corpus and the already-established NEX-1 v0.1 wire contract, `P` is exact: it is the sum of canonical wire bit lengths emitted by the normative encoder.
+
+Thus Stage 4's `P = 1371 bits` for corpus v0.3 remains exact. The correction is interpretive: this is a description length **under the NEX wire contract**, not a machine-free absolute information quantity.
+
+## S — specification proxy, not accepted transmission cost
+
+No receiver-neutral transmission encoding of the NEX prose/formal specification has been defined. Stage 4 records UTF-8 Markdown size only as a transparent host-document proxy.
+
+Markdown, English, UTF-8, notation, and URLs cannot be silently assumed by an unknown receiver, so this byte count is not accepted as `S | A`.
 
 ## R — reference implementation proxy
 
-Stage 4 also records the UTF-8 byte size of an explicit manifest of Go reference source files implementing the Core wire/static/runtime path.
+Stage 4 records the UTF-8 byte size of an explicit Go source manifest implementing the Core path. This value remains `R`, not `B`.
 
-The manifest intentionally excludes tests, benchmark tooling, and Stage 4 instrumentation. It includes the reference implementation of:
+Go syntax, `math/big`, compiler/runtime, garbage collector, standard library, ABI, and host semantics are not receiver-neutral bootstrap assumptions.
 
-```text
-Term representation
-wire codec
-scope validation
-type representation
-substitution/polymorphism/unification
-primitive table
-type inference
-runtime representation
-reference evaluator
-```
-
-This quantity is named `R`, not `B`.
-
-Go syntax, `math/big`, Go's compiler/runtime, standard library, garbage collector, and host ABI are not part of a receiver-neutral bootstrap. Therefore:
+Therefore:
 
 ```text
 R != B
 ```
 
-and no conversion factor from `R` to `B` is assumed.
+and no conversion factor is assumed.
 
-## B — unknown until there is a bootstrap artifact
+## B — unknown until a dependency-closed bootstrap exists
 
-`B` remains unknown in Stage 4 because the project does not yet have an architecture-neutral, transmissible bootstrap artifact from which a receiver can reconstruct the required decoder/validator/evaluator machinery.
+Stage 5 preserved this conclusion and strengthened it with explicit receiver profiles. There is still no accepted complete receiver-neutral bootstrap artifact, so no full `B | A` or total `C | A` is numerically known.
 
-Consequently:
+The corrected receiver taxonomy is maintained in `stage5/receiver-assumptions/assumptions-v0.2.json` and ADR-0014.
 
-```text
-total C is not numerically computable yet
-```
+## Comparing designs
 
-This is a result, not a missing-data value to be filled with the Go source size.
-
-## Comparing two designs
-
-For designs A and B over a chosen program population:
+For two designs under the **same declared receiver profile and compatible accounting boundary**:
 
 ```text
-Delta C = Delta S + Delta B + Delta P
+Delta C | A = Delta S | A + Delta B | A + Delta P | A
 ```
 
-For repeated programs where an average per-program payload delta is meaningful:
+A repeated-program break-even may be written only after the corresponding setup terms are represented consistently. Cross-profile numeric comparisons are not total-cost rankings unless differing priors are themselves normalized or priced.
 
-```text
-Delta C(N) = Delta S + Delta B + N * Delta P_avg
-```
+Examples:
 
-A break-even population can be computed only when enough of `Delta S`, `Delta B`, and `Delta P_avg` are known. If bootstrap delta is unknown, Stage 4 must leave the total comparison unresolved or state a symbolic threshold.
+- root-type transmission adds program bits; it is a total win only if a real checker/bootstrap reduction compensates for them;
+- BLC saves 7 bits on the three-program pure-lambda subset, but relative setup/bootstrap costs are not measured;
+- call-by-need changes no program bits and its evaluator-transition reduction is not a transmission-cost term.
 
-Examples from earlier Stage 4 experiments:
+## Machine-readable report
 
-- the root-type hybrid adds `+134` program bits for one v0.3 corpus batch; it is beneficial in total cost only if a real reduction in `S+B` eventually outweighs accumulated payload overhead;
-- BLC saves 7 payload bits over NEX on the three-program pure-lambda subset, but the relative `S+B` costs are not measured;
-- call-by-need changes no program bits at all; its large runtime transition reduction cannot be inserted into `C`, and sharing machinery may change bootstrap cost.
-
-## Machine-readable accounting report
-
-`reference/go/cmd/nexaccount` emits:
+`reference/go/cmd/nexaccount` remains a Stage 4 report for:
 
 - exact corpus `P`;
-- raw UTF-8 specification-size proxy;
-- explicit Go reference-source proxy `R`;
-- `B.known = false` with a reason;
+- raw specification proxy;
+- explicit Go reference proxy `R`;
+- `B.known = false`;
 - `total_C_computable = false`.
 
-The report is intentionally designed so an unknown bootstrap cannot accidentally be represented as zero.
+It intentionally prevents an unknown bootstrap from being represented as zero.
 
 ## Reproduction
 
@@ -125,4 +118,4 @@ go run ./cmd/nexaccount \
   -pretty=false
 ```
 
-The same command is part of `verify.sh`; accepted values require clean-checkout CI.
+The original numeric report remains a valid Stage 4 artifact. ADR-0016 and Stage 5's corrected receiver model refine only its interpretation.
