@@ -1,6 +1,6 @@
 # Stage 5 — Independent reconstruction and receiver-neutral bootstrap
 
-**Status:** In progress — Stage 5.0–5.6 merged/verified; Stage 5.7 receiver-assumption model implemented on active branch; Stage 5.8 next  
+**Status:** In progress — Stage 5.0–5.6 merged/verified; Stage 5.7 receiver-assumption model verified on PR #9 checkpoint; Stage 5.8 next  
 **Active branch:** `stage5/receiver-assumptions`  
 **Prerequisite:** Stage 4 complete  
 **Primary purpose:** test whether NEX-1 v0.1 can be reconstructed independently from specification/conformance artifacts and replace the unknown bootstrap term `B` with explicit assumption-conditioned evidence rather than host-language proxies.
@@ -205,6 +205,23 @@ and its bits are counted once.
 
 Stage 5.7 does not select `U`. A numeric claim under `A2(U)` is invalid until a concrete versioned `U` has exact binary operational semantics and input framing.
 
+The first PR #9 checkpoint verified the model and all regression gates:
+
+```text
+stage5-receiver-assumptions  35387833962  success
+stage5-independence          35387833785  success
+stage5-differential          35387833852  success
+```
+
+The dedicated validator reports:
+
+```text
+A0        4 effective assumption atoms
+A1        7 effective assumption atoms
+A2(U)     9 effective assumption atoms
+A_host(H) 8 effective assumption atoms
+```
+
 ## Stage 5.0 — independence protocol — Complete
 
 Before a second implementation is written, freeze what it is allowed to observe.
@@ -328,7 +345,7 @@ The known multi-error diagnostic-precedence question remains intentionally unspe
 
 If later testing exposes a portable ambiguity, add the smallest reproducer and language-neutral vector. Do not resolve ambiguities by the rule “match Go”.
 
-## Stage 5.7 — receiver-assumption model for bootstrap — Implemented; PR verification pending
+## Stage 5.7 — receiver-assumption model for bootstrap — Verified on current PR checkpoint
 
 Before assigning a bit count to `B`, the receiver prior must be named and versioned.
 
@@ -447,7 +464,7 @@ Stage 5 uses multiple PRs with one dominant reason each:
 
 1. **PR #7 — independence protocol + conformance packet** — merged;
 2. **PR #8 — frozen independent implementation + differential conformance** — merged;
-3. **active PR — receiver-assumption model / ADR-0014** — in progress;
+3. **PR #9 — receiver-assumption model / ADR-0014** — current, verified on initial clean-checkout checkpoint;
 4. **next PR — bootstrap candidate and measurement**;
 5. **final Stage 5 PR — research decision gate / closeout**.
 
@@ -478,15 +495,15 @@ Stage 5 is complete only when all applicable items are true:
 - [x] current differential discrepancies are classified (none found in accepted 942-case run);
 - [x] current ambiguity audit is recorded and does not silently promote implementation behavior to semantics;
 - [x] receiver assumptions for bootstrap are explicit and versioned in the Stage 5.7 model;
-- [ ] Stage 5.7 dedicated PR CI has accepted the model;
+- [x] Stage 5.7 dedicated PR CI has accepted the model on run `35387833962`;
 - [ ] at least one measurable bootstrap candidate exists under explicit assumptions, or inability to construct one is documented as a negative result;
 - [x] `B` has never been replaced with host-language source size;
 - [ ] Stage 5 final decision gate records established, conditional, contradicted, and unknown results;
-- [ ] living dissertation EN/RU includes all material Stage 5.7–5.9 evidence;
+- [x] living dissertation EN/RU includes Stage 5.7 receiver-assumption evidence;
 - [x] no prohibited NEX-1 v0.2/system/frontend work has entered the stage so far.
 
 ## Next starting gate
 
 Do not choose a bootstrap machine by intuition and then hide its semantics.
 
-The immediate gate is to finish/verify Stage 5.7. After that, Stage 5.8 must freeze one explicit assumption profile and one concrete candidate artifact before any bit-count result is accepted.
+Stage 5.8 must freeze one explicit assumption profile and one concrete candidate artifact before any bit-count result is accepted. For an `A2(U)` experiment, the chosen `U` must itself be exact and versioned first.
