@@ -12,9 +12,9 @@
   "teaching_goal": {
     "decode": true,
     "encode": true,
-    "static_check": true,
+    "static": true,
     "evaluate": true,
-    "construct_programs": true,
+    "construct": true,
     "self_test": true
   },
   "hard_constraints": {
