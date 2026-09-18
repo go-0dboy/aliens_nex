@@ -1,0 +1,35 @@
+name: wire-foundation
+
+on:
+  pull_request:
+    paths:
+      - 'reference/go/**'
+      - 'conformance/wire-v0.1.json'
+      - '.github/workflows/wire-foundation.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'reference/go/**'
+      - 'conformance/wire-v0.1.json'
+      - '.github/workflows/wire-foundation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-go-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: reference/go/go.mod
+          cache-dependency-path: reference/go/go.mod
+
+      - name: Verify wire reference implementation
+        working-directory: reference/go
+        run: sh verify.sh
