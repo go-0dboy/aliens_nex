@@ -19,7 +19,7 @@ func caseTerm(sum, leftFn, rightFn *Term) *Term {
 }
 
 func TestPairCreationDoesNotForceFields(t *testing.T) {
-	term := pairTerm(deferredFixIdentityTerm(), deferredFixIdentityTerm())
+	term := pairTerm(divergingFixTerm(), divergingFixTerm())
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
 		t.Fatal(err)
@@ -32,7 +32,7 @@ func TestPairCreationDoesNotForceFields(t *testing.T) {
 func TestFstDoesNotForceRightField(t *testing.T) {
 	term := App(
 		Prim(NaturalUint64(5)),
-		pairTerm(Nat(NaturalUint64(1)), deferredFixIdentityTerm()),
+		pairTerm(Nat(NaturalUint64(1)), divergingFixTerm()),
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
@@ -44,7 +44,7 @@ func TestFstDoesNotForceRightField(t *testing.T) {
 func TestSndDoesNotForceLeftField(t *testing.T) {
 	term := App(
 		Prim(NaturalUint64(6)),
-		pairTerm(deferredFixIdentityTerm(), Nat(NaturalUint64(2))),
+		pairTerm(divergingFixTerm(), Nat(NaturalUint64(2))),
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
@@ -59,8 +59,8 @@ func TestSumConstructorsDoNotForcePayload(t *testing.T) {
 		term *Term
 		kind ValueKind
 	}{
-		{"inl", inlTerm(deferredFixIdentityTerm()), ValueInl},
-		{"inr", inrTerm(deferredFixIdentityTerm()), ValueInr},
+		{"inl", inlTerm(divergingFixTerm()), ValueInl},
+		{"inr", inrTerm(divergingFixTerm()), ValueInr},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			value, err := EvaluateClosed(tc.term, DefaultEvalLimits)
@@ -79,7 +79,7 @@ func TestCaseInlDoesNotEvaluateRightFunction(t *testing.T) {
 	term := caseTerm(
 		inlTerm(Nat(NaturalUint64(5))),
 		identity,
-		deferredFixIdentityTerm(),
+		divergingFixTerm(),
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
@@ -92,7 +92,7 @@ func TestCaseInrDoesNotEvaluateLeftFunction(t *testing.T) {
 	identity := Lam(Var(NaturalUint64(0)))
 	term := caseTerm(
 		inrTerm(Nat(NaturalUint64(6))),
-		deferredFixIdentityTerm(),
+		divergingFixTerm(),
 		identity,
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
@@ -105,9 +105,9 @@ func TestCaseInrDoesNotEvaluateLeftFunction(t *testing.T) {
 func TestCasePassesSelectedPayloadLazily(t *testing.T) {
 	ignorePayload := Lam(Nat(NaturalUint64(7)))
 	term := caseTerm(
-		inlTerm(deferredFixIdentityTerm()),
+		inlTerm(divergingFixTerm()),
 		ignorePayload,
-		deferredFixIdentityTerm(),
+		divergingFixTerm(),
 	)
 	value, err := EvaluateClosed(term, DefaultEvalLimits)
 	if err != nil {
