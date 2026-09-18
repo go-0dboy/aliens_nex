@@ -1,12 +1,12 @@
 # Architecture Decision Records
 
-NEX uses Architecture Decision Records (ADRs) to preserve not only the final decision, but also the reasoning, alternatives, rejected options, deferred options, and consequences.
+NEX uses Architecture Decision Records (ADRs) to preserve not only final decisions, but also reasoning, alternatives, rejected/deferred options, later corrections, and consequences.
 
 ## Why ADRs exist here
 
-NEX is a research-oriented language project. Many choices can look attractive in isolation: SKI, Binary Lambda Calculus, Hindley-Milner, System F, PCF, recursive types, linear types, stack bytecode, explicit memory, DAG transport, and others. Repeating the same debate in each new session wastes time and makes the design unstable.
+NEX is a research-oriented language project. Choices such as SKI, Binary Lambda Calculus, Hindley-Milner, System F, PCF, recursive types, explicit memory, DAG transport, bootstrap machines, and receiver priors can look attractive in isolation. ADRs prevent repeated debates and silent architectural drift.
 
-An ADR is therefore required for any decision that materially changes one or more of:
+An ADR is required for decisions that materially change or reinterpret one or more of:
 
 - Core semantics;
 - type system;
@@ -15,8 +15,9 @@ An ADR is therefore required for any decision that materially changes one or mor
 - primitive set;
 - execution/profile boundary;
 - compatibility rules;
-- bootstrap architecture;
-- repository-wide development process.
+- bootstrap/accounting architecture;
+- repository-wide development/research process;
+- a material research claim when later evidence narrows or corrects it.
 
 ## Current ADRs
 
@@ -35,10 +36,11 @@ An ADR is therefore required for any decision that materially changes one or mor
 - [ADR-0013: Freeze the Stage 5 independence protocol and use Python for the first independent implementation](0013-stage5-independence-protocol.md)
 - [ADR-0014: Condition bootstrap cost on explicit receiver assumptions](0014-condition-bootstrap-cost-on-receiver-assumptions.md)
 - [ADR-0015: Close Stage 5 with a negative complete-bootstrap result](0015-stage5-decision-gate.md)
+- [ADR-0016: Correct research claims after the post-Stage-5 literature re-audit](0016-post-stage5-literature-reaudit-corrections.md)
 
 ## Status values
 
-Each ADR MUST use one of these statuses:
+Each ADR MUST use one of:
 
 - `Proposed` — under active consideration;
 - `Accepted` — current project decision;
@@ -46,11 +48,11 @@ Each ADR MUST use one of these statuses:
 - `Deferred` — intentionally postponed pending evidence;
 - `Superseded` — replaced by a later ADR.
 
-A superseded ADR MUST remain in the repository and link to the ADR that replaces it.
+A superseded ADR remains in the repository and links to its replacement. A factual clarification may also be recorded by a later ADR while the original architectural choice remains Accepted.
 
 ## Required structure
 
-Each ADR SHOULD contain:
+An ADR SHOULD contain:
 
 1. Title
 2. Status
@@ -66,34 +68,28 @@ Each ADR SHOULD contain:
 
 ## Numbering
 
-ADRs use monotonically increasing four-digit numbers:
-
-```text
-0001-title.md
-0002-title.md
-...
-```
-
-Numbers are never reused.
+ADRs use monotonically increasing four-digit numbers and IDs are never reused.
 
 ## Rule for research claims
 
 An ADR MUST distinguish among:
 
 - established external fact;
+- project design decision;
 - project inference;
 - hypothesis;
-- experimentally verified result.
+- experimentally verified result;
+- unresolved unknown.
 
-A hypothesis MUST NOT be rewritten later as a fact merely because it has been repeated in project documentation.
+A hypothesis MUST NOT become a fact merely through repetition. When later literature or experiments narrow an Accepted rationale, the correction must be explicit and historically traceable.
 
-External research used materially by an ADR should be registered in `docs/SOURCES.md` and referenced by its stable source ID where useful.
+External research used materially by an ADR belongs in `docs/SOURCES.md` under a stable source ID.
 
 ## Review rule
 
 A change that contradicts an Accepted ADR MUST either:
 
-- update that ADR only if the original decision itself has not materially changed, or
-- add a new ADR that supersedes it.
+- add a new ADR that supersedes or corrects the relevant part; or
+- update the older ADR only to add a clearly dated clarification pointing to the later decision.
 
-Silent architectural drift is not allowed.
+Silent architectural or research-claim drift is not allowed.

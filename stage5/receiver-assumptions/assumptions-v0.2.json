@@ -1,0 +1,163 @@
+{
+  "schema": "nex-receiver-assumptions-v0.2",
+  "status": "post-stage5-literature-corrected-model",
+  "date": "2026-09-19",
+  "history": {
+    "previous": "assumptions-v0.1.json",
+    "reason": "The v0.1 A1 profile implicitly assumed the ability to interpret recursively defined rules. The literature re-audit judged that capability too computationally strong to hide inside a generic mathematical prior. v0.2 separates elementary mathematical concepts from an exact rule calculus R."
+  },
+  "principles": {
+    "assumptions_are_transmitted": false,
+    "assumption_bit_cost_measured_here": false,
+    "conditional_claim_notation": "B | A",
+    "cross_profile_numeric_ranking_allowed": false,
+    "host_source_counts_as_receiver_neutral_bootstrap": false,
+    "double_count_shared_spec_bootstrap_bits": false,
+    "physical_layer_below_A0_is_zero_cost": false,
+    "description_length_is_unconditional": false
+  },
+  "atoms": [
+    {
+      "id": "T_BINARY",
+      "category": "transport",
+      "statement": "The receiver is given two distinguished logical symbols with an agreed mapping to binary 0 and 1."
+    },
+    {
+      "id": "T_ORDER",
+      "category": "transport",
+      "statement": "Received logical symbols form a finite sequence with an agreed first-to-last order."
+    },
+    {
+      "id": "T_FRAME",
+      "category": "transport",
+      "statement": "The exact start, end, and bit length of the measured frame are available to the receiver."
+    },
+    {
+      "id": "T_CORRECT",
+      "category": "transport",
+      "statement": "The measured frame is delivered without residual bit errors; physical noise handling is below this model boundary."
+    },
+    {
+      "id": "M_NAT",
+      "category": "mathematical",
+      "statement": "The parties share the concept of non-negative integers, zero, successor, equality, ordering, addition, and subtraction where defined."
+    },
+    {
+      "id": "M_FINSEQ",
+      "category": "mathematical",
+      "statement": "The parties share finite sequences, sequence length, concatenation, and positional indexing as mathematical concepts."
+    },
+    {
+      "id": "C_RULE_CALCULUS_R",
+      "category": "computational",
+      "statement": "A parameter R names one exact formal rule calculus, including its finite syntax, binding/substitution conventions if any, operational interpretation, recursion convention, and binary serialization/framing."
+    },
+    {
+      "id": "C_MACHINE_U",
+      "category": "computational",
+      "statement": "A parameter U names one exact fixed universal binary abstract machine whose operational semantics are already shared."
+    },
+    {
+      "id": "C_PREFIX_INPUT_U",
+      "category": "computational",
+      "statement": "For the same U, the program/data boundary and self-delimiting binary input convention are already shared exactly."
+    },
+    {
+      "id": "H_PLATFORM_H",
+      "category": "host",
+      "statement": "A parameter H names a concrete terrestrial execution platform, language/runtime, ABI, or equivalent host environment."
+    }
+  ],
+  "profiles": [
+    {
+      "id": "A0",
+      "name": "digital transport prior",
+      "extends": null,
+      "adds": ["T_BINARY", "T_ORDER", "T_FRAME", "T_CORRECT"],
+      "receiver_neutral_candidate": true,
+      "parameter": null,
+      "explicitly_not_assumed": [
+        "natural-number wire coding",
+        "Elias gamma coding",
+        "NEX term grammar or primitive IDs",
+        "de Bruijn binding",
+        "NEX type or evaluation semantics",
+        "text/character encoding",
+        "any rule calculus",
+        "any universal machine",
+        "any terrestrial processor, ABI, OS, language, or runtime"
+      ]
+    },
+    {
+      "id": "A1",
+      "name": "elementary discrete-mathematics prior",
+      "extends": "A0",
+      "adds": ["M_NAT", "M_FINSEQ"],
+      "receiver_neutral_candidate": true,
+      "parameter": null,
+      "explicitly_not_assumed": [
+        "a syntax for executable or recursive rule descriptions",
+        "Elias gamma or any particular integer code",
+        "NEX term grammar or primitive IDs",
+        "de Bruijn binding conventions",
+        "Hindley-Milner inference",
+        "NEX evaluation semantics",
+        "a universal machine or instruction set",
+        "a terrestrial execution platform"
+      ]
+    },
+    {
+      "id": "A1(R)",
+      "name": "exact formal-rule-calculus prior",
+      "extends": "A1",
+      "adds": ["C_RULE_CALCULUS_R"],
+      "receiver_neutral_candidate": true,
+      "parameter": {
+        "name": "R",
+        "constraint": "R must be versioned and must fix exact formal syntax, semantics, recursion/binding rules, and binary serialization before any B | A1(R) claim is accepted."
+      },
+      "explicitly_not_assumed": [
+        "NEX term grammar or primitive IDs unless explicitly encoded in R",
+        "a universal machine unless R itself defines one",
+        "a terrestrial execution platform"
+      ]
+    },
+    {
+      "id": "A2(U)",
+      "name": "fixed universal-machine prior",
+      "extends": "A1",
+      "adds": ["C_MACHINE_U", "C_PREFIX_INPUT_U"],
+      "receiver_neutral_candidate": true,
+      "parameter": {
+        "name": "U",
+        "constraint": "U must have a versioned exact binary operational semantics and exact program/data framing before any B | A2(U) measurement is accepted."
+      },
+      "explicitly_not_assumed": [
+        "NEX term grammar or primitive IDs",
+        "NEX static semantics",
+        "NEX dynamic semantics",
+        "a terrestrial host unless U itself explicitly is one, in which case the claim is not receiver-neutral"
+      ]
+    },
+    {
+      "id": "A_host(H)",
+      "name": "terrestrial host control",
+      "extends": "A1",
+      "adds": ["H_PLATFORM_H"],
+      "receiver_neutral_candidate": false,
+      "parameter": {
+        "name": "H",
+        "constraint": "H must identify an exact host language/runtime/platform version."
+      },
+      "explicitly_not_assumed": []
+    }
+  ],
+  "accounting": {
+    "conceptual_objective": "C = S + B + P",
+    "exact_message_form": "C | A = |M_A|, where M_A is the exact transmitted object under declared profile A",
+    "disjoint_segments": "C | A = (S | A) + (B | A,S) + (P | A,S,B)",
+    "joint_artifact": "C | A = (SB | A) + (P | A,SB)",
+    "rule": "Every transmitted bit is counted exactly once. If a bit cannot be defensibly partitioned between specification and executable bootstrap roles, it belongs to one joint SB segment rather than both S and B.",
+    "program_payload": "For a fixed NEX wire contract, the canonical program bit length is exact. It is a conditional description length under that established contract, not an unconditional machine-free information quantity."
+  }
+}

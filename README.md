@@ -2,130 +2,183 @@
 
 [Русская версия](README.ru.md)
 
-Experimental repository for **NEX-1**: a minimal, architecture-neutral, statically typed language for compact transmission of programs between systems that do not share a programming language, processor architecture, ABI, operating system, or textual notation.
+Experimental repository for **NEX-1**: a compact, architecture-neutral, statically typed computational core for transmitting executable computational knowledge when sender and receiver cannot assume a shared programming language, processor architecture, ABI, operating system, text encoding, or host runtime.
+
+The project objective is practical and research-oriented: **construct a formal system that an unknown receiver can be taught well enough to decode, type-check, execute, and eventually author programs in it**. Novelty is not a success criterion. Prior work is studied to improve the design.
 
 ## Current status
 
-NEX-1 v0.1 now has an executable research baseline covering canonical wire encoding, static validation/type inference, dynamic semantics, language-neutral conformance artifacts, frozen benchmark corpora, and empirical comparison tooling.
+Stages 0–5 are complete. NEX-1 v0.1 currently has:
 
-Stages 0–3 are complete. Stage 4 — empirical validation and benchmarking — is implementation-complete on PR #6 and pending merge review. See [Current continuation status](docs/STATUS.md) for the authoritative checkpoint.
+- canonical binary encode/decode and language-neutral wire conformance;
+- closed-scope validation and rank-1 Hindley–Milner inference;
+- weak call-by-name normative semantics;
+- a Go reference implementation;
+- an independently produced Python implementation frozen before Go comparison;
+- frozen empirical corpora and Stage 4 comparison tooling;
+- post-freeze Go/Python differential conformance;
+- explicit receiver-assumption and bootstrap-accounting models;
+- a negative complete-bootstrap result: no accepted receiver-neutral `B | A` exists yet;
+- a living bilingual dissertation and a post-Stage-5 literature re-audit.
 
-Primary documents:
+Authoritative current state: [docs/STATUS.md](docs/STATUS.md).
+
+## Primary documents
 
 - [NEX-1 Core v0.1 specification](docs/NEX-1-v0.1.md) / [Russian translation](docs/NEX-1-v0.1.ru.md)
 - [Architecture](docs/ARCHITECTURE.md) / [Russian translation](docs/ARCHITECTURE.ru.md)
 - [Living research dissertation](docs/RESEARCH-DISSERTATION.md) / [Russian translation](docs/RESEARCH-DISSERTATION.ru.md)
-- [Domain language and invariants](docs/DOMAIN.md)
+- [Post-Stage-5 research audit](docs/RESEARCH-AUDIT-2026-09-19.md) / [Russian mirror](docs/RESEARCH-AUDIT-2026-09-19.ru.md)
+- [Related work: teaching computation to an unknown receiver](docs/RELATED-WORK.md) / [Russian mirror](docs/RELATED-WORK.ru.md)
+- [Research source registry](docs/SOURCES.md)
+- [Current continuation status](docs/STATUS.md)
 - [Development workflow](docs/WORKFLOW.md)
 - [Testing and conformance](docs/TESTING.md)
-- [Research sources registry](docs/SOURCES.md)
-- [Current continuation status](docs/STATUS.md)
 - [Architecture Decision Records](docs/adr/README.md)
 - [AI agent instructions](AGENTS.md)
 
-English is the canonical documentation language. The project overview, language specification, architecture overview, and research dissertation have maintained Russian mirrors according to ADR-0003 and ADR-0012.
+English is canonical. README, specification, architecture overview, dissertation, research audit, and related-work comparison maintain Russian mirrors where required by the documentation policy.
 
-NEX-1 v0.1 currently defines:
+## NEX-1 v0.1 Core
 
-- six Core term constructors: `Var`, `Lam`, `App`, `Let`, `Nat`, `Prim`;
-- zero-based de Bruijn indices, so bound variable names are not transmitted;
-- Hindley-Milner style rank-1 let-polymorphism;
-- natural numbers, functions, products, sums, and unit;
+The stable Core defines:
+
+- six term constructors: `Var`, `Lam`, `App`, `Let`, `Nat`, `Prim`;
+- zero-based de Bruijn indices;
+- rank-1 HM let-polymorphism;
+- arbitrary-precision naturals;
+- functions, product/sum primitives, and unit;
 - explicit general recursion through `fix`;
 - eleven fixed Core primitives;
-- a canonical prefix-free binary wire encoding;
-- weak call-by-name normative reference semantics;
-- a strict separation between the universal Core and machine/environment profiles.
+- a canonical prefix binary representation;
+- weak call-by-name normative evaluation;
+- strict separation between Core and optional machine/environment profiles.
 
-## Design and research goal
+Stages 4–5 and the post-stage audit did **not** change this normative v0.1 object.
 
-NEX does not try to minimize only the interpreter or only source-code syntax. The intended optimization target is the total information cost:
+## Research objective and accounting
+
+The historical shorthand is:
 
 ```text
 C = S + B + P
 ```
 
-where `S` is receiver-neutral specification cost, `B` is receiver-neutral bootstrap cost, and `P` is transmitted program cost.
-
-Stage 4 establishes that `P` can be measured exactly for frozen corpora, while a defensible receiver-neutral `S` and especially `B` are still unresolved. Therefore the project does **not** claim that NEX is globally smallest, globally better than Binary Lambda Calculus, or already optimal under total information cost.
-
-The current research manuscript synthesizes the project from its initial problem statement through Stages 0–4, including positive, negative, and unresolved findings:
-
-- [Canonical research dissertation](docs/RESEARCH-DISSERTATION.md)
-- [Russian mirror](docs/RESEARCH-DISSERTATION.ru.md)
-
-Per ADR-0012, the dissertation is a living research record and must be enriched when new reproducible measurements, significant architectural conclusions, independent conformance results, falsifications, or `S/B/P/C` evidence become available.
-
-## Project memory and decisions
-
-The repository is the project source of truth. Durable architectural reasoning belongs in ADRs, including rejected and deferred alternatives. Chat history is not relied on as architectural memory.
-
-External technical sources that materially influence specifications, ADRs, algorithms, standards choices, or benchmark baselines are tracked in `docs/SOURCES.md` under ADR-0004.
-
-Implementation work follows the feedback loop defined in `docs/WORKFLOW.md`:
+The re-audit makes the exact interpretation stricter. A numerical total is meaningful only for one concrete transmitted object under declared receiver assumptions `A`:
 
 ```text
-Problem
-  -> Contract
-  -> Invariant
-  -> Failing test / executable example
-  -> Implementation
-  -> Verification
-  -> Diff review
-  -> Status checkpoint
-  -> Research synthesis checkpoint when evidence changed
+C | A = |M_A|
 ```
 
-## Important non-goals for v0.1
+When transmitted roles are defensibly separable:
 
-Core v0.1 intentionally does not define:
+```text
+C | A = (S | A) + (B | A,S) + (P | A,S,B)
+```
 
-- pointers or mutable machine memory;
-- files, sockets, display, keyboard, or operating-system calls;
-- Unicode or strings;
-- floating point;
-- threads or atomics;
-- exceptions, objects, classes, or modules;
-- a human-oriented source language.
+and if specification/bootstrap are inseparable:
 
-These belong in libraries, frontends, or explicit execution profiles rather than the universal Core.
+```text
+C | A = (SB | A) + (P | A,SB)
+```
 
-## Evidence accumulated so far
+Every transmitted bit is counted once. Host Go/Python source size is not silently converted into receiver-neutral bootstrap cost.
 
-The current repository contains:
+For frozen corpus v0.3, canonical program payload remains exactly:
 
-- canonical wire encode/decode with golden/conformance vectors;
-- closed-scope validation and HM principal type inference;
-- a weak call-by-name Core evaluator and evaluation conformance;
-- experimental call-by-need comparison preserving the tested observable results;
-- frozen benchmark corpora and constructor-level wire accounting;
-- internal `Let` and `Nat` experiments;
-- an experimental type-information envelope;
-- BLC, Jot-translation, and structural stack baselines with explicit comparison limits;
-- machine-readable total-information accounting that keeps unknown bootstrap cost unknown;
-- a consolidated reproducible Stage 4 report.
+```text
+17 programs
+345 AST nodes
+1371 bits
+```
 
-The latest measured conclusions and limitations are maintained in `docs/STATUS.md` and synthesized in the research dissertation.
+This is an exact NEX wire length under the fixed v0.1 contract, not an unconditional machine-free information quantity.
 
-## Research basis
+## Stage 5 evidence
 
-NEX-1 is an experimental design built from established ideas including:
+The independently produced Python implementation was frozen before access to `reference/go`. Post-freeze comparison yielded:
 
-- de Bruijn indices;
-- Binary Lambda Calculus;
-- Hindley-Milner type inference and principal type schemes;
-- PCF-style typed general recursion;
-- universal/self-delimiting integer coding;
-- call-by-name and lazy evaluation research;
-- separation of portable computation from host/environment embedding.
+```text
+942 portable matches
+0 semantic mismatches
+0 resource asymmetries
+```
 
-The maintained research bibliography and usage notes are in [docs/SOURCES.md](docs/SOURCES.md). Primary references are cited in the dissertation, specification, and ADRs where relevant.
+The accepted interpretation is **strong differential-conformance evidence of reconstructability on the tested surface**, not a proof of semantic correctness or specification completeness.
+
+The 942 cases consist of:
+
+```text
+17   frozen corpus programs
+325  valid cases from 13 structural templates over 25 parameter sets
+100  static-error cases from 4 error families over 25 parameter sets
+500  randomized term shapes tested at wire level
+```
+
+## Receiver assumptions
+
+Historical Stage 5 evidence is preserved in `assumptions-v0.1.json`. The corrected current model is `stage5/receiver-assumptions/assumptions-v0.2.json`:
+
+```text
+A0       exact binary-frame prior
+A1       elementary discrete mathematics only
+A1(R)    A1 + exact formal rule calculus R
+A2(U)    A1 + exact universal binary machine U and framing
+A_host(H) terrestrial engineering control only
+```
+
+These profiles are experimental conditions, not claims about what an extraterrestrial intelligence necessarily knows. No accepted complete receiver-neutral bootstrap currently exists, so full `B | A` and total `C | A` remain unknown.
+
+## Related work and design lessons
+
+The project explicitly compares itself with Lincos, the DeVito–Oehrle science-based language, Lingua Cosmica, and especially CosmicOS. The purpose is to learn from prior approaches, not to establish priority.
+
+The comparison suggests a two-layer architecture:
+
+```text
+NEX Teaching / Bootstrap Message
+        |
+        | progressively establishes meaning
+        v
+NEX-1 Core
+        |
+        | canonical typed programs
+        v
+subsequent computation
+```
+
+CosmicOS is especially relevant because it already treats the message as an executable curriculum: mathematics and logic are introduced first, then programs and simulations. NEX's complementary strength is the exact final target: a typed binary Core with explicit semantics, conformance tests, independent reconstruction evidence, and bit accounting.
+
+See [docs/RELATED-WORK.md](docs/RELATED-WORK.md) for the full comparison.
+
+## Important current limitations
+
+The project does not yet establish:
+
+- global minimality or global superiority over BLC/other bases;
+- formal NEX-specific type safety;
+- a formal NEX-specific CBN/call-by-need equivalence theorem;
+- representativeness of the 17-program design corpus;
+- a complete receiver-neutral teaching/bootstrap message;
+- numerical total `C | A`.
+
+The Stage 4 transition reduction `226151 -> 2484` is an evaluator transition-counter result, not a 98.90% wall-clock speedup claim.
 
 ## Next research direction
 
-After Stage 4 is reviewed and merged, the highest-value unresolved evidence is not another immediate Core expansion. The next design discussion should focus on:
+The next stage should focus on **teachability and bootstrap construction**, not on an immediate Core redesign.
 
-1. an independent conformance implementation built from the specification rather than the Go implementation; and
-2. a genuinely receiver-neutral bootstrap/specification experiment capable of making `B`, and eventually total `C`, measurable.
+The central question is:
 
-Any incompatible NEX-1 redesign should remain deferred until that evidence is considered.
+> What finite transmitted sequence can take a receiver from an explicit prior profile to demonstrable ability to decode, type-check, execute, and construct NEX programs?
+
+Candidate Stage-6 work includes:
+
+1. define the teaching/bootstrap message as a separate layer above the stable NEX-1 Core;
+2. design a progressive lesson sequence inspired by Lincos and CosmicOS;
+3. use type judgments and existing conformance vectors as receiver self-tests;
+4. define an operational success criterion for “NEX competence”;
+5. construct a finite machine-readable teaching artifact and measure its exact bits;
+6. continue NEX-specific metatheory and bounded-exhaustive cross-implementation testing as supporting evidence.
+
+The repository remains the source of truth. New measurements, falsifications, formal results, and literature corrections must update durable project documents rather than relying on chat history.
