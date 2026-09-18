@@ -1,0 +1,60 @@
+{
+  "schema": "nex-stage5-bootstrap-attempt-v0.1",
+  "profile_registry": "stage5/receiver-assumptions/assumptions-v0.1.json",
+  "acceptance_contract": {
+    "requires_exact_versioned_profile": true,
+    "requires_finite_transmitted_artifact": true,
+    "requires_exact_bit_length": true,
+    "requires_dependency_closure": true,
+    "requires_receiver_neutral_profile": true,
+    "requires_verified_nex_wire_static_dynamic_scope": true,
+    "host_source_size_is_not_bootstrap": true
+  },
+  "candidates": [
+    {
+      "id": "a1-recursive-rule-description",
+      "profile": "A1",
+      "status": "rejected_incomplete",
+      "receiver_neutral": true,
+      "finite_artifact": false,
+      "exact_bit_length": null,
+      "dependency_closure_complete": false,
+      "verified_nex_wire_static_dynamic_scope": false,
+      "accepted_bootstrap_bits": null,
+      "reason": "A1 permits understanding deterministic finite/recursive rule descriptions, but Stage 5 has not fixed a receiver-neutral binary syntax and operational semantics for such a rule language. Counting UTF-8, Markdown, JSON, Go, or Python would add undeclared conventions."
+    },
+    {
+      "id": "a2-blc-machine-candidate",
+      "profile": "A2(U=BLC)",
+      "status": "rejected_incomplete",
+      "receiver_neutral": true,
+      "machine_source": "SRC-0002",
+      "finite_artifact": false,
+      "exact_bit_length": null,
+      "dependency_closure_complete": false,
+      "verified_nex_wire_static_dynamic_scope": false,
+      "accepted_bootstrap_bits": null,
+      "reason": "Binary Lambda Calculus is an exact compact computational candidate, but no frozen and conformance-verified BLC program implementing the complete NEX-1 decoder, static semantics, and evaluator exists. Counting only a BLC universal evaluator would not be a NEX bootstrap."
+    },
+    {
+      "id": "host-python-control",
+      "profile": "A_host(Python3.12)",
+      "status": "engineering_control_only",
+      "receiver_neutral": false,
+      "finite_artifact": true,
+      "dependency_closure_complete": false,
+      "verified_nex_wire_static_dynamic_scope": true,
+      "frozen_nex_package_source_bytes": 28832,
+      "frozen_author_written_checkpoint_bytes": 52859,
+      "accepted_bootstrap_bits": null,
+      "reason": "The independent Python implementation is finite and verified, but Python 3.12 and its execution environment are undeclared receiver-side machinery under a non-neutral host profile. Its byte size is an engineering control, not B."
+    }
+  ],
+  "result": {
+    "accepted_full_bootstrap_candidates": 0,
+    "full_bootstrap_cost_known": false,
+    "total_C_computable": false,
+    "classification": "negative_result",
+    "conclusion": "Stage 5 did not produce a defensible complete B | A or SB | A. The failed closure is recorded rather than replaced with host-source size or an interpreter hidden in the prior."
+  }
+}
