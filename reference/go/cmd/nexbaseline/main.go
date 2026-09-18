@@ -36,12 +36,12 @@ type fullCorpusAggregate struct {
 }
 
 type report struct {
-	Schema        string                  `json:"schema"`
-	CorpusVersion string                  `json:"corpus_version"`
-	Programs      []programReport         `json:"programs"`
-	LambdaSubset  lambdaSubsetAggregate   `json:"pure_lambda_subset"`
-	FullCorpus    fullCorpusAggregate     `json:"full_corpus"`
-	Notes         []string                `json:"notes"`
+	Schema        string                `json:"schema"`
+	CorpusVersion string                `json:"corpus_version"`
+	Programs      []programReport       `json:"programs"`
+	LambdaSubset  lambdaSubsetAggregate `json:"pure_lambda_subset"`
+	FullCorpus    fullCorpusAggregate   `json:"full_corpus"`
+	Notes         []string              `json:"notes"`
 }
 
 func main() {
