@@ -37,8 +37,8 @@ It is not a general bibliography. A source belongs here when it materially influ
 - Type: author-maintained technical reference / research implementation material
 - URL: https://tromp.github.io/cl/Binary_lambda_calculus.html
 - Used by NEX for: evidence that lambda terms with de Bruijn-style variables can be encoded directly as compact self-delimiting binary syntax; comparative baseline for description size.
-- Current project impact: motivates a binary prefix term representation and the plan to compare NEX against BLC.
-- Important limitation: BLC is untyped and its exact constructor/variable encoding is not the NEX wire format. NEX's static typing and `Let`/`Nat`/`Prim` design are separate choices.
+- Current project impact: motivates a binary prefix term representation and the Stage 4 direct pure-lambda comparison against BLC.
+- Important limitation: BLC is untyped and its exact constructor/variable encoding is not the NEX wire format. NEX's static typing and `Let`/`Nat`/`Prim` design are separate choices. Stage 4 compares identical pure lambda terms directly and does not silently Church-encode NEX built-ins.
 
 ### SRC-0003 — Hindley–Milner / Algorithm W
 
@@ -107,7 +107,7 @@ It is not a general bibliography. A source belongs here when it materially influ
 
 ## Comparative / candidate sources
 
-These sources are relevant to alternatives already discussed or likely to be benchmarked, but they are not normative foundations of NEX-1 v0.1.
+These sources are relevant to alternatives already discussed or benchmarked, but they are not normative foundations of NEX-1 v0.1.
 
 ### SRC-0009 — Combinatory logic / SK basis
 
@@ -117,8 +117,19 @@ These sources are relevant to alternatives already discussed or likely to be ben
 - Reference overview: https://encyclopediaofmath.org/wiki/Combinatory_logic
 - Historical work identified there: M. Schönfinkel, _Über die Bausteine der mathematischen Logik_, Mathematische Annalen 92 (1924), 305–316.
 - Used by NEX for: comparison with very small combinator bases such as `S` and `K`.
-- Current project impact: ADR-0002 records pure SKI-style Core as rejected for v0.1 while retaining it as a benchmark candidate.
-- Follow-up requirement: before a quantitative SKI benchmark is treated as research evidence, register the exact formal encoding/implementation used for that benchmark rather than relying only on this overview.
+- Current project impact: ADR-0002 records pure SKI-style Core as rejected for v0.1 while retaining it as a benchmark candidate. Stage 4 uses a fixed SK bracket-abstraction translation only as an intermediate step for the Jot baseline.
+- Important limitation: this general source does not define the exact binary Jot encoding. Stage 4's exact Jot program mapping is grounded separately in SRC-0014.
+
+### SRC-0014 — Chris Barker Iota/Jot exact encoding
+
+**Chris Barker, _Iota and Jot: the simplest languages?_ (2001; author page preserved by the Internet Archive).**
+
+- Type: archived primary author-maintained technical reference
+- Archived URL: https://web.archive.org/web/20201112014512/http://www.nyu.edu/projects/barker/Iota/
+- Last reviewed by NEX: 2026-09-18
+- Used by NEX for: the exact Jot semantics and the author's mapping from combinatory logic to Jot: `K -> 11100`, `S -> 11111000`, and application `AB -> 1[A][B]`.
+- Current project impact: Stage 4.5 uses those exact bit rules after a separately documented deterministic NEX-pure-lambda -> SK bracket abstraction. The resulting number is a reproducible translation cost.
+- Important limitation: the Stage 4 bracket-abstraction algorithm is a NEX experiment choice, not a claim that Barker prescribed that exact lambda-to-SK translator. The measured Jot length is not claimed to be the shortest Jot program for the same function; for example Barker's Jot semantics gives the empty program the identity meaning.
 
 ---
 

@@ -11,8 +11,9 @@ Before making changes, read at least:
 5. `docs/WORKFLOW.md`
 6. `docs/TESTING.md`
 7. `docs/SOURCES.md`
-8. relevant files in `docs/adr/`
-9. `docs/STATUS.md`
+8. `docs/RESEARCH-DISSERTATION.md`
+9. relevant files in `docs/adr/`
+10. `docs/STATUS.md`
 
 ## Required working behavior
 
@@ -44,15 +45,37 @@ AI agents MUST:
 
 Do not add a link merely because it was read during research. The registry is for sources that materially influence project work.
 
+## Living research dissertation policy
+
+Per ADR-0012, `docs/RESEARCH-DISSERTATION.md` is the canonical scholarly synthesis of the project and `docs/RESEARCH-DISSERTATION.ru.md` is its required Russian mirror.
+
+The dissertation is not a substitute for the normative specification, ADRs, conformance artifacts, benchmark JSON, or tests. It synthesizes them into the durable research argument.
+
+A change MUST update the dissertation in the same pull request, or explicitly state why no dissertation update is needed, when it produces a defensible new:
+
+- reproducible measurement that changes or materially refines a conclusion;
+- research-significant accepted/rejected/deferred architecture decision;
+- external baseline or primary source materially used by the project;
+- independent conformance result;
+- formal proof, counterexample, falsification, or limitation;
+- stage-completion conclusion;
+- estimate/model for `S`, `B`, `P`, or total `C`;
+- contradiction or qualification of an earlier hypothesis.
+
+Dissertation text MUST preserve the distinction among external established result, NEX design decision, reproducible NEX measurement, inference from evidence, and open hypothesis/unknown.
+
+Do not invent verbatim quotations. Direct quotation may be used only after checking the exact source wording; otherwise paraphrase and cite the primary source.
+
 ## Documentation language policy
 
 English is the canonical documentation language.
 
-Per ADR-0003, semantic changes to any of these primary documents should update the Russian mirror in the same pull request:
+Per ADR-0003 and ADR-0012, semantic changes to any of these primary documents should update the Russian mirror in the same pull request:
 
 - `README.md` <-> `README.ru.md`;
 - `docs/NEX-1-vX.Y.md` <-> `docs/NEX-1-vX.Y.ru.md`;
-- `docs/ARCHITECTURE.md` <-> `docs/ARCHITECTURE.ru.md`.
+- `docs/ARCHITECTURE.md` <-> `docs/ARCHITECTURE.ru.md`;
+- `docs/RESEARCH-DISSERTATION.md` <-> `docs/RESEARCH-DISSERTATION.ru.md`.
 
 If a mirror cannot be updated immediately, explicitly mark it out of date in the pull request and in `docs/STATUS.md`.
 

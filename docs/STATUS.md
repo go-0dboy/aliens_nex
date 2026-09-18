@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Current stage:** `Stage 3 — Dynamic semantics and evaluator — Complete`  
+**Current stage:** `Stage 4 — Empirical validation and benchmarking — Implementation complete; pending merge review`  
 **Stage 0 completed by:** PR `#1 docs: establish ADRs and project workflow`  
 **Research source registry completed by:** PR `#2 docs: add research source registry`  
 **Stage 1 completed by:** PR `#3 stage1: implement NEX wire foundation`  
@@ -10,151 +10,226 @@
 **Stage 2 completed by:** PR `#4 stage2: complete static validation and principal type inference`  
 **Stage 2 merge commit:** `cefe889d90a275897de31aa23c4b9742a388ec8f`  
 **Stage 3 completed by:** PR `#5 stage3: complete dynamic semantics and reference evaluator`  
-**Stage 3 merge commit:** `166cdc03282ea500263fdca7185f006f9b17a702`
+**Stage 3 merge commit:** `166cdc03282ea500263fdca7185f006f9b17a702`  
+**Active Stage 4 branch:** `stage4/empirical-validation`  
+**Active Stage 4 pull request:** `#6`  
+**Living research dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md` (ADR-0012)
 
-## Stage 0 — Complete
+## Stages 0–3 — Complete
 
-Stage 0 established the NEX-1 v0.1 specification, ADR/workflow system, bilingual core documentation, source registry, architecture, testing strategy, and durable project memory.
+Stage 0 established the specification/process baseline. Stage 1 implemented canonical wire encode/decode. Stage 2 implemented closed-scope/static validation and principal HM type inference. Stage 3 implemented the complete weak-call-by-name v0.1 Core evaluator, synchronized EN/RU dynamic semantics, language-neutral evaluation conformance, resource separation, fuzz/property verification, and clean-checkout CI.
 
-## Stage 1 — Wire foundation — Complete
+Detailed completion records remain in `docs/STAGE-1.md`, `docs/STAGE-2.md`, and `docs/STAGE-3.md`.
 
-Defined and closed in `docs/STAGE-1.md`.
+## Stage 4 — Implementation complete; pending merge review
 
-The repository has an executable, CI-verified canonical wire layer for the six v0.1 term constructors, arbitrary-precision `U(n)`, exact/prefix decoding, implementation-independent conformance vectors, and decoder resource limits separated from wire validity.
+Stage 4 is defined in `docs/STAGE-4.md`. ADR-0010 froze the measurement contract/corpus discipline before optimization; ADR-0011 records the evidence-based decision gate.
 
-## Stage 2 — Static validation — Complete
+### 4.0 — measurement contract — Complete
 
-Defined and closed in `docs/STAGE-2.md`.
-
-The reference static pipeline provides:
-
-```text
-Term
-  -> ValidateClosed
-  -> ValidateCorePrimitives
-  -> InferClosed
-  -> principal TypeScheme
-```
-
-`conformance/static-v0.1.json` contains 15 scope vectors and 19 type vectors. The implementation includes substitutions, free type variables, unification with occurs check, primitive type schemes, fresh instantiation, let-generalization, Algorithm-W-style inference, property tests, fuzzing, and clean-checkout CI.
-
-ADR-0007 keeps ordinary term-level type annotations out of canonical v0.1 terms while requiring a future measured comparison against compact explicit/hybrid type information.
-
-## Stage 3 — Dynamic semantics and evaluator — Complete
-
-Defined and closed in `docs/STAGE-3.md`.
-
-Completed functionality:
+The project separates:
 
 ```text
-3.0 dynamic-semantics contract audit and EN/RU specification clarification
-3.1 runtime Value / Environment / Thunk / Closure model
-3.2 weak call-by-name Var/Lam/App/Let/Nat evaluator
-3.3 curried primitive application spine and authoritative runtime arity
-3.4 unit/succ/pred/ifz execution with lazy branch selection
-3.5 pair/fst/snd/inl/inr/case execution with delayed fields/payloads
-3.6 fix and bounded implementation refusal for nontermination tests
-3.7 language-neutral evaluation conformance corpus
-3.8 evaluator resource controls, property/fuzz testing, clean-checkout CI
-3.9 final scope/diff review
+P  exact transmitted-program cost
+R  host/reference implementation proxy
+B  actual bootstrap transmission cost (unknown)
+S  specification transmission cost (no accepted receiver-neutral scalar yet)
+C  S + B + P
 ```
 
-### Dynamic semantics
+`R` MUST NOT be substituted for `B`.
 
-ADR-0008 selects the first reference evaluator as:
+### 4.1 — frozen benchmark corpora — Complete
+
+- `benchmarks/corpus-v0.1.json`: immutable 10-program foundation corpus.
+- `corpus-v0.2.json`: preserved negative checkpoint; `factorial-5` exceeded the default 1,000,000-transition non-memoizing CBN budget. This is resource refusal, not invalidity or proof of divergence.
+- `benchmarks/corpus-v0.3.json`: accepted frozen extended corpus, 17 programs total.
+
+Clean-checkout CI `35368707827` parsed, type-checked, evaluated, and measured accepted v0.3.
+
+### 4.2 — instrumentation — Complete
+
+Implemented:
+
+- exact wire/AST/constructor metrics and per-constructor wire-bit attribution;
+- reference-only evaluator transition/depth statistics;
+- shared frozen-corpus loader/parser;
+- deterministic benchmark/report CLIs;
+- clean-checkout reproduction in `reference/go/verify.sh`.
+
+### 4.3 — internal NEX experiments — Complete
+
+Frozen v0.3 aggregate:
 
 ```text
-weak call-by-name
-+ environment based
-+ closures
-+ explicit non-memoizing thunks
+programs   17
+wire_bits  1371
+ast_nodes  345
 ```
 
-The runtime environment is ordered nearest de Bruijn binder first. Lambda arguments and `Let` values are delayed. Pair fields and sum payloads remain delayed until selected. Unsaturated primitives are function WHNFs. Call-by-need sharing remains a permitted later optimization rather than the reference behavior.
-
-ADR-0009 separates evaluator resource refusal from NEX validity and semantic results. Finite fuel/depth exhaustion does not prove divergence and does not make a valid program invalid.
-
-The evaluator implements every NEX-1 v0.1 Core primitive:
+Exact wire-bit attribution:
 
 ```text
-fix succ pred ifz pair fst snd inl inr case unit
+Prim  460 bits  33.6%
+Var   286 bits  20.9%
+App   264 bits  19.3%
+Nat   244 bits  17.8%
+Lam    84 bits   6.1%
+Let    33 bits   2.4%
 ```
 
-The canonical English `docs/NEX-1-v0.1.md` and informative Russian mirror `docs/NEX-1-v0.1.ru.md` are synchronized for the Stage 3 dynamic contract, including non-strict `Let`, primitive arities and partial application, WHNF categories, primitive forcing rules, divergence/resource refusal, evaluator conformance requirements, and Stage 3 research references.
+The early hypothesis that `App` would dominate this corpus is not supported; primitive references are the largest measured contributor. This is corpus-specific evidence.
 
-### Evaluation conformance
+`Let` shows a real break-even point. For a 5-bit payload: 2 repeats cost +4 bits with `Let`, 3 repeats +2, 4 tie, 8 save 8. For the tested 14-bit payload, two repeats already save 5 bits.
 
-`conformance/eval-v0.1.json` records implementation-independent observable WHNF results covering:
-
-- lambda and natural results;
-- beta application;
-- ignored divergent arguments;
-- non-strict `Let`;
-- `unit`, `succ`, `pred`, and both `ifz` paths;
-- partial primitive application;
-- lazy products and projections;
-- lazy sums and both `case` branches;
-- terminating recursion through `fix`.
-
-The conformance JSON is loaded directly by the Go test suite rather than duplicated in test code.
-
-### Verification evidence
-
-Final PR head before merge:
+Direct natural literals strongly outperform the tested `succ`-chain construction. Representative endpoint:
 
 ```text
-09f4cb330a8f495996fe253868fd863331fb4d64
+Nat(255)          21 bits
+succ-chain(255) 2300 bits
 ```
 
-Final PR clean-checkout CI:
+Clean-checkout CI `35369320807` reproduced the full v0.3 profile and experiment outputs.
+
+### 4.4 — erased HM versus hybrid root type — Complete first experiment
+
+The non-normative root-principal-type envelope measured:
 
 ```text
-35365175098  success
+erased term bits       1371
+root type bits          134
+hybrid total           1505
+program overhead       +9.77%
 ```
 
-Post-merge `main` clean-checkout CI on merge commit `166cdc03282ea500263fdca7185f006f9b17a702`:
+Small polymorphic functions have large relative overhead (`identity` +240%, `constant` +222.2%, `composition` +200%); most larger `N`-result programs add only 4 type bits.
+
+This measures `Delta P` only. No reduction in receiver-neutral `S+B` has been implemented or measured, and a root principal type does not replace internal HM inference.
+
+Clean-checkout CI `35370010741` reproduced the experiment.
+
+### 4.5 — external / structural baselines — Complete first reproducible set
+
+On the identical pure-lambda subset (`identity`, `constant`, `composition`):
 
 ```text
-35365823377  success
+NEX                         37 bits
+BLC                         30 bits
+Jot via fixed SK translation 288 bits
 ```
 
-`reference/go/verify.sh` runs:
+BLC is 7 bits smaller on this narrow shared subset. The Jot number is only for the documented deterministic bracket-abstraction translation and is not a shortest-Jot claim.
+
+On full v0.3:
 
 ```text
-gofmt check
-go vet ./...
-go test ./...
-1s FuzzSubstitutionComposition
-1s FuzzUnifyProducesEqualAppliedTypes
-1s FuzzInferenceSuccessfulSchemeIsClosedAndStable
-1s FuzzEvaluationDeterministicObservation
+NEX canonical wire  1371 bits
+tiny postfix stack  1529 bits
+delta                +158 bits (+11.52%)
 ```
 
-The final Stage 3 diff was reviewed against its scope guard. No human frontend/parser, optimizer, mutable memory/system profile, native/bytecode compiler, or self-hosting implementation entered Stage 3.
+The tiny-stack baseline reuses NEX integer/primitive conventions and therefore is a structural comparison, not an independent total-bootstrap comparison.
 
-## Research basis added for Stage 3
+Clean-checkout CI `35372182772` reproduced these values.
 
-`docs/SOURCES.md` includes:
+### 4.6 — call-by-name versus call-by-need — Complete first experiment
+
+Normative weak CBN was not changed. A separate experimental memoizing evaluator was added and required to match the same observable WHNF on every accepted program.
+
+All 17 v0.3 programs agreed observationally.
+
+Reference-only aggregate:
 
 ```text
-SRC-0011 Plotkin 1975   call-by-name / call-by-value distinction
-SRC-0012 Launchbury 1993 lazy semantics with sharing
-SRC-0013 Sestoft 1997   lazy abstract-machine derivation
+CBN transitions          226151
+call-by-need transitions   2484
+saved                    223667
+reduction                 98.90%
+memo hits                   237
+programs with fewer transitions 6/17
 ```
 
-These sources inform evaluation strategy and implementation alternatives; NEX-specific primitive forcing rules remain project decisions documented in the specification and ADRs.
+Representative heavy workloads:
 
-## Remaining project-wide unverified claims
+```text
+factorial-4         209315 -> 895
+fibonacci-5           7424 -> 512
+let-reuse-expensive    8710 -> 560
+```
 
-Still intentionally unverified:
+This is implementation/runtime evidence, not a transmission-cost result. Call-by-need changes no program bits and may increase bootstrap/runtime machinery.
+
+Clean-checkout CI `35372634610` reproduced the strategy comparison.
+
+### 4.7 — total-information accounting — Complete model
+
+Machine-readable accounting keeps unknowns explicit.
+
+For v0.3:
+
+```text
+P exact                         1371 bits
+canonical spec Markdown        23440 UTF-8 bytes
+raw Markdown proxy            187520 bits
+selected Go reference Core     43013 UTF-8 bytes
+B bootstrap                    unknown
+C total                        not numerically computable
+```
+
+The Markdown size is only an `S` proxy; it is not accepted as receiver-neutral specification cost. Go source size is `R`, not `B`. Unknown `B` is not treated as zero.
+
+Clean-checkout CI `35373159387` reproduced the accounting output.
+
+### 4.8 — consolidated reproducible report — Complete
+
+`reference/go/cmd/nexreport` recomputes the principal Stage 4 results from frozen corpus data and experiment/reference functions in one command. It does not copy numbers from documentation.
+
+Clean-checkout CI `35373511054` generated `nex-stage4-experimental-report-v0.1` and also reran all previous tests, experiment CLIs, and fuzz/property checks successfully.
+
+### 4.9 — evidence-based decision gate — Complete
+
+ADR-0011 records the decisions supported by current evidence:
+
+- keep NEX-1 v0.1 wire/Core stable;
+- keep direct `Nat`;
+- keep `Let` while acknowledging its local break-even behavior;
+- keep erased HM for v0.1; explicit/hybrid verification remains deferred until a real alternative checker/bootstrap exists;
+- keep weak call-by-name normative; call-by-need remains an allowed optimization when observable results are preserved;
+- prioritize primitive-reference/profile encoding in future compactness experiments because `Prim` is the largest measured v0.3 wire contributor;
+- do not claim NEX is globally smallest or superior to BLC;
+- keep total-information superiority unresolved until an actual receiver-neutral bootstrap artifact makes `B` measurable.
+
+## Living research dissertation — Established
+
+ADR-0012 adds a cumulative dissertation-style research manuscript to the repository:
+
+- canonical English: `docs/RESEARCH-DISSERTATION.md`;
+- required Russian mirror: `docs/RESEARCH-DISSERTATION.ru.md`.
+
+The manuscript synthesizes the research problem, object/subject, goal, research questions, hypotheses, theoretical basis, methodology, Stages 0–4, reproducible measurements, negative results, limitations/threats to validity, current contributions, glossary, bibliography, and reproducibility artifacts.
+
+The dissertation is now a mandatory research-synthesis checkpoint. A PR that creates a material new measurement, research-significant decision, external baseline/source, independent conformance result, proof/counterexample, stage-level conclusion, revised `S/B/P/C` evidence, or falsification/qualification of an earlier hypothesis must update the English manuscript and Russian mirror, or explicitly document why no dissertation change is required.
+
+Direct quotations must not be invented; exact quotations may be used only after verifying source wording. Ordinary literature claims should be paraphrased and cited to primary/official sources registered in `docs/SOURCES.md`.
+
+## Stage 4 scope review
+
+Stage 4 did not add new normative NEX-1 v0.1 term constructors, mutable memory/system calls, product frontend/parser work, native/bytecode compiler, machine profile, or self-hosting implementation. Experimental encoders/evaluators remain isolated from normative v0.1 semantics.
+
+The dissertation/process additions are documentation and research-governance work; they do not change normative NEX-1 v0.1 semantics or Stage 4 measurements.
+
+## Remaining project-wide unknowns
+
+Still intentionally unresolved:
 
 - formal/exhaustive proof of decoder, type-inference, or evaluator correctness;
-- conformance agreement with a second independent implementation;
-- bootstrap/self-hosting feasibility and size;
-- total-information-cost comparison against BLC, SKI/Jot, WebAssembly, a typed stack machine, or an explicit-type NEX variant;
-- practical cost of call-by-name versus call-by-need for representative NEX programs;
+- agreement with a second independent implementation;
+- actual receiver-neutral bootstrap artifact and cost `B`;
+- receiver-neutral specification transmission cost `S`;
+- broader-corpus generalization of v0.3 constructor distribution;
+- independent total-cost comparisons against external architectures;
 - any claim that NEX is globally optimal or the smallest possible language.
 
 ## Next recommended step
 
-Define Stage 4 before implementation. Stage 4 should be chosen based on the project objective rather than implementation convenience: after wire decoding, static validation, and executable Core semantics are complete, the next work should make the current design measurable and independently falsifiable before expanding the language or adding machine-specific features.
+Review PR #6 as the completed Stage 4 implementation plus the new living research dissertation/process rule. If accepted, merge it, mark Stage 4 `Complete` on `main`, update the dissertation's Stage 4 evidence status from pending merge to merged, and only then design the next stage around the highest-value unresolved evidence: independent conformance implementation and a receiver-neutral bootstrap experiment. Do not begin a normative NEX-1 v0.2 redesign before that discussion.
