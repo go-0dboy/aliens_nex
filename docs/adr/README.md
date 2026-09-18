@@ -32,6 +32,7 @@ An ADR is therefore required for any decision that materially changes one or mor
 - [ADR-0010: Freeze the measurement contract and benchmark corpus before optimization](0010-freeze-measurement-contract-before-optimization.md)
 - [ADR-0011: Hold NEX-1 v0.1 stable after the Stage 4 evidence gate](0011-stage4-evidence-gate.md)
 - [ADR-0012: Maintain a living research dissertation](0012-maintain-living-research-dissertation.md)
+- [ADR-0013: Freeze the Stage 5 independence protocol and use Python for the first independent implementation](0013-stage5-independence-protocol.md)
 
 ## Status values
 
