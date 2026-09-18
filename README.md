@@ -10,6 +10,16 @@ The normative draft is:
 
 - [NEX-1 Core v0.1 specification](docs/NEX-1-v0.1.md)
 
+Project working documents:
+
+- [Architecture](docs/ARCHITECTURE.md)
+- [Domain language and invariants](docs/DOMAIN.md)
+- [Development workflow](docs/WORKFLOW.md)
+- [Testing and conformance](docs/TESTING.md)
+- [Current continuation status](docs/STATUS.md)
+- [Architecture Decision Records](docs/adr/README.md)
+- [AI agent instructions](AGENTS.md)
+
 NEX-1 v0.1 currently defines:
 
 - six Core term constructors: `Var`, `Lam`, `App`, `Let`, `Nat`, `Prim`;
@@ -32,6 +42,23 @@ cost = specification + bootstrap implementation + transmitted programs
 
 This is why the project does not simply reduce everything to SKI combinators or machine instructions. The hypothesis is that a small typed lambda core with de Bruijn indices and direct binary data representation can provide a better overall trade-off.
 
+## Project memory and decisions
+
+The repository is the project source of truth. Durable architectural reasoning belongs in ADRs, including rejected and deferred alternatives. Chat history is not relied on as architectural memory.
+
+Implementation work follows the feedback loop defined in `docs/WORKFLOW.md`:
+
+```text
+Problem
+  -> Contract
+  -> Invariant
+  -> Failing test / executable example
+  -> Implementation
+  -> Verification
+  -> Diff review
+  -> Status checkpoint
+```
+
 ## Important non-goals for v0.1
 
 Core v0.1 intentionally does not define:
@@ -48,16 +75,17 @@ These belong in libraries, frontends, or explicit execution profiles rather than
 
 ## Next milestone
 
-Build a reference implementation that can:
+The first implementation milestone is intentionally smaller than a complete interpreter:
 
-1. decode the canonical NEX bit stream;
-2. validate de Bruijn scope;
-3. infer types using Algorithm W / unification with occurs check;
-4. evaluate well-typed closed programs;
-5. encode terms back to the canonical wire form;
-6. measure bit size, AST size, reduction count, and memory use for a fixed benchmark corpus.
+1. implement the self-delimiting `U(n)` integer codec;
+2. implement canonical `Term` wire encoding/decoding;
+3. add fixed conformance/golden vectors;
+4. prove round-trip behavior with automated tests;
+5. reject malformed encodings deterministically.
 
-The first benchmark corpus should include identity, addition, multiplication, factorial, Fibonacci, pair/sum processing, a small parser or recognizer, and eventually a NEX decoder and type checker written in NEX itself.
+Only after that feedback loop is green should the project add de Bruijn validation, Algorithm W type inference, and the evaluator as separate stages.
+
+See `docs/STATUS.md` for the current continuation point.
 
 ## Research basis
 
