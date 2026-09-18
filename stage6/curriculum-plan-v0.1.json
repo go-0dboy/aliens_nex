@@ -1,0 +1,173 @@
+{
+  "schema": "nex-stage6-curriculum-plan-v0.1",
+  "status": "planning-contract-not-transmitted-artifact",
+  "date": "2026-09-19",
+  "core_target": "NEX-1 Core v0.1",
+  "decision": "ADR-0017",
+  "receiver_profile": {
+    "selected": false,
+    "allowed_profiles": ["A0", "A1", "A1(R)", "A2(U)"],
+    "note": "The first Stage 6 experiment must select and freeze one exact profile before teaching content is accepted."
+  },
+  "teaching_goal": {
+    "decode": true,
+    "encode": true,
+    "static_check": true,
+    "evaluate": true,
+    "construct_programs": true,
+    "self_test": true
+  },
+  "hard_constraints": {
+    "nex1_core_must_remain_unchanged": true,
+    "teaching_representation_may_differ_from_canonical_wire": true,
+    "undeclared_terrestrial_prose_is_not_receiver_neutral": true,
+    "heldout_construction_tasks_required": true,
+    "exact_bits_for_plan_are_not_bootstrap_cost": true,
+    "receiver_proxy_results_are_not_alien_cognition_claims": true
+  },
+  "competence_categories": [
+    "decode",
+    "encode",
+    "static",
+    "evaluate",
+    "construct",
+    "self_test"
+  ],
+  "lessons": [
+    {
+      "id": "L00-frame",
+      "order": 0,
+      "prerequisites": [],
+      "concepts_introduced": ["binary_symbols", "sequence_order", "frame_boundary"],
+      "candidate_prior_atoms": ["T_BINARY", "T_ORDER", "T_FRAME", "T_CORRECT"],
+      "goal": "Establish or explicitly account for the ordered binary frame on which later teaching depends.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L01-naturals",
+      "order": 1,
+      "prerequisites": ["L00-frame"],
+      "concepts_introduced": ["natural_numbers", "equality", "ordering", "finite_sequences"],
+      "candidate_prior_atoms": ["M_NAT", "M_FINSEQ"],
+      "goal": "Establish the mathematical objects used by NEX integer coding and structural examples.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L02-integer-code",
+      "order": 2,
+      "prerequisites": ["L01-naturals"],
+      "concepts_introduced": ["self_delimiting_integer", "gamma_n_plus_1"],
+      "candidate_prior_atoms": [],
+      "goal": "Teach the exact U(n) integer representation used by canonical NEX wire.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L03-structure",
+      "order": 3,
+      "prerequisites": ["L01-naturals"],
+      "concepts_introduced": ["constructor", "ordered_tree", "recursive_structure"],
+      "candidate_prior_atoms": [],
+      "goal": "Establish a compositional structural model before introducing NEX terms.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L04-values-primitives",
+      "order": 4,
+      "prerequisites": ["L02-integer-code", "L03-structure"],
+      "concepts_introduced": ["Nat", "unit", "succ", "pred", "ifz", "equational_observation"],
+      "candidate_prior_atoms": [],
+      "goal": "Introduce direct values and simple observable primitive behavior.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L05-application-functions",
+      "order": 5,
+      "prerequisites": ["L04-values-primitives"],
+      "concepts_introduced": ["App", "Lam", "function_application", "weak_head_function"],
+      "candidate_prior_atoms": [],
+      "goal": "Introduce first-class functions and application using controlled examples.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L06-binding",
+      "order": 6,
+      "prerequisites": ["L05-application-functions"],
+      "concepts_introduced": ["bound_variable", "Var", "de_bruijn_index", "Let"],
+      "candidate_prior_atoms": [],
+      "goal": "Teach binding and transition from pedagogical examples to canonical zero-based de Bruijn references.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L07-products-sums",
+      "order": 7,
+      "prerequisites": ["L05-application-functions", "L06-binding"],
+      "concepts_introduced": ["pair", "fst", "snd", "inl", "inr", "case", "selective_forcing"],
+      "candidate_prior_atoms": [],
+      "goal": "Introduce structured data and branch/projection behavior without forcing unused payloads.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L08-recursion",
+      "order": 8,
+      "prerequisites": ["L04-values-primitives", "L05-application-functions", "L06-binding"],
+      "concepts_introduced": ["fix", "general_recursion", "termination", "divergence"],
+      "candidate_prior_atoms": [],
+      "goal": "Introduce general recursive computation and distinguish valid divergence from invalidity.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L09-types",
+      "order": 9,
+      "prerequisites": ["L07-products-sums"],
+      "concepts_introduced": ["N_type", "unit_type", "function_type", "product_type", "sum_type", "type_judgment"],
+      "candidate_prior_atoms": [],
+      "goal": "Teach the monotype language and use type constraints to reduce interpretive ambiguity.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L10-polymorphism",
+      "order": 10,
+      "prerequisites": ["L06-binding", "L09-types"],
+      "concepts_introduced": ["type_variable", "type_scheme", "instantiation", "Let_polymorphism", "principal_scheme"],
+      "candidate_prior_atoms": [],
+      "goal": "Teach enough rank-1 polymorphism to validate primitive schemes and principal type examples.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L11-canonical-wire",
+      "order": 11,
+      "prerequisites": ["L02-integer-code", "L03-structure", "L06-binding", "L07-products-sums", "L08-recursion", "L10-polymorphism"],
+      "concepts_introduced": ["canonical_term_prefixes", "exact_bit_length", "canonical_encode", "canonical_decode"],
+      "candidate_prior_atoms": [],
+      "goal": "Transition from teaching representation to the exact NEX-1 canonical wire contract.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L12-self-tests",
+      "order": 12,
+      "prerequisites": ["L11-canonical-wire"],
+      "concepts_introduced": ["conformance_vector", "static_rejection", "portable_WHNF", "resource_refusal"],
+      "candidate_prior_atoms": [],
+      "goal": "Transmit exercises by which the receiver can test decoder, typechecker, and evaluator reconstruction.",
+      "status": "hypothesis"
+    },
+    {
+      "id": "L13-heldout-competence",
+      "order": 13,
+      "prerequisites": ["L12-self-tests"],
+      "concepts_introduced": ["heldout_interpretation", "heldout_program_construction"],
+      "candidate_prior_atoms": [],
+      "goal": "Evaluate competence on tasks not present in the teaching material, including construction of valid NEX programs.",
+      "status": "experiment_only_not_transmitted_lesson"
+    }
+  ],
+  "measurement_plan": {
+    "publish_T_bits_before_exact_serialization": false,
+    "lesson_bits": true,
+    "self_test_bits": true,
+    "heldout_tasks_counted_in_T": false,
+    "receiver_success_by_category": true,
+    "assumption_leaks": true,
+    "curriculum_revision_count": true
+  }
+}
