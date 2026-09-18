@@ -1,11 +1,12 @@
 # Stage 2 — Static validation
 
-**Status:** In progress  
-**Branch:** `stage2/static-validation`
+**Status:** Complete  
+**Completed by:** PR `#4 stage2: complete static validation and principal type inference`  
+**Merge commit:** `cefe889d90a275897de31aa23c4b9742a388ec8f`
 
 Stage 2 begins after the wire layer is already proven executable and repeatable. Its job is to determine whether a decoded NEX term is a valid closed, statically typed NEX-1 Core program **without executing it**.
 
-The target pipeline is:
+The completed pipeline is:
 
 ```text
 bits
@@ -13,7 +14,7 @@ bits
   -> Term
   -> scope validation      Stage 2
   -> type inference
-  -> verified typed Term
+  -> principal TypeScheme
 ```
 
 Execution remains outside Stage 2.
@@ -43,7 +44,7 @@ Top-level validation starts at depth `0`, therefore a valid top-level Core progr
 
 ### 2.2 — type representation and type schemes
 
-Add an in-memory representation of:
+The reference implementation represents:
 
 ```text
 T ::= a
@@ -56,31 +57,30 @@ T ::= a
 S ::= forall a1 ... an. T
 ```
 
-Internal type-variable identity must not depend on human-readable names such as `a`, `b`, or `T17`.
+Internal type-variable identity does not depend on human-readable names such as `a`, `b`, or `T17`.
 
 ### 2.3 — substitutions and free type variables
 
-Implement:
+Implemented:
 
 - substitution application to types, schemes, and environments;
 - free type variables for types, schemes, and environments;
-- substitution composition.
-
-The implementation must have property tests for substitution identity and composition.
+- substitution composition;
+- property tests for substitution composition.
 
 ### 2.4 — unification with occurs check
 
-Implement structural unification for type variables, `1`, `N`, function, product, and sum types.
+Structural unification is implemented for type variables, `1`, `N`, function, product, and sum types.
 
-Unification MUST perform the occurs check. For example:
+Unification performs the occurs check. For example:
 
 ```text
 T0 ~ T0 -> T1
 ```
 
-must fail rather than construct an infinite type.
+fails rather than constructing an infinite type.
 
-A core property to test is:
+The tested core property is:
 
 ```text
 if unify(A, B) = S
@@ -89,24 +89,25 @@ then apply(S, A) == apply(S, B)
 
 ### 2.5 — primitive type schemes and primitive validity
 
-Create one authoritative Core primitive table for IDs `0..10`, including the schemes from NEX-1 v0.1.
+One authoritative Core primitive table contains IDs `0..10`, names, and type schemes from NEX-1 v0.1.
 
-The static validator must reject unknown Core primitive IDs when no external profile is explicitly selected.
+Core-only static validation rejects unknown, reserved, and profile primitive IDs when no external profile is explicitly selected.
 
-Type inference and later evaluation must not maintain incompatible independent primitive definitions.
+Type inference and future evaluation must derive primitive metadata from this authoritative table rather than maintaining incompatible independent definitions.
 
 ### 2.6 — instantiation and generalization
 
-Implement:
+Implemented:
 
 - fresh instantiation of quantified variables for each scheme use;
+- direct alpha-renaming during instantiation;
 - let-generalization over variables not free in the outer environment;
 - monomorphic lambda-bound variables;
 - no polymorphic recursion in v0.1.
 
 ### 2.7 — Algorithm W style inference
 
-Implement inference for the six Core constructors:
+Inference is implemented for the six Core constructors:
 
 ```text
 Var
@@ -117,13 +118,13 @@ Nat
 Prim
 ```
 
-The public Stage 2 entry point operates on a closed term after scope validation.
+The public `InferClosed(term)` entry point operates on a closed Core term, validates Core primitive IDs, performs HM-style inference, and returns the principal type scheme.
 
 ### 2.8 — language-neutral type conformance
 
 Conformance is part of Stage 2 design, not an afterthought.
 
-The project must maintain implementation-independent vectors containing, as applicable:
+The project maintains implementation-independent vectors containing, as applicable:
 
 ```text
 Term
@@ -131,28 +132,39 @@ expected principal type
 expected static error class
 ```
 
-Type-variable names are not semantically significant. Before comparison, inferred principal types must be canonicalized by first occurrence, for example:
+Type-variable names are not semantically significant. Before comparison, inferred principal types are canonicalized by first occurrence, for example:
 
 ```text
 T17 -> T17       => T0 -> T0
 T42 -> T9 -> T42 => T0 -> T1 -> T0
 ```
 
-Required positive examples include identity, constant function, `succ`, application, products/sums, `fix`, and polymorphic `let` reuse.
-
-Required negative examples include out-of-scope variables, function/non-function mismatches, incompatible types, occurs-check failure, and unknown primitive IDs.
+The current corpus contains 15 scope vectors and 19 type vectors, including identity, constant function, `succ`, application, products/sums, `fix`, polymorphic `let` reuse, out-of-scope variables, function/non-function mismatches, incompatible types, occurs-check failure, and unknown primitive IDs.
 
 ### 2.9 — properties, fuzzing, CI, and completion review
 
-Before Stage 2 is complete:
+Stage 2 completion verification includes:
 
-- all static conformance vectors pass;
-- scope validation is independently tested;
-- substitution/unification properties pass;
-- Algorithm W examples and let-polymorphism pass;
-- malformed static programs are rejected deterministically;
-- CI executes the same verification from a clean checkout;
-- the final diff is reviewed to confirm that evaluator/runtime behavior has not leaked into Stage 2.
+- all static conformance vectors;
+- independent scope tests;
+- substitution/unification properties;
+- Algorithm W and let-polymorphism tests;
+- deterministic malformed static-program rejection;
+- clean-checkout CI;
+- final diff review confirming evaluator/runtime behavior did not leak into Stage 2.
+
+`reference/go/verify.sh` runs:
+
+```text
+gofmt check
+go vet ./...
+go test ./...
+1s FuzzSubstitutionComposition
+1s FuzzUnifyProducesEqualAppliedTypes
+1s FuzzInferenceSuccessfulSchemeIsClosedAndStable
+```
+
+Final pre-merge PR CI evidence includes run `35360079519` and final head run `35360245915`, both successful.
 
 ## Type annotations policy during Stage 2
 
@@ -178,13 +190,13 @@ NEX-explicit
   compact transmitted type information/certificates + smaller checker bootstrap
 ```
 
-The comparison must use a stated corpus and measurement method. If an explicit/certificate design wins materially, changing canonical type transmission requires a new ADR and a new specification revision; Stage 2 must not silently alter v0.1 wire terms.
+The comparison must use a stated corpus and measurement method. If an explicit/certificate design wins materially, changing canonical type transmission requires a new ADR and a new specification revision.
 
 See ADR-0007.
 
 ## Scope guard
 
-Stage 2 MUST NOT implement:
+Stage 2 did **not** implement:
 
 - beta reduction or evaluator semantics;
 - execution of `fix`, `succ`, `pred`, `ifz`, products, or sums;
@@ -194,18 +206,19 @@ Stage 2 MUST NOT implement:
 - native/bytecode compilation;
 - self-hosting.
 
-Knowing that `succ : N -> N` is a typing fact. Computing `succ 5 -> 6` belongs to a later execution stage.
+Knowing that `succ : N -> N` is a typing fact. Computing `succ 5 -> 6` belongs to Stage 3 or later.
 
-## Definition of done
+## Definition of done — satisfied
 
-Stage 2 is complete when the reference implementation can take a Stage-1-decoded Core term and deterministically produce exactly one of:
+The reference implementation can take a Stage-1-decoded Core term and deterministically produce exactly one of:
 
 ```text
 principal type scheme
 scope error
 primitive validity error
 type/unification error
-resource-limit refusal (if configured)
 ```
 
 with implementation-independent conformance vectors and repeatable CI evidence.
+
+Stage 2 is therefore complete.
