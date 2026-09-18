@@ -133,6 +133,46 @@ These sources are relevant to alternatives already discussed or benchmarked, but
 
 ---
 
+## Receiver-assumption / information-accounting sources
+
+### SRC-0015 — Shannon communication-system boundary
+
+**Claude E. Shannon (1948), _A Mathematical Theory of Communication_.**
+
+- Type: primary research paper
+- Original publication: _Bell System Technical Journal_, Vol. 27, pp. 379–423 and 623–656, July/October 1948.
+- Reprint checked by NEX: https://people.math.harvard.edu/~ctm/home/text/others/shannon/entropy/entropy.pdf
+- Last reviewed by NEX: 2026-09-18
+- Used by NEX for: the explicit decomposition of a communication system into source/transmitter/channel/receiver/destination and the methodological separation between engineering transmission and semantic interpretation.
+- Current project impact: supports Stage 5.7's decision to name the digital channel/framing substrate as an explicit assumption boundary (`A0`) rather than silently mixing raw physical signalling with NEX semantics.
+- Important limitation: Shannon does not define the NEX receiver prior, does not justify that binary framing is universally natural, and does not assign zero cost to establishing a channel. The `A0/A1/A2(U)` taxonomy is a NEX research model.
+
+### SRC-0016 — Kolmogorov algorithmic description relativity
+
+**A. N. Kolmogorov (1965), _Three approaches to the definition of the concept “quantity of information”_.**
+
+- Type: primary research paper
+- Official record: https://www.mathnet.ru/eng/ppi68
+- Publication: _Problemy Peredachi Informatsii_, 1(1), 3–11, 1965.
+- Last reviewed by NEX: 2026-09-18
+- Used by NEX for: the algorithmic approach to information in which description length is defined through an effective description method rather than as a machine-free absolute scalar.
+- Current project impact: supports treating the computational prior/reference machine as part of the condition for a bootstrap measurement rather than pretending an executable bit length is unconditional.
+- Important limitation: NEX does not claim its concrete bootstrap artifacts are Kolmogorov-optimal, nor does this source identify a privileged universal machine for an unknown receiver.
+
+### SRC-0017 — Chaitin self-delimiting program-size information
+
+**Gregory J. Chaitin (1975), _A Theory of Program Size Formally Identical to Information Theory_.**
+
+- Type: primary research paper
+- DOI: https://doi.org/10.1145/321892.321894
+- IBM Research record: https://research.ibm.com/publications/a-theory-of-program-size-formally-identical-to-information-theory
+- Last reviewed by NEX: 2026-09-18
+- Used by NEX for: the program-size formulation based on self-delimiting programs and the methodological importance of fixing the program interpretation before assigning bit lengths.
+- Current project impact: supports requiring an exact program/data and self-delimiting input convention when Stage 5.8 instantiates `A2(U)`.
+- Important limitation: NEX does not adopt Chaitin's particular universal computer as its bootstrap machine, and a self-delimiting bootstrap candidate remains conditional on the selected `U`.
+
+---
+
 ## Implementation platform sources
 
 ### SRC-0010 — Go reference implementation platform

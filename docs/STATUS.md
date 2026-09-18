@@ -2,23 +2,40 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Active branch:** `stage5/independent-differential`  
-**Current state:** `Stage 4 — Complete; Stage 5 — In progress (independent reconstruction through 5.5 verified)`  
+**Active branch:** `stage5/receiver-assumptions`  
+**Current state:** `Stage 4 — Complete; Stage 5 — In progress (5.0–5.7 verified on PR checkpoints; 5.8 bootstrap artifact next)`  
 **Living research dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md` (ADR-0012)
 
 ## Completed milestones
 
 - Stage 0 — specification/process/ADR baseline — Complete.
-- Research source registry — Complete.
+- Research source registry — Complete and maintained as research evolves.
 - Stage 1 — canonical wire foundation — Complete by PR #3, merge `e9bf6ff0bbc19fd36c27451572d7b617ebabc9f8`.
 - Stage 2 — static validation and principal HM type inference — Complete by PR #4, merge `cefe889d90a275897de31aa23c4b9742a388ec8f`.
 - Stage 3 — dynamic semantics and reference evaluator — Complete by PR #5, merge `166cdc03282ea500263fdca7185f006f9b17a702`.
 - Stage 4 — empirical validation and benchmarking — Complete by PR #6, squash merge `ebffde6c8669f65dfcba98d31d261d59b48d4dd0`.
 - Stage 5.0/5.1 — independence protocol + frozen conformance packet — Complete by PR #7, squash merge `04f4f84cce50a15638802babbe934b70e495911c`.
+- Stage 5.2–5.6 — frozen independent Python reconstruction + post-freeze differential conformance — Complete by PR #8, squash merge `f500a5c5485b4cd5f6b5d9bd6bc76980f2f06cdb`.
 
 Stage 4 final PR head `871d0bc44dbf18854d5e58b15191799b11b834af` passed clean-checkout CI `35377200520`; post-merge run `35377892126` passed.
 
 PR #7 final head `534f5e10468d62fe728f80bcabd4636678bd4c40` passed `stage5-independence` run `35380403587`. Post-merge `main` commit `04f4f84cce50a15638802babbe934b70e495911c` passed push run `35383798779`.
+
+PR #8 final head `5707dd3dafb5f49498ac3c8b163ddf8a04994845` passed:
+
+```text
+reference-go        35385704921  success
+stage5-independence 35385705027  success
+stage5-differential 35385705162  success
+```
+
+Post-merge `main` commit `f500a5c5485b4cd5f6b5d9bd6bc76980f2f06cdb` passed:
+
+```text
+reference-go        35386452647  success
+stage5-independence 35386452451  success
+stage5-differential 35386452447  success
+```
 
 ## Stage 5 — In progress
 
@@ -68,7 +85,7 @@ Neither changes NEX-1 v0.1 semantics or wire format.
 
 No global precedence is defined for terms containing multiple independent static errors; such precedence remains deliberately implementation-specific unless future evidence requires a portable rule.
 
-### 5.2–5.4 — independent Python reconstruction — Verified checkpoint
+### 5.2–5.4 — independent Python reconstruction — Complete for first independent implementation
 
 A separate model/implementation context received the frozen packet rather than the repository/reference implementation and returned `nex1-independent-python-v0.1.zip`.
 
@@ -102,11 +119,11 @@ The independent implementation chose materially different host representations i
 
 One ambiguity was independently recorded: error precedence for a term containing multiple independent static defects is not globally specified. The Python implementation chooses scope validation first but explicitly classifies that choice as implementation ordering rather than portable semantics.
 
-### 5.5 — post-freeze differential conformance — Verified
+### 5.5 — post-freeze differential conformance — Complete
 
 Only after the archive SHA-256 was frozen did comparison with `reference/go` begin.
 
-PR #8 adds a comparison layer outside the frozen independent subtree. It compares only portable observations:
+The comparison layer outside the frozen independent subtree compares only portable observations:
 
 ```text
 canonical wire bits
@@ -116,24 +133,7 @@ observable WHNF / portable evaluation error class
 
 It deliberately does not compare object layout, fresh variable IDs, thunk/closure representation, transition counts, allocations, or other host-specific details.
 
-Clean-checkout Stage 5 differential run:
-
-```text
-stage5-differential run 35384938381 — success
-reference-go run        35384938291 — success
-stage5-independence     35384938418 — success
-```
-
-Generated report artifact:
-
-```text
-nex-stage5-differential-report-v0.1
-artifact id 10563821507
-artifact digest sha256:bda41629934f1c7b8f2554726002c3af5186d8cb19df649d8fab72129f8ba62a
-seed 20260918
-```
-
-Differential result:
+Accepted deterministic differential set:
 
 ```text
 cases total                942
@@ -148,47 +148,143 @@ resource asymmetries         0
 
 This is the strongest current evidence that NEX-1 v0.1 behavior is reconstructable from the frozen specification/conformance packet independently of the original Go implementation. It is empirical conformance evidence, not a formal proof that the specification is complete for every possible term or implementation.
 
-### 5.6 — ambiguity audit / hardening — Current conclusion
+### 5.6 — ambiguity audit / hardening — Complete for current evidence
 
-The independent reconstruction and 942-case differential run exposed no new Core semantic contradiction requiring a NEX-1 v0.1 change.
+The independent reconstruction and 942-case differential run exposed no Core semantic contradiction requiring a NEX-1 v0.1 change.
 
 Current findings:
 
 - F1/F2 remain packet presentation conventions, already documented in Stage 5.1;
 - the multiple-error-precedence question remains deliberately unspecified and did not produce a portable mismatch;
-- no Go bug, independent-Python semantic bug, or conformance-vector contradiction has been identified by the accepted differential evidence so far.
+- no Go bug, independent-Python semantic bug, or conformance-vector contradiction has been identified by the accepted differential evidence.
 
 Therefore no normative v0.1 semantic/wire hardening is currently justified by Stage 5.6. Future discrepancies must still be classified rather than resolved by blindly matching Go.
 
-### Next gate — 5.7 receiver-assumption model
+### 5.7 — receiver-assumption model — Verified on PR #9 checkpoint
 
-The independent-reconstruction half of Stage 5 is now supported strongly enough to move to the bootstrap half without redesigning NEX.
+ADR-0014 introduces explicit conditional bootstrap accounting.
 
-Next work must define explicit receiver assumption sets before measuring bootstrap:
-
-```text
-A0 / A1 / A2 ...
-physical/channel assumptions
-binary order/framing assumptions
-mathematical assumptions
-integer/code assumptions
-term/binding/type/evaluation assumptions
-```
-
-Any future bootstrap number must be written conditionally:
+The core methodological rule is:
 
 ```text
 B | A
 ```
 
-and never replaced by Go/Python source size or an undeclared interpreter dependency.
+rather than an unconditional scalar `B`.
+
+The first versioned assumption registry is:
+
+```text
+stage5/receiver-assumptions/assumptions-v0.1.json
+```
+
+It defines an explicit assumption ladder:
+
+```text
+A0
+  digital transport prior only
+  exact finite ordered binary frame
+
+A1
+  A0 + explicit discrete mathematical metalanguage
+
+A2(U)
+  A1 + one exact fixed universal binary abstract machine U
+  + exact self-delimiting program/data convention
+```
+
+and a separate engineering control:
+
+```text
+A_host(H)
+  A1 + concrete terrestrial host H
+  not eligible for receiver-neutral bootstrap claims
+```
+
+The dedicated validator reports:
+
+```text
+A0:        4 effective assumption atoms
+A1:        7 effective assumption atoms
+A2(U):     9 effective assumption atoms
+A_host(H): 8 effective assumption atoms
+```
+
+Important consequences:
+
+- the physical signalling layer below `A0` is out of scope, not zero-cost;
+- `A0 ⊂ A1 ⊂ A2(U)` is an inclusion relation of stated assumptions, not a numeric price or probability model;
+- `U` remains a parameter in Stage 5.7; Stage 5.8 must freeze a concrete candidate before any `B | A2(U)` number is accepted;
+- Go/Python/WebAssembly/x86/POSIX source/runtime measurements remain host controls, not receiver-neutral `B`;
+- results under different assumption profiles cannot be ranked numerically without a later model that prices or normalizes the differing priors.
+
+ADR-0014 also closes a potential accounting error. The conceptual objective remains:
+
+```text
+C = S + B + P
+```
+
+but exact transmitted-bit accounting must count every bit once. For disjoint specification/bootstrap segments:
+
+```text
+C | A = (S | A) + (B | A,S) + P
+```
+
+If one artifact inseparably serves both specification and executable-bootstrap roles:
+
+```text
+C | A = (SB | A) + P
+```
+
+and the same bits must not be counted once as `S` and again as `B`.
+
+The model is machine-readable and validated by:
+
+```text
+python stage5/validate_receiver_assumptions.py
+```
+
+Accepted first clean-checkout PR #9 checkpoint:
+
+```text
+stage5-receiver-assumptions  35387833962  success
+stage5-independence          35387833785  success
+stage5-differential          35387833852  success
+```
+
+The dedicated run verifies the assumption model itself; the other two runs confirm that this research/accounting change does not mutate the frozen independent implementation or its accepted differential behavior.
+
+New primary-source entries materially used by this decision are registered as SRC-0015 (Shannon), SRC-0016 (Kolmogorov), and SRC-0017 (Chaitin).
+
+### Next gate — 5.8 first measurable bootstrap artifact
+
+Do not select a compact language or machine merely because its own syntax is small.
+
+Stage 5.8 must first choose what exact assumption profile is being instantiated, then freeze at least one concrete bootstrap candidate and measure the actual transmitted ledger.
+
+For an `A2(U)` experiment, `U` must itself have exact versioned binary semantics before the bootstrap measurement is accepted.
+
+At minimum the next experiment should attempt to separate or jointly account for:
+
+```text
+B_decode
+B_static
+B_eval
+S or SB segments
+P
+```
+
+without circularly omitting the interpreter needed to interpret the bootstrap.
 
 ## Remaining project-wide unknowns
 
-- receiver-neutral assumption sets and a defensible measurable bootstrap artifact `B | A`;
-- receiver-neutral specification cost `S`;
-- whether total `C = S + B + P` becomes computable under any explicit assumption set;
+- which concrete bootstrap representation and, for `A2(U)`, which exact machine `U` should be tested first;
+- whether a sufficiently receiver-neutral bootstrap can be constructed under `A0` or `A1`, or only under a stronger `A2(U)` prior;
+- the actual measured bootstrap cost `B | A` or joint `SB | A`;
+- receiver-neutral specification cost `S | A` where it can be separated defensibly;
+- whether total `C | A` becomes computable under any explicit assumption profile;
+- how to compare different assumption profiles without pretending stronger priors are free;
 - broader-corpus generalization of Stage 4 constructor distributions;
 - formal proof of selected codec/type/evaluator properties;
 - additional independent implementations in other paradigms/toolchains;
-- independent total-cost comparisons against alternative computational systems under common receiver assumptions.
+- independent total-cost comparisons against alternative computational systems under the same receiver-assumption profile.

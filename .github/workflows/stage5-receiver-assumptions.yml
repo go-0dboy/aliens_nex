@@ -1,0 +1,40 @@
+name: stage5-receiver-assumptions
+
+on:
+  pull_request:
+    paths:
+      - 'stage5/receiver-assumptions/**'
+      - 'stage5/validate_receiver_assumptions.py'
+      - 'docs/adr/0014-condition-bootstrap-cost-on-receiver-assumptions.md'
+      - 'docs/adr/README.md'
+      - 'docs/SOURCES.md'
+      - 'docs/STAGE-5.md'
+      - 'docs/STATUS.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+      - '.github/workflows/stage5-receiver-assumptions.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'stage5/receiver-assumptions/**'
+      - 'stage5/validate_receiver_assumptions.py'
+      - 'docs/adr/0014-condition-bootstrap-cost-on-receiver-assumptions.md'
+      - 'docs/adr/README.md'
+      - 'docs/SOURCES.md'
+      - 'docs/STAGE-5.md'
+      - 'docs/STATUS.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+      - '.github/workflows/stage5-receiver-assumptions.yml'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate receiver assumption model
+        run: python stage5/validate_receiver_assumptions.py
