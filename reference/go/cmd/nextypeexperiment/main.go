@@ -12,22 +12,22 @@ import (
 )
 
 type programReport struct {
-	ID               string  `json:"id"`
-	PrincipalType    string  `json:"principal_type"`
-	ErasedTermBits   int     `json:"erased_term_bits"`
-	RootTypeBits     int     `json:"root_type_bits"`
-	HybridTotalBits  int     `json:"hybrid_total_bits"`
-	OverheadBits     int     `json:"overhead_bits"`
-	OverheadPercent  float64 `json:"overhead_percent"`
+	ID              string  `json:"id"`
+	PrincipalType   string  `json:"principal_type"`
+	ErasedTermBits  int     `json:"erased_term_bits"`
+	RootTypeBits    int     `json:"root_type_bits"`
+	HybridTotalBits int     `json:"hybrid_total_bits"`
+	OverheadBits    int     `json:"overhead_bits"`
+	OverheadPercent float64 `json:"overhead_percent"`
 }
 
 type aggregateReport struct {
-	Programs          int     `json:"programs"`
-	ErasedTermBits    int     `json:"erased_term_bits"`
-	RootTypeBits      int     `json:"root_type_bits"`
-	HybridTotalBits   int     `json:"hybrid_total_bits"`
-	OverheadBits      int     `json:"overhead_bits"`
-	OverheadPercent   float64 `json:"overhead_percent"`
+	Programs        int     `json:"programs"`
+	ErasedTermBits  int     `json:"erased_term_bits"`
+	RootTypeBits    int     `json:"root_type_bits"`
+	HybridTotalBits int     `json:"hybrid_total_bits"`
+	OverheadBits    int     `json:"overhead_bits"`
+	OverheadPercent float64 `json:"overhead_percent"`
 }
 
 type report struct {
