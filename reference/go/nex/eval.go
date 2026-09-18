@@ -3,6 +3,7 @@ package nex
 import (
 	"errors"
 	"fmt"
+	"math/big"
 )
 
 var (
@@ -94,7 +95,7 @@ func (e *evaluator) eval(term *Term, env Environment, depth uint32) (*Value, err
 			bodyEnv := extendEnvironment(fn.Closure.Env, arg)
 			return e.eval(fn.Closure.Body, bodyEnv, depth+1)
 		case ValuePrimitive:
-			return e.applyPrimitive(fn.Primitive, arg)
+			return e.applyPrimitive(fn.Primitive, arg, depth+1)
 		default:
 			return nil, ErrEvalInvariant
 		}
@@ -119,7 +120,7 @@ func (e *evaluator) eval(term *Term, env Environment, depth uint32) (*Value, err
 			return nil, err
 		}
 		if primitive.Arity == 0 {
-			return nil, ErrPrimitiveExecutionDeferred
+			return e.executePrimitive(primitive.ID, nil, depth+1)
 		}
 		return primitiveValue(primitive.ID, nil), nil
 
@@ -135,7 +136,7 @@ func (e *evaluator) force(thunk *Thunk, depth uint32) (*Value, error) {
 	return e.eval(thunk.Term, thunk.Env, depth)
 }
 
-func (e *evaluator) applyPrimitive(application *PrimitiveApplication, arg *Thunk) (*Value, error) {
+func (e *evaluator) applyPrimitive(application *PrimitiveApplication, arg *Thunk, depth uint32) (*Value, error) {
 	if application == nil || arg == nil {
 		return nil, ErrEvalInvariant
 	}
@@ -150,5 +151,53 @@ func (e *evaluator) applyPrimitive(application *PrimitiveApplication, arg *Thunk
 	if len(args) < int(primitive.Arity) {
 		return primitiveValue(application.ID, args), nil
 	}
-	return nil, ErrPrimitiveExecutionDeferred
+	return e.executePrimitive(application.ID, args, depth)
+}
+
+func (e *evaluator) executePrimitive(id uint64, args []*Thunk, depth uint32) (*Value, error) {
+	switch id {
+	case 1: // succ
+		n, err := e.forceNat(args[0], depth+1)
+		if err != nil {
+			return nil, err
+		}
+		return natValue(new(big.Int).Add(n, NaturalUint64(1))), nil
+
+	case 2: // pred
+		n, err := e.forceNat(args[0], depth+1)
+		if err != nil {
+			return nil, err
+		}
+		if n.Sign() == 0 {
+			return natValue(n), nil
+		}
+		return natValue(new(big.Int).Sub(n, NaturalUint64(1))), nil
+
+	case 3: // ifz
+		n, err := e.forceNat(args[0], depth+1)
+		if err != nil {
+			return nil, err
+		}
+		if n.Sign() == 0 {
+			return e.force(args[1], depth+1)
+		}
+		return e.force(args[2], depth+1)
+
+	case 10: // unit
+		return unitValue(), nil
+
+	default:
+		return nil, ErrPrimitiveExecutionDeferred
+	}
+}
+
+func (e *evaluator) forceNat(thunk *Thunk, depth uint32) (*big.Int, error) {
+	value, err := e.force(thunk, depth)
+	if err != nil {
+		return nil, err
+	}
+	if value == nil || value.Kind != ValueNat || value.Nat == nil {
+		return nil, ErrEvalInvariant
+	}
+	return cloneNat(value.Nat), nil
 }
