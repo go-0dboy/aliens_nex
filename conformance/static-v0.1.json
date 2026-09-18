@@ -1,0 +1,121 @@
+{
+  "schema": "nex-static-conformance-v0.1",
+  "core_version": "NEX-1 Core v0.1",
+  "scope_vectors": [
+    {
+      "name": "nat0-closed",
+      "term": {"kind": "Nat", "value": "0"},
+      "valid": true
+    },
+    {
+      "name": "prim0-closed",
+      "term": {"kind": "Prim", "value": "0"},
+      "valid": true
+    },
+    {
+      "name": "identity",
+      "term": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
+      "valid": true
+    },
+    {
+      "name": "constant-function",
+      "term": {"kind": "Lam", "a": {"kind": "Lam", "a": {"kind": "Var", "value": "1"}}},
+      "valid": true
+    },
+    {
+      "name": "inner-identity",
+      "term": {"kind": "Lam", "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}},
+      "valid": true
+    },
+    {
+      "name": "closed-application",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
+        "b": {"kind": "Nat", "value": "0"}
+      },
+      "valid": true
+    },
+    {
+      "name": "let-binder-visible-in-body",
+      "term": {
+        "kind": "Let",
+        "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
+        "b": {"kind": "Var", "value": "0"}
+      },
+      "valid": true
+    },
+    {
+      "name": "let-value-can-see-outer-lambda",
+      "term": {
+        "kind": "Lam",
+        "a": {
+          "kind": "Let",
+          "a": {"kind": "Var", "value": "0"},
+          "b": {"kind": "Var", "value": "1"}
+        }
+      },
+      "valid": true
+    },
+    {
+      "name": "let-binder-survives-inner-lambda",
+      "term": {
+        "kind": "Let",
+        "a": {"kind": "Nat", "value": "0"},
+        "b": {"kind": "Lam", "a": {"kind": "Var", "value": "1"}}
+      },
+      "valid": true
+    },
+    {
+      "name": "free-var0",
+      "term": {"kind": "Var", "value": "0"},
+      "valid": false,
+      "error": "out_of_scope"
+    },
+    {
+      "name": "lambda-var1",
+      "term": {"kind": "Lam", "a": {"kind": "Var", "value": "1"}},
+      "valid": false,
+      "error": "out_of_scope"
+    },
+    {
+      "name": "application-free-argument",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
+        "b": {"kind": "Var", "value": "0"}
+      },
+      "valid": false,
+      "error": "out_of_scope"
+    },
+    {
+      "name": "let-is-not-recursive",
+      "term": {
+        "kind": "Let",
+        "a": {"kind": "Var", "value": "0"},
+        "b": {"kind": "Var", "value": "0"}
+      },
+      "valid": false,
+      "error": "out_of_scope"
+    },
+    {
+      "name": "let-body-var1-without-outer-binder",
+      "term": {
+        "kind": "Let",
+        "a": {"kind": "Nat", "value": "0"},
+        "b": {"kind": "Var", "value": "1"}
+      },
+      "valid": false,
+      "error": "out_of_scope"
+    },
+    {
+      "name": "huge-index-out-of-scope",
+      "term": {
+        "kind": "Lam",
+        "a": {"kind": "Var", "value": "340282366920938463463374607431768211455"}
+      },
+      "valid": false,
+      "error": "out_of_scope"
+    }
+  ]
+}
