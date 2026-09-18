@@ -3,7 +3,7 @@
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
 **Active branch:** `stage5/receiver-assumptions`  
-**Current state:** `Stage 4 — Complete; Stage 5 — In progress (5.0–5.6 merged/verified; 5.7 receiver-assumption model implemented on branch)`  
+**Current state:** `Stage 4 — Complete; Stage 5 — In progress (5.0–5.7 verified on PR checkpoints; 5.8 bootstrap artifact next)`  
 **Living research dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md` (ADR-0012)
 
 ## Completed milestones
@@ -160,7 +160,7 @@ Current findings:
 
 Therefore no normative v0.1 semantic/wire hardening is currently justified by Stage 5.6. Future discrepancies must still be classified rather than resolved by blindly matching Go.
 
-### 5.7 — receiver-assumption model — Implemented on active branch; verification pending
+### 5.7 — receiver-assumption model — Verified on PR #9 checkpoint
 
 ADR-0014 introduces explicit conditional bootstrap accounting.
 
@@ -201,6 +201,15 @@ A_host(H)
   not eligible for receiver-neutral bootstrap claims
 ```
 
+The dedicated validator reports:
+
+```text
+A0:        4 effective assumption atoms
+A1:        7 effective assumption atoms
+A2(U):     9 effective assumption atoms
+A_host(H): 8 effective assumption atoms
+```
+
 Important consequences:
 
 - the physical signalling layer below `A0` is out of scope, not zero-cost;
@@ -235,9 +244,17 @@ The model is machine-readable and validated by:
 python stage5/validate_receiver_assumptions.py
 ```
 
-A dedicated `stage5-receiver-assumptions` workflow gates the model once a PR is opened.
+Accepted first clean-checkout PR #9 checkpoint:
 
-New primary-source entries used materially by this decision are registered as SRC-0015 (Shannon), SRC-0016 (Kolmogorov), and SRC-0017 (Chaitin).
+```text
+stage5-receiver-assumptions  35387833962  success
+stage5-independence          35387833785  success
+stage5-differential          35387833852  success
+```
+
+The dedicated run verifies the assumption model itself; the other two runs confirm that this research/accounting change does not mutate the frozen independent implementation or its accepted differential behavior.
+
+New primary-source entries materially used by this decision are registered as SRC-0015 (Shannon), SRC-0016 (Kolmogorov), and SRC-0017 (Chaitin).
 
 ### Next gate — 5.8 first measurable bootstrap artifact
 
