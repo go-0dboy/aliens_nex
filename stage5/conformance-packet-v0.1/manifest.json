@@ -1,0 +1,82 @@
+{
+  "schema": "nex-stage5-conformance-packet-manifest-v0.1",
+  "packet_id": "nex1-independent-conformance-packet-v0.1",
+  "core_version": "NEX-1 Core v0.1",
+  "source_commit": "4f9c50aed13cdbdf72c9ce6510521477d49c05a5",
+  "implementation_target": {
+    "language": "Python",
+    "minimum_version": "3.12",
+    "dependencies": "standard-library-only"
+  },
+  "source_files": [
+    {
+      "path": "docs/NEX-1-v0.1.md",
+      "git_blob_sha": "38d033a30c68efd1057857b29c9389676a99778f",
+      "role": "normative_core_specification"
+    },
+    {
+      "path": "conformance/wire-v0.1.json",
+      "git_blob_sha": "470d9a712bdeff701e63d1c72cc4fef3ed279dd5",
+      "role": "wire_conformance"
+    },
+    {
+      "path": "conformance/static-v0.1.json",
+      "git_blob_sha": "ae58559853846d3361edf07ef9b42bacd3c28aa6",
+      "role": "static_conformance"
+    },
+    {
+      "path": "conformance/eval-v0.1.json",
+      "git_blob_sha": "c4bcab5e1d5be4cbcfd11daa268d449ebc304bae",
+      "role": "evaluation_conformance"
+    },
+    {
+      "path": "docs/adr/0002-nex-core-v0.1-design-basis.md",
+      "git_blob_sha": "544938fc0970bf7a5568e96e70aeab1ec426dd1a",
+      "role": "core_design_constraints"
+    },
+    {
+      "path": "docs/adr/0006-decoder-resource-limits.md",
+      "git_blob_sha": "e9ef2a93c25c742e4d8f0e894980ed2822c66b21",
+      "role": "decoder_resource_semantics"
+    },
+    {
+      "path": "docs/adr/0007-erased-type-annotations-v0.1.md",
+      "git_blob_sha": "397c11355f8fd59d0b11daf6b4d1798e9c62ca7b",
+      "role": "typing_wire_constraint"
+    },
+    {
+      "path": "docs/adr/0009-separate-evaluation-resource-limits-from-semantics.md",
+      "git_blob_sha": "ad255ea639375eccae38c409ca39956c0e8276bf",
+      "role": "evaluation_resource_semantics"
+    }
+  ],
+  "packet_local_files": [
+    "stage5/conformance-packet-v0.1/README.md",
+    "stage5/conformance-packet-v0.1/OBSERVATIONS.md",
+    "stage5/conformance-packet-v0.1/AUDIT.md",
+    "stage5/conformance-packet-v0.1/manifest.json"
+  ],
+  "explicitly_excluded_guidance": [
+    "reference/go/**",
+    "reference/go/experiment/**",
+    "benchmarks/**",
+    "docs/experiments/**",
+    "docs/STAGE-1.md",
+    "docs/STAGE-2.md",
+    "docs/STAGE-3.md",
+    "docs/STAGE-4.md",
+    "docs/STATUS.md",
+    "docs/RESEARCH-DISSERTATION.md",
+    "docs/RESEARCH-DISSERTATION.ru.md",
+    "docs/adr/0008-environment-based-call-by-name-reference-evaluator.md"
+  ],
+  "allowed_external_source_ids": [
+    "SRC-0001",
+    "SRC-0003",
+    "SRC-0004",
+    "SRC-0005",
+    "SRC-0006",
+    "SRC-0011"
+  ],
+  "independence_checkpoint_required_before_reference_comparison": true
+}
