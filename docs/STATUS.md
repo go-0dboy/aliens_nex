@@ -2,35 +2,49 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Current stage:** `Stage 3 — Dynamic semantics and evaluator — Implementation complete; pending merge review`  
+**Current stage:** `Stage 3 — Dynamic semantics and evaluator — Complete`  
 **Stage 0 completed by:** PR `#1 docs: establish ADRs and project workflow`  
 **Research source registry completed by:** PR `#2 docs: add research source registry`  
 **Stage 1 completed by:** PR `#3 stage1: implement NEX wire foundation`  
 **Stage 1 merge commit:** `e9bf6ff0bbc19fd36c27451572d7b617ebabc9f8`  
 **Stage 2 completed by:** PR `#4 stage2: complete static validation and principal type inference`  
 **Stage 2 merge commit:** `cefe889d90a275897de31aa23c4b9742a388ec8f`  
-**Active Stage 3 branch:** `stage3/dynamic-semantics`  
-**Active Stage 3 pull request:** `#5 stage3: implement dynamic semantics and reference evaluator`
+**Stage 3 completed by:** PR `#5 stage3: complete dynamic semantics and reference evaluator`  
+**Stage 3 merge commit:** `166cdc03282ea500263fdca7185f006f9b17a702`
 
 ## Stage 0 — Complete
 
-Stage 0 established the project specification, ADR/workflow system, bilingual core documentation, source registry, architecture, testing strategy, and durable project memory.
+Stage 0 established the NEX-1 v0.1 specification, ADR/workflow system, bilingual core documentation, source registry, architecture, testing strategy, and durable project memory.
 
 ## Stage 1 — Wire foundation — Complete
 
-Stage 1 is defined and closed in `docs/STAGE-1.md`. The repository has an executable, tested, CI-verified canonical wire layer for the six v0.1 term constructors, arbitrary-precision `U(n)`, exact/prefix decoding, independent conformance vectors, and implementation resource limits separated from wire validity.
+Defined and closed in `docs/STAGE-1.md`.
+
+The repository has an executable, CI-verified canonical wire layer for the six v0.1 term constructors, arbitrary-precision `U(n)`, exact/prefix decoding, implementation-independent conformance vectors, and decoder resource limits separated from wire validity.
 
 ## Stage 2 — Static validation — Complete
 
-Stage 2 is defined and closed in `docs/STAGE-2.md`. The reference static pipeline validates closed de Bruijn scope, Core primitive IDs, and Hindley-Milner principal types. `conformance/static-v0.1.json` contains 15 scope vectors and 19 type vectors.
+Defined and closed in `docs/STAGE-2.md`.
+
+The reference static pipeline provides:
+
+```text
+Term
+  -> ValidateClosed
+  -> ValidateCorePrimitives
+  -> InferClosed
+  -> principal TypeScheme
+```
+
+`conformance/static-v0.1.json` contains 15 scope vectors and 19 type vectors. The implementation includes substitutions, free type variables, unification with occurs check, primitive type schemes, fresh instantiation, let-generalization, Algorithm-W-style inference, property tests, fuzzing, and clean-checkout CI.
 
 ADR-0007 keeps ordinary term-level type annotations out of canonical v0.1 terms while requiring a future measured comparison against compact explicit/hybrid type information.
 
-## Stage 3 — Dynamic semantics and evaluator — Implementation complete; pending merge review
+## Stage 3 — Dynamic semantics and evaluator — Complete
 
-Stage 3 is defined in `docs/STAGE-3.md`.
+Defined and closed in `docs/STAGE-3.md`.
 
-Completed on PR #5:
+Completed functionality:
 
 ```text
 3.0 dynamic-semantics contract audit and EN/RU specification clarification
@@ -60,39 +74,48 @@ The runtime environment is ordered nearest de Bruijn binder first. Lambda argume
 
 ADR-0009 separates evaluator resource refusal from NEX validity and semantic results. Finite fuel/depth exhaustion does not prove divergence and does not make a valid program invalid.
 
-### Core primitive runtime
-
-The authoritative primitive table carries ID, name, arity, and type scheme for IDs `0..10`. The evaluator implements all NEX-1 v0.1 Core primitives:
+The evaluator implements every NEX-1 v0.1 Core primitive:
 
 ```text
 fix succ pred ifz pair fst snd inl inr case unit
 ```
 
-The forcing contract is tested explicitly: unselected `ifz`/`case` branches and unselected pair fields are not evaluated merely by the selecting primitive; constructor payloads remain delayed.
-
-### Specification synchronization
-
-The canonical English `docs/NEX-1-v0.1.md` and informative Russian mirror `docs/NEX-1-v0.1.ru.md` are synchronized for the Stage 3 dynamic contract, including:
-
-- non-strict `Let`;
-- primitive arities and partial application;
-- WHNF categories;
-- primitive forcing rules;
-- divergence versus evaluator resource refusal;
-- evaluator conformance requirements;
-- Stage 3 research references.
+The canonical English `docs/NEX-1-v0.1.md` and informative Russian mirror `docs/NEX-1-v0.1.ru.md` are synchronized for the Stage 3 dynamic contract, including non-strict `Let`, primitive arities and partial application, WHNF categories, primitive forcing rules, divergence/resource refusal, evaluator conformance requirements, and Stage 3 research references.
 
 ### Evaluation conformance
 
-`conformance/eval-v0.1.json` contains implementation-independent observable-WHNF vectors covering beta application, ignored divergent arguments, non-strict `Let`, natural/unit primitives, both `ifz` paths, partial primitive application, lazy products/sums, both `case` branches, and terminating `fix` recursion.
+`conformance/eval-v0.1.json` records implementation-independent observable WHNF results covering:
+
+- lambda and natural results;
+- beta application;
+- ignored divergent arguments;
+- non-strict `Let`;
+- `unit`, `succ`, `pred`, and both `ifz` paths;
+- partial primitive application;
+- lazy products and projections;
+- lazy sums and both `case` branches;
+- terminating recursion through `fix`.
+
+The conformance JSON is loaded directly by the Go test suite rather than duplicated in test code.
 
 ### Verification evidence
 
-Verified clean-checkout GitHub Actions:
+Final PR head before merge:
 
 ```text
-CI 35364644931  success   # dynamic contract/spec checkpoint
-CI 35365016780  success   # post-status/final Stage 3 branch checkpoint
+09f4cb330a8f495996fe253868fd863331fb4d64
+```
+
+Final PR clean-checkout CI:
+
+```text
+35365175098  success
+```
+
+Post-merge `main` clean-checkout CI on merge commit `166cdc03282ea500263fdca7185f006f9b17a702`:
+
+```text
+35365823377  success
 ```
 
 `reference/go/verify.sh` runs:
@@ -107,21 +130,7 @@ go test ./...
 1s FuzzEvaluationDeterministicObservation
 ```
 
-### Stage 3.9 final scope review
-
-The complete `main...stage3/dynamic-semantics` diff was reviewed against `docs/STAGE-3.md`.
-
-It contains only:
-
-- Stage 3 planning, ADRs, source/status documentation;
-- synchronized EN/RU dynamic-semantics specification changes;
-- reference evaluator/runtime implementation;
-- language-neutral evaluation conformance;
-- evaluator tests/fuzz verification.
-
-It does **not** contain a human frontend/parser, optimizer, mutable memory/system profile, native/bytecode compiler, or self-hosting implementation.
-
-PR #5 is therefore the Stage 3 completion candidate and is ready for merge review.
+The final Stage 3 diff was reviewed against its scope guard. No human frontend/parser, optimizer, mutable memory/system profile, native/bytecode compiler, or self-hosting implementation entered Stage 3.
 
 ## Research basis added for Stage 3
 
@@ -133,18 +142,19 @@ SRC-0012 Launchbury 1993 lazy semantics with sharing
 SRC-0013 Sestoft 1997   lazy abstract-machine derivation
 ```
 
-These sources inform evaluation strategy and implementation alternatives; NEX-specific primitive forcing rules remain project decisions documented in the specification/ADRs.
+These sources inform evaluation strategy and implementation alternatives; NEX-specific primitive forcing rules remain project decisions documented in the specification and ADRs.
 
 ## Remaining project-wide unverified claims
 
 Still intentionally unverified:
 
-- formal/exhaustive proof of decoder, inference, or evaluator correctness;
+- formal/exhaustive proof of decoder, type-inference, or evaluator correctness;
 - conformance agreement with a second independent implementation;
-- self-hosting feasibility;
-- total-information-cost comparison against BLC, SKI/Jot, WebAssembly, stack bytecode, or an explicit-type NEX variant;
+- bootstrap/self-hosting feasibility and size;
+- total-information-cost comparison against BLC, SKI/Jot, WebAssembly, a typed stack machine, or an explicit-type NEX variant;
+- practical cost of call-by-name versus call-by-need for representative NEX programs;
 - any claim that NEX is globally optimal or the smallest possible language.
 
 ## Next recommended step
 
-Review PR #5 as the Stage 3 completion candidate. If accepted, merge it and mark Stage 3 complete on `main` before defining Stage 4. Do not begin frontend, optimizer, machine profiles, compiler, mutable memory, or self-hosting work before that merge decision.
+Define Stage 4 before implementation. Stage 4 should be chosen based on the project objective rather than implementation convenience: after wire decoding, static validation, and executable Core semantics are complete, the next work should make the current design measurable and independently falsifiable before expanding the language or adding machine-specific features.
