@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -eu
 
-unformatted=$(gofmt -l nex/*.go)
+unformatted=$(gofmt -l nex/*.go cmd/nexbench/*.go)
 if [ -n "$unformatted" ]; then
   echo "gofmt required for:" >&2
   echo "$unformatted" >&2
@@ -10,6 +10,8 @@ fi
 
 go vet ./...
 go test ./...
+
+go run ./cmd/nexbench -corpus ../../benchmarks/corpus-v0.1.json -pretty=false >/tmp/nex-benchmark-v0.1.json
 
 go test -run '^$' -fuzz=FuzzSubstitutionComposition -fuzztime=1s ./nex
 go test -run '^$' -fuzz=FuzzUnifyProducesEqualAppliedTypes -fuzztime=1s ./nex

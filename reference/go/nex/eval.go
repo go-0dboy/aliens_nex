@@ -21,15 +21,29 @@ var DefaultEvalLimits = EvalLimits{
 	MaxDepth:       10_000,
 }
 
+// EvalStats are Go reference-evaluator counters, not portable Core observables.
+type EvalStats struct {
+	Transitions uint64 `json:"transitions"`
+	MaxDepth    uint32 `json:"max_depth"`
+}
+
 type evaluator struct {
 	limits      EvalLimits
 	transitions uint64
+	maxDepth    uint32
 }
 
 // EvaluateClosed evaluates a statically valid closed Core term to weak-head form.
 func EvaluateClosed(term *Term, limits EvalLimits) (*Value, error) {
+	value, _, err := EvaluateClosedWithStats(term, limits)
+	return value, err
+}
+
+// EvaluateClosedWithStats evaluates like EvaluateClosed and additionally returns
+// reference-implementation counters. These counters are not portable NEX semantics.
+func EvaluateClosedWithStats(term *Term, limits EvalLimits) (*Value, EvalStats, error) {
 	if _, err := InferClosed(term); err != nil {
-		return nil, err
+		return nil, EvalStats{}, err
 	}
 	if limits.MaxTransitions == 0 {
 		limits.MaxTransitions = DefaultEvalLimits.MaxTransitions
@@ -38,10 +52,14 @@ func EvaluateClosed(term *Term, limits EvalLimits) (*Value, error) {
 		limits.MaxDepth = DefaultEvalLimits.MaxDepth
 	}
 	e := &evaluator{limits: limits}
-	return e.eval(term, nil, 0)
+	value, err := e.eval(term, nil, 0)
+	return value, EvalStats{Transitions: e.transitions, MaxDepth: e.maxDepth}, err
 }
 
 func (e *evaluator) step(depth uint32) error {
+	if depth > e.maxDepth {
+		e.maxDepth = depth
+	}
 	if depth > e.limits.MaxDepth {
 		return fmt.Errorf("%w: depth %d > %d", ErrEvalResourceLimit, depth, e.limits.MaxDepth)
 	}

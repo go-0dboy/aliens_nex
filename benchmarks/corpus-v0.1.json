@@ -1,0 +1,234 @@
+{
+  "schema": "nex-benchmark-corpus-v0.1",
+  "corpus_version": "v0.1",
+  "status": "frozen-foundation",
+  "freeze_note": "This corpus version is immutable once committed. Additions or semantic changes require a new corpus version.",
+  "programs": [
+    {
+      "id": "identity",
+      "description": "Polymorphic identity function",
+      "classification": "direct",
+      "term": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
+      "expected": {"kind": "Function"}
+    },
+    {
+      "id": "constant",
+      "description": "Two-argument constant function returning its first argument",
+      "classification": "direct",
+      "term": {"kind": "Lam", "a": {"kind": "Lam", "a": {"kind": "Var", "value": "1"}}},
+      "expected": {"kind": "Function"}
+    },
+    {
+      "id": "composition",
+      "description": "Function composition lambda",
+      "classification": "direct",
+      "term": {
+        "kind": "Lam",
+        "a": {
+          "kind": "Lam",
+          "a": {
+            "kind": "Lam",
+            "a": {
+              "kind": "App",
+              "a": {"kind": "Var", "value": "2"},
+              "b": {
+                "kind": "App",
+                "a": {"kind": "Var", "value": "1"},
+                "b": {"kind": "Var", "value": "0"}
+              }
+            }
+          }
+        }
+      },
+      "expected": {"kind": "Function"}
+    },
+    {
+      "id": "succ-41",
+      "description": "Natural successor",
+      "classification": "direct",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "1"},
+        "b": {"kind": "Nat", "value": "41"}
+      },
+      "expected": {"kind": "Nat", "value": "42"}
+    },
+    {
+      "id": "ifz-zero",
+      "description": "Zero branch selection",
+      "classification": "direct",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "3"},
+            "b": {"kind": "Nat", "value": "0"}
+          },
+          "b": {"kind": "Nat", "value": "7"}
+        },
+        "b": {"kind": "Nat", "value": "9"}
+      },
+      "expected": {"kind": "Nat", "value": "7"}
+    },
+    {
+      "id": "let-id-42",
+      "description": "Let-bound identity applied to a natural",
+      "classification": "direct",
+      "term": {
+        "kind": "Let",
+        "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
+        "b": {
+          "kind": "App",
+          "a": {"kind": "Var", "value": "0"},
+          "b": {"kind": "Nat", "value": "42"}
+        }
+      },
+      "expected": {"kind": "Nat", "value": "42"}
+    },
+    {
+      "id": "pair-fst",
+      "description": "Construct a pair and project the first field",
+      "classification": "direct",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "5"},
+        "b": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "4"},
+            "b": {"kind": "Nat", "value": "1"}
+          },
+          "b": {"kind": "Nat", "value": "2"}
+        }
+      },
+      "expected": {"kind": "Nat", "value": "1"}
+    },
+    {
+      "id": "sum-inl-case",
+      "description": "Construct an inl value and select the left case branch",
+      "classification": "direct",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "9"},
+            "b": {
+              "kind": "App",
+              "a": {"kind": "Prim", "value": "7"},
+              "b": {"kind": "Nat", "value": "5"}
+            }
+          },
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        },
+        "b": {"kind": "Lam", "a": {"kind": "Nat", "value": "0"}}
+      },
+      "expected": {"kind": "Nat", "value": "5"}
+    },
+    {
+      "id": "countdown-5",
+      "description": "Terminating recursion through fix; reconstructs five while counting down",
+      "classification": "direct",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {
+            "kind": "Lam",
+            "a": {
+              "kind": "Lam",
+              "a": {
+                "kind": "App",
+                "a": {
+                  "kind": "App",
+                  "a": {
+                    "kind": "App",
+                    "a": {"kind": "Prim", "value": "3"},
+                    "b": {"kind": "Var", "value": "0"}
+                  },
+                  "b": {"kind": "Nat", "value": "0"}
+                },
+                "b": {
+                  "kind": "App",
+                  "a": {"kind": "Prim", "value": "1"},
+                  "b": {
+                    "kind": "App",
+                    "a": {"kind": "Var", "value": "1"},
+                    "b": {
+                      "kind": "App",
+                      "a": {"kind": "Prim", "value": "2"},
+                      "b": {"kind": "Var", "value": "0"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "b": {"kind": "Nat", "value": "5"}
+      },
+      "expected": {"kind": "Nat", "value": "5"}
+    },
+    {
+      "id": "addition-2-3",
+      "description": "Recursive natural addition using fix, pred, succ and ifz",
+      "classification": "direct",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "0"},
+            "b": {
+              "kind": "Lam",
+              "a": {
+                "kind": "Lam",
+                "a": {
+                  "kind": "Lam",
+                  "a": {
+                    "kind": "App",
+                    "a": {
+                      "kind": "App",
+                      "a": {
+                        "kind": "App",
+                        "a": {"kind": "Prim", "value": "3"},
+                        "b": {"kind": "Var", "value": "1"}
+                      },
+                      "b": {"kind": "Var", "value": "0"}
+                    },
+                    "b": {
+                      "kind": "App",
+                      "a": {"kind": "Prim", "value": "1"},
+                      "b": {
+                        "kind": "App",
+                        "a": {
+                          "kind": "App",
+                          "a": {"kind": "Var", "value": "2"},
+                          "b": {
+                            "kind": "App",
+                            "a": {"kind": "Prim", "value": "2"},
+                            "b": {"kind": "Var", "value": "1"}
+                          }
+                        },
+                        "b": {"kind": "Var", "value": "0"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "b": {"kind": "Nat", "value": "2"}
+        },
+        "b": {"kind": "Nat", "value": "3"}
+      },
+      "expected": {"kind": "Nat", "value": "5"}
+    }
+  ]
+}
