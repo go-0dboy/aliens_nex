@@ -5,7 +5,7 @@
 **Тип документа:** живая исследовательская рукопись в диссертационном стиле  
 **Основной язык:** английский  
 **Каноническая версия:** `RESEARCH-DISSERTATION.md`  
-**Граница учтённых данных:** Stages 0–4 завершены; Stage 5.0–5.6 завершены независимым восстановлением и differential conformance; Stage 5.7 — модель receiver assumptions реализована, 18.09.2026  
+**Граница учтённых данных:** Stages 0–4 завершены; Stage 5.0–5.6 завершены независимым восстановлением и differential conformance; Stage 5.7 — receiver-assumption model проверена первым clean-checkout PR checkpoint, 18.09.2026  
 **Проект:** NEX / `aliens_nex`
 
 > Эта рукопись является научным синтезом исследования, поддерживаемым непосредственно в репозитории. Она ещё не оформлена под требования конкретного университета, ВАК, национальной системы аттестации или библиографического стандарта. Нормативное определение языка остаётся в `docs/NEX-1-v0.1.md`, а архитектурные и исследовательско-методологические решения — в принятых ADR.
@@ -30,7 +30,9 @@ Stage 5 проверяет, определяется ли поведение NEX
 
 Stage 5.7 исследует более глубокую проблему учёта: длина исполняемого bootstrap в битах бессмысленна без явного указания того, что получатель уже знает. ADR-0014 поэтому делает claims о specification/bootstrap условными относительно явного receiver prior `A`. Первая versioned-модель задаёт `A0` — точный конечный упорядоченный бинарный кадр; `A1` — `A0` плюс явно перечисленный дискретно-математический метаязык; `A2(U)` — `A1` плюс одна точно заданная универсальная бинарная абстрактная машина `U` и её self-delimiting program/data convention; а `A_host(H)` используется как земной инженерный контроль и запрещён для receiver-neutral claims. Поэтому проект использует `B | A`, `S | A`, `C | A`, а не безусловный scalar `B`. Вводится также правило отсутствия двойного счёта: если один передаваемый артефакт неразделимо выполняет одновременно роль specification и executable bootstrap, его биты учитываются один раз как `SB | A`, а не отдельно как `S` и `B`.
 
-Эта модель пока не даёт численной стоимости bootstrap. Stage 5.7 не выбирает конкретную универсальную машину `U`, не назначает bit-price receiver priors и не ранжирует профили с более сильными и более слабыми assumptions только по числу передаваемых битов. Главная следующая задача — Stage 5.8: заморозить хотя бы один конкретный bootstrap artifact под одним объявленным профилем и измерить реальный transmitted ledger без циклического исчезновения необходимого интерпретатора. До этого полная `C | A` остаётся численно не определённой, а проект не утверждает глобальную минимальность NEX или общее превосходство над альтернативными исчислениями.
+Модель Stage 5.7 представлена machine-readable registry и прошла dedicated clean-checkout validator на PR #9 вместе с прежними independence/differential regression gates. Validator подтверждает 4 effective assumption atoms для `A0`, 7 для `A1`, 9 для `A2(U)` и 8 для non-neutral control `A_host(H)`. Эта проверка подтверждает внутренние structural invariants registry, но не даёт численной стоимости bootstrap или prior information.
+
+Stage 5.7 не выбирает конкретную universal machine `U`, не назначает bit-price receiver priors и не ранжирует профили с более сильными и более слабыми assumptions только по числу передаваемых битов. Главная следующая задача — Stage 5.8: заморозить хотя бы один конкретный bootstrap artifact под одним объявленным профилем и измерить реальный transmitted ledger без циклического исчезновения необходимого интерпретатора. До этого полная `C | A` остаётся численно не определённой, а проект не утверждает глобальную минимальность NEX или общее превосходство над альтернативными исчислениями.
 
 **Ключевые слова:** минимальный язык программирования, архитектурно-независимые вычисления, Binary Lambda Calculus, индексы де Брёйна, Hindley–Milner, бинарное кодирование, bootstrap, условная информационная стоимость, receiver assumptions, call-by-name, call-by-need, независимая реализация, differential conformance, воспроизводимое исследование.
 
@@ -614,7 +616,17 @@ Universal machine в `A2(U)` остаётся параметром. Stage 5.7 н
 
 Второй результат — no-double-counting ledger. Если compact artifact одновременно определяет NEX и исполняет его, одни и те же bits нельзя отдельно отнести к `S` и к `B`; неразделимый segment учитывается как `SB | A`.
 
-Таким образом, RQ8 получает частичный ответ: profiles и допустимая accounting notation определены, но executable bootstrap по ним ещё не измерен.
+Первый clean-checkout checkpoint PR #9 подтвердил модель и сохранил весь предыдущий independent-conformance evidence:
+
+```text
+stage5-receiver-assumptions  35387833962  success
+stage5-independence          35387833785  success
+stage5-differential          35387833852  success
+```
+
+Dedicated validator сообщает 4, 7, 9 и 8 effective assumption atoms соответственно для `A0`, `A1`, `A2(U)` и `A_host(H)`. Это structural verification registry, а не измерение information content priors.
+
+Таким образом, RQ8 получает частичный ответ: profiles и допустимая accounting notation определены и clean-checkout verified, но executable bootstrap по ним ещё не измерен.
 
 ---
 
@@ -650,7 +662,7 @@ Universal machine в `A2(U)` остаётся параметром. Stage 5.7 н
 
 ## RQ8
 
-**Методологически отвечен частично; численный ответ открыт.** Stage 5.7 задаёт `A0`, `A1`, parameterized `A2(U)`, non-neutral `A_host(H)`, а также `B | A`, `S | A`, `SB | A`. Stage 5.8 должен зафиксировать хотя бы один concrete artifact и, для `A2`, одну exact `U` до принятия численного результата.
+**Методологически отвечен частично; численный ответ открыт.** Stage 5.7 задаёт и clean-checkout проверяет `A0`, `A1`, parameterized `A2(U)`, non-neutral `A_host(H)`, а также `B | A`, `S | A`, `SB | A`. Stage 5.8 должен зафиксировать хотя бы один concrete artifact и, для `A2`, одну exact `U` до принятия численного результата.
 
 ---
 
@@ -722,7 +734,7 @@ Conformance, fuzzing, frozen checkpoints, differential testing и receiver-prior
 12. Second implementation, созданная без перевода reference source.
 13. Hash-frozen pre-comparison checkpoint.
 14. 942-case post-freeze differential result: 942 matches, 0 semantic mismatch, 0 resource asymmetry.
-15. Machine-readable versioned receiver-assumption ladder `A0 ⊂ A1 ⊂ A2(U)` и non-neutral host control `A_host(H)`.
+15. Machine-readable и clean-checkout-validated receiver-assumption ladder `A0 ⊂ A1 ⊂ A2(U)` и non-neutral host control `A_host(H)`.
 16. Conditional notation `B | A`, `S | A`, `C | A`, не позволяющая undeclared receiver priors исчезать из claims.
 17. No-double-counting transmitted-bit ledger с joint `SB | A` для неразделимого specification/bootstrap artifact.
 18. Living dissertation process, сохраняющий положительные, отрицательные и нерешённые результаты.
@@ -799,7 +811,7 @@ NEX-1 v0.1 имеет canonical wire, principal rank-1 type reconstruction, weak
 
 Stage 5 добавил independent reconstruction evidence. Frozen packet был выдан отдельному implementation context до доступа к Go. Полученная реализация прошла все packet vectors и была зафиксирована content hash. Лишь после этого был открыт Go reference. Последующий 942-case differential дал 942 portable matches, 0 semantic mismatch и 0 resource asymmetry. Это не доказывает global correctness/minimality/optimality NEX, но существенно усиливает утверждение о независимой восстанавливаемости specification/conformance package на проверенной семантической поверхности.
 
-Stage 5.7 сделал явным то, что сокращённая формула `C = S + B + P` оставляла скрытым: bootstrap size зависит от того, что получатель знает заранее. Теперь различаются минимальная digital transport boundary `A0`, explicit mathematical metalanguage prior `A1`, parameterized universal-machine prior `A2(U)` и terrestrial host controls. Physical layer ниже `A0` находится вне текущей модели, а не бесплатен; stronger prior не превращается автоматически в cost-free winner; overlapping specification/bootstrap bits учитываются один раз через joint `SB | A`.
+Stage 5.7 сделал явным то, что сокращённая формула `C = S + B + P` оставляла скрытым: bootstrap size зависит от того, что получатель знает заранее. Теперь различаются минимальная digital transport boundary `A0`, explicit mathematical metalanguage prior `A1`, parameterized universal-machine prior `A2(U)` и terrestrial host controls. Physical layer ниже `A0` находится вне текущей модели, а не бесплатен; stronger prior не превращается автоматически в cost-free winner; overlapping specification/bootstrap bits учитываются один раз через joint `SB | A`. Первый clean-checkout checkpoint PR #9 подтвердил registry и одновременно сохранил зелёными прежние independence/differential gates.
 
 Главный оставшийся вопрос теперь конкретен: можно ли заморозить и точно посчитать конечный bootstrap artifact при одном из этих profiles без circular accounting? До результата Stage 5.8 проект не будет заявлять численную `C | A` или глобальное превосходство. Сохранение этой неопределённости является частью научного метода, позволяющего будущим claims стать воспроизводимыми и фальсифицируемыми.
 
@@ -962,7 +974,7 @@ Stage 5.7 сделал явным то, что сокращённая форму
 - Final PR #8 CI: `35385704921`, `35385705027`, `35385705162` — success.
 - Post-merge PR #8 CI: `35386452647`, `35386452451`, `35386452447` — success.
 - Differential report: 942/942 portable matches, 0 mismatches, 0 resource asymmetries.
-- Stage 5.7 receiver-assumption CI: pending PR verification на текущей границе данных.
+- Stage 5.7 first receiver-assumption PR checkpoint: `35387833962`, `35387833785`, `35387833852` — success.
 
 ---
 
