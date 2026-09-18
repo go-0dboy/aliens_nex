@@ -1,0 +1,107 @@
+name: research-reaudit
+
+on:
+  pull_request:
+    paths:
+      - 'README.md'
+      - 'README.ru.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+      - 'docs/RESEARCH-AUDIT-2026-09-19.md'
+      - 'docs/RESEARCH-AUDIT-2026-09-19.ru.md'
+      - 'docs/SOURCES.md'
+      - 'docs/STATUS.md'
+      - 'docs/STAGE-5.md'
+      - 'docs/adr/0002-nex-core-v0.1-design-basis.md'
+      - 'docs/adr/0014-condition-bootstrap-cost-on-receiver-assumptions.md'
+      - 'docs/adr/0016-post-stage5-literature-reaudit-corrections.md'
+      - 'docs/adr/README.md'
+      - 'docs/experiments/stage4-accounting.md'
+      - 'docs/experiments/stage4-evaluation-strategy.md'
+      - 'stage5/receiver-assumptions/**'
+      - 'stage5/validate_receiver_assumptions.py'
+      - '.github/workflows/research-reaudit.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'README.md'
+      - 'README.ru.md'
+      - 'docs/RESEARCH-DISSERTATION.md'
+      - 'docs/RESEARCH-DISSERTATION.ru.md'
+      - 'docs/RESEARCH-AUDIT-2026-09-19.md'
+      - 'docs/RESEARCH-AUDIT-2026-09-19.ru.md'
+      - 'docs/SOURCES.md'
+      - 'docs/STATUS.md'
+      - 'docs/STAGE-5.md'
+      - 'docs/adr/0002-nex-core-v0.1-design-basis.md'
+      - 'docs/adr/0014-condition-bootstrap-cost-on-receiver-assumptions.md'
+      - 'docs/adr/0016-post-stage5-literature-reaudit-corrections.md'
+      - 'docs/adr/README.md'
+      - 'docs/experiments/stage4-accounting.md'
+      - 'docs/experiments/stage4-evaluation-strategy.md'
+      - 'stage5/receiver-assumptions/**'
+      - 'stage5/validate_receiver_assumptions.py'
+      - '.github/workflows/research-reaudit.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  full-evidence-regression:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Verify Go reference and Stage 4 experiments
+        working-directory: reference/go
+        run: sh verify.sh
+
+      - name: Verify frozen Stage 5 packet sources
+        run: python stage5/build_packet.py --verify
+
+      - name: Verify frozen independent source hashes
+        run: python stage5/verify_independent_checkpoint.py
+
+      - name: Materialize frozen packet for independent verifier
+        run: python stage5/build_packet.py --output independent/python/packet
+
+      - name: Verify independent Python implementation
+        working-directory: independent/python
+        run: python verify.py
+
+      - name: Validate historical and corrected receiver assumptions
+        run: python stage5/validate_receiver_assumptions.py
+
+      - name: Validate frozen bootstrap-feasibility result
+        run: python stage5/bootstrap/validate_attempt.py
+
+      - name: Re-run Go/Python differential conformance
+        run: python stage5/differential/run.py --report research-reaudit-differential.json
+
+      - name: Validate differential report
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('research-reaudit-differential.json').read_text())
+          assert report['success'] is True
+          assert report['cases_total'] == 942
+          assert report['mismatches'] == []
+          assert report['resource_asymmetries'] == []
+          print('research re-audit evidence regression verified')
+          PY
+
+      - name: Upload differential report
+        uses: actions/upload-artifact@v4
+        with:
+          name: nex-research-reaudit-differential
+          path: research-reaudit-differential.json
+          if-no-files-found: error
