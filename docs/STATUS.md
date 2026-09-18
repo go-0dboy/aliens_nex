@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Current stage:** `Stage 3 — Dynamic semantics and evaluator — implementation complete through 3.8; finalization pending`  
+**Current stage:** `Stage 3 — Dynamic semantics and evaluator — Implementation complete; pending merge review`  
 **Stage 0 completed by:** PR `#1 docs: establish ADRs and project workflow`  
 **Research source registry completed by:** PR `#2 docs: add research source registry`  
 **Stage 1 completed by:** PR `#3 stage1: implement NEX wire foundation`  
@@ -10,7 +10,7 @@
 **Stage 2 completed by:** PR `#4 stage2: complete static validation and principal type inference`  
 **Stage 2 merge commit:** `cefe889d90a275897de31aa23c4b9742a388ec8f`  
 **Active Stage 3 branch:** `stage3/dynamic-semantics`  
-**Active Stage 3 pull request:** `#5 stage3: define dynamic semantics and start reference evaluator`
+**Active Stage 3 pull request:** `#5 stage3: implement dynamic semantics and reference evaluator`
 
 ## Stage 0 — Complete
 
@@ -26,14 +26,14 @@ Stage 2 is defined and closed in `docs/STAGE-2.md`. The reference static pipelin
 
 ADR-0007 keeps ordinary term-level type annotations out of canonical v0.1 terms while requiring a future measured comparison against compact explicit/hybrid type information.
 
-## Stage 3 — Dynamic semantics and evaluator — Finalization pending
+## Stage 3 — Dynamic semantics and evaluator — Implementation complete; pending merge review
 
 Stage 3 is defined in `docs/STAGE-3.md`.
 
-Implemented and verified on PR #5:
+Completed on PR #5:
 
 ```text
-3.0 dynamic-semantics contract audit and English specification clarification
+3.0 dynamic-semantics contract audit and EN/RU specification clarification
 3.1 runtime Value / Environment / Thunk / Closure model
 3.2 weak call-by-name Var/Lam/App/Let/Nat evaluator
 3.3 curried primitive application spine and authoritative runtime arity
@@ -42,6 +42,7 @@ Implemented and verified on PR #5:
 3.6 fix and bounded implementation refusal for nontermination tests
 3.7 language-neutral evaluation conformance corpus
 3.8 evaluator resource controls, property/fuzz testing, clean-checkout CI
+3.9 final scope/diff review
 ```
 
 ### Dynamic semantics
@@ -61,42 +62,70 @@ ADR-0009 separates evaluator resource refusal from NEX validity and semantic res
 
 ### Core primitive runtime
 
-The authoritative primitive table now carries ID, name, arity, and type scheme for IDs `0..10`. The evaluator implements all v0.1 Core primitives:
+The authoritative primitive table carries ID, name, arity, and type scheme for IDs `0..10`. The evaluator implements all NEX-1 v0.1 Core primitives:
 
 ```text
 fix succ pred ifz pair fst snd inl inr case unit
 ```
 
-The forcing contract is tested explicitly: unselected `ifz`/`case` branches and unselected pair fields are not evaluated merely by the selecting primitive.
+The forcing contract is tested explicitly: unselected `ifz`/`case` branches and unselected pair fields are not evaluated merely by the selecting primitive; constructor payloads remain delayed.
+
+### Specification synchronization
+
+The canonical English `docs/NEX-1-v0.1.md` and informative Russian mirror `docs/NEX-1-v0.1.ru.md` are synchronized for the Stage 3 dynamic contract, including:
+
+- non-strict `Let`;
+- primitive arities and partial application;
+- WHNF categories;
+- primitive forcing rules;
+- divergence versus evaluator resource refusal;
+- evaluator conformance requirements;
+- Stage 3 research references.
 
 ### Evaluation conformance
 
-`conformance/eval-v0.1.json` records implementation-independent observable WHNF results. The corpus covers beta application, ignored divergent arguments, non-strict `Let`, natural/unit primitives, both `ifz` paths, partial primitive application, lazy products/sums, both `case` branches, and a terminating `fix` recursion example.
+`conformance/eval-v0.1.json` contains implementation-independent observable-WHNF vectors covering beta application, ignored divergent arguments, non-strict `Let`, natural/unit primitives, both `ifz` paths, partial primitive application, lazy products/sums, both `case` branches, and terminating `fix` recursion.
 
 ### Verification evidence
 
-Current PR head before this status update: `9d9da3a7f24a38b2f473f0ab60e5ed4452b2c274`.
-
-Clean-checkout GitHub Actions:
+Verified clean-checkout GitHub Actions:
 
 ```text
-CI 35364644931  success
+CI 35364644931  success   # dynamic contract/spec checkpoint
+CI 35365016780  success   # post-status/final Stage 3 branch checkpoint
 ```
 
-`reference/go/verify.sh` runs formatting, vet, unit/conformance tests, the Stage 2 fuzz properties, and `FuzzEvaluationDeterministicObservation`.
+`reference/go/verify.sh` runs:
 
-### Remaining Stage 3 completion work
+```text
+gofmt check
+go vet ./...
+go test ./...
+1s FuzzSubstitutionComposition
+1s FuzzUnifyProducesEqualAppliedTypes
+1s FuzzInferenceSuccessfulSchemeIsClosedAndStable
+1s FuzzEvaluationDeterministicObservation
+```
 
-Stage 3 MUST NOT be marked complete yet. Remaining items:
+### Stage 3.9 final scope review
 
-1. synchronize `docs/NEX-1-v0.1.ru.md` with the accepted English dynamic-semantics clarification;
-2. run final clean-checkout CI after documentation/status synchronization;
-3. perform Stage 3.9 final diff/scope review;
-4. update PR #5 as the Stage 3 completion candidate for review/merge.
+The complete `main...stage3/dynamic-semantics` diff was reviewed against `docs/STAGE-3.md`.
+
+It contains only:
+
+- Stage 3 planning, ADRs, source/status documentation;
+- synchronized EN/RU dynamic-semantics specification changes;
+- reference evaluator/runtime implementation;
+- language-neutral evaluation conformance;
+- evaluator tests/fuzz verification.
+
+It does **not** contain a human frontend/parser, optimizer, mutable memory/system profile, native/bytecode compiler, or self-hosting implementation.
+
+PR #5 is therefore the Stage 3 completion candidate and is ready for merge review.
 
 ## Research basis added for Stage 3
 
-`docs/SOURCES.md` now includes:
+`docs/SOURCES.md` includes:
 
 ```text
 SRC-0011 Plotkin 1975   call-by-name / call-by-value distinction
@@ -118,4 +147,4 @@ Still intentionally unverified:
 
 ## Next recommended step
 
-Synchronize the Russian v0.1 specification mirror with the Stage 3 dynamic contract, then perform the Stage 3.9 final verification and diff review. Do not start frontend, optimizer, machine profiles, compiler, mutable memory, or self-hosting work before Stage 3 is closed.
+Review PR #5 as the Stage 3 completion candidate. If accepted, merge it and mark Stage 3 complete on `main` before defining Stage 4. Do not begin frontend, optimizer, machine profiles, compiler, mutable memory, or self-hosting work before that merge decision.
