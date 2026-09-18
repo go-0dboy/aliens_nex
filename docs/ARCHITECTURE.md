@@ -1,11 +1,39 @@
 # Architecture
 
-This document describes the current logical architecture of the NEX project. It is a living view of the accepted ADRs and specification; it does not replace them.
+This document describes the current logical architecture of NEX. It is a living view of accepted ADRs and the normative specification; it does not replace them.
 
-## Layers
+## Communication architecture
+
+ADR-0017 separates the protocol used to **teach** NEX from the stable computational Core that the receiver is ultimately expected to use.
 
 ```text
-Human / machine frontend syntax
+Declared receiver prior A
+            |
+            v
+NEX Teaching / Bootstrap Message T
+            |
+            | establishes meaning progressively
+            v
+ Reconstructed NEX-1 competence
+            |
+       self-test gate
+            |
+            v
+      NEX-1 Core v0.1
+            |
+     canonical programs P
+```
+
+The teaching representation and the canonical Core representation are intentionally different architectural layers.
+
+A teaching lesson may use redundancy, examples, temporary pedagogical notation, or staged encodings. None of those conventions are free: if the receiver is expected to interpret them and they are not part of the declared prior, their definition belongs to transmitted teaching material.
+
+The canonical NEX-1 Core remains unchanged unless a later evidence-backed Core-version ADR explicitly changes it.
+
+## Core execution layers
+
+```text
+Optional human / machine frontend
             |
             v
       Canonical NEX terms
@@ -27,6 +55,8 @@ Human / machine frontend syntax
       Host / target machine
 ```
 
+Human-friendly syntax is not canonical NEX wire and is not assumed in receiver-neutral communication.
+
 ## Core model
 
 NEX-1 Core v0.1 has six canonical term constructors:
@@ -40,42 +70,56 @@ Nat
 Prim
 ```
 
-The type system provides natural numbers, unit, functions, products, sums, and rank-1 let-polymorphism.
+The type system provides natural numbers, unit, functions, products, sums, and rank-1 `Let` polymorphism. General recursion is explicit through `fix`.
 
-General recursion is explicit through the `fix` primitive.
+The canonical dynamic strategy is weak call-by-name. Internal evaluator representation is not a portable observable.
 
-## Module boundaries for the reference implementation
+## Teaching-layer responsibilities
 
-The first implementation should be split into modules with narrow contracts.
+Stage 6 introduces a research layer above the Core. It owns experimental artifacts for:
+
+```text
+curriculum dependency graph
+lesson serialization
+pedagogical examples
+transmitted self-tests
+held-out interpretation tests
+held-out program-construction tests
+receiver experiment protocol
+assumption-leak classification
+teaching-message bit accounting
+```
+
+The teaching layer MUST NOT silently import:
+
+- English or another natural language;
+- Unicode/UTF-8/Markdown/JSON as receiver knowledge;
+- Go/Python/runtime semantics;
+- an unlisted mathematical or computational notation;
+- a universal machine or rule calculus not present in the selected receiver profile.
+
+## Core reference-implementation modules
 
 ### `term`
 
-Owns the canonical in-memory term representation and de Bruijn scope rules.
-
-Must not know about parsing a human source language.
+Owns canonical in-memory terms and de Bruijn scope rules. It does not own a human source language.
 
 ### `wire`
 
-Owns canonical bit encoding/decoding and self-delimiting natural-number encoding.
-
-Contract:
+Owns canonical term bit encoding/decoding and the self-delimiting natural-number code.
 
 ```text
 encode : Term -> Bits
 decode : Bits -> Result<Term, DecodeError>
 ```
 
-The decoder must reject malformed or trailing-invalid representations according to the specification.
-
 ### `types`
 
-Owns type terms, type schemes, substitutions, free-type-variable operations, and unification.
+Owns type terms, schemes, substitutions, free-variable operations, and unification.
 
 ### `infer`
 
 Owns Algorithm-W-style inference over NEX terms and the primitive type environment.
-
-Contract:
 
 ```text
 infer : Term -> Result<TypeScheme, TypeError>
@@ -83,50 +127,61 @@ infer : Term -> Result<TypeScheme, TypeError>
 
 ### `eval`
 
-Owns the reference evaluation semantics.
-
-It must implement the specified observable semantics, not an unrelated optimization model.
+Owns reference evaluation. It implements the specified observable semantics rather than an unrelated optimization model.
 
 ### `primitives`
 
-Owns the stable Core primitive ID table, type schemes, and primitive reduction rules.
-
-There must be one authoritative primitive table conceptually; type inference and evaluation must not drift into separately maintained incompatible definitions.
+Owns the stable Core primitive-ID table, type schemes, and primitive reduction rules. Type inference and evaluation must derive from one authoritative primitive contract.
 
 ### `conformance`
 
-Owns normative/golden vectors that exercise decode, encode, type inference, rejection, and evaluation.
+Owns language-neutral vectors connecting the specification to portable encode/decode/static/evaluation observations.
+
+Under Stage 6, selected transmitted conformance examples may additionally act as receiver self-tests, but the transmitted subset and its bits must be explicitly accounted for.
 
 ### `bench`
 
-Owns reproducible measurements. Benchmarks must not be mixed with conformance claims.
+Owns reproducible measurements. Benchmarks are not conformance evidence.
+
+### `stage6`
+
+Owns Stage 6 planning/teaching experiment artifacts. It is not a new language implementation and must not become an alternate source of Core semantics.
 
 ## Dependency direction
 
-Preferred dependency direction:
+Core reference implementation:
 
 ```text
 term <- wire
 term <- infer <- types
 term <- eval
 infer <- primitives -> eval
-conformance -> all public contracts
-bench -> public contracts
+conformance -> Core public contracts
+bench -> Core public contracts
 ```
 
-Avoid circular dependencies between evaluator, type inference, and wire codec.
+Teaching research:
 
-## Out of scope for the first reference implementation
+```text
+receiver assumptions -> curriculum
+NEX specification/conformance -> curriculum/self-tests
+curriculum -> exact teaching serialization (future)
+serialization -> teaching-bit accounting (future)
+held-out tasks -> receiver experiment
+```
 
-The first implementation should not add unless an ADR explicitly changes scope:
+A curriculum may reference the normative Core contract, but the normative Core MUST NOT depend on the curriculum.
 
-- a C-like or Rust-like frontend;
+## Architectural guardrails
+
+Without a separate ADR and new Core version, Stage 6 does not add:
+
+- new NEX-1 term constructors or primitive IDs;
+- incompatible wire changes;
+- mutable Core memory;
+- OS/system bindings;
 - native code generation;
-- mutable host memory model;
-- operating-system bindings;
-- recursive algebraic types;
-- linear types;
-- DAG/content-addressed transport;
-- optimizer passes.
+- production frontend features;
+- self-hosting claims.
 
-These may be useful later, but they would weaken the first feedback loop: prove the Core specification first.
+The teaching layer is allowed to fail, grow, reorder lessons, or use temporary pedagogical encodings without destabilizing NEX-1 v0.1. That separation is deliberate: first test how to teach the existing exact system; change the system only if the evidence later requires it.
