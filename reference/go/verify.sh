@@ -12,6 +12,7 @@ go vet ./...
 go test ./...
 
 go run ./cmd/nexbench -corpus ../../benchmarks/corpus-v0.1.json -pretty=false >/tmp/nex-benchmark-v0.1.json
+go run ./cmd/nexbench -corpus ../../benchmarks/corpus-v0.2.json -pretty=false >/tmp/nex-benchmark-v0.2.json
 
 go test -run '^$' -fuzz=FuzzSubstitutionComposition -fuzztime=1s ./nex
 go test -run '^$' -fuzz=FuzzUnifyProducesEqualAppliedTypes -fuzztime=1s ./nex
