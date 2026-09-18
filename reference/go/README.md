@@ -26,10 +26,21 @@ Not implemented here yet:
 
 ## Run verification
 
+From the repository root:
+
 ```bash
 cd reference/go
-go test ./...
+sh verify.sh
+```
+
+The script checks `gofmt`, runs `go vet ./...`, and then `go test ./...`.
+
+The equivalent commands can also be run individually:
+
+```bash
+gofmt -l nex/*.go
 go vet ./...
+go test ./...
 ```
 
 Optional fuzzing:
