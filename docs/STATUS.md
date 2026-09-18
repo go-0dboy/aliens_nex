@@ -1,9 +1,9 @@
 # Project status
 
-**Date:** 2026-09-18  
+**Date:** 2026-09-19  
 **Baseline branch:** `main`  
-**Active work:** Stage 5 closeout  
-**Current state:** `Stages 0–5 complete`  
+**Active work:** post-Stage-5 research corrections and literature re-audit  
+**Current state:** `Stages 0–5 complete; NEX-1 v0.1 unchanged; research claims corrected/narrowed after re-audit`  
 **Living dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md`
 
 ## Completed stages
@@ -15,13 +15,31 @@
 - Stage 4 — empirical validation and benchmarking — Complete, PR #6.
 - Stage 5 — independent reconstruction and receiver-conditioned bootstrap evidence — Complete.
 
-## Stage 5 summary
+## Post-Stage-5 literature re-audit
 
-### Independent reconstruction
+The 2026-09-19 audit is recorded in:
 
-PR #7 established the blind protocol and frozen conformance packet. PR #8 imported the independently produced Python implementation and performed post-freeze differential comparison.
+- `docs/RESEARCH-AUDIT-2026-09-19.md`;
+- `docs/RESEARCH-AUDIT-2026-09-19.ru.md`;
+- ADR-0016.
 
-Accepted result:
+### Overall audit judgment
+
+No reviewed issue invalidates NEX-1 v0.1 wire/static/dynamic semantics or the frozen Stage 4–5 measurements.
+
+The audit did identify corrections to the **research interpretation**:
+
+1. typed combinatory logic is a valid static-typing competitor; the old SKI rationale was too strong;
+2. `C=S+B+P` is a conditional transmitted-bit ledger, not an unconditional machine-free information scalar;
+3. the historical `A1` receiver prior hid too much computational structure and is refined in `assumptions-v0.2.json`;
+4. `942/942` is strong differential-conformance evidence but not a correctness/completeness proof;
+5. the 98.90% call-by-need result is a reduction in the project evaluator transition counter, not a wall-clock speedup claim;
+6. prior interstellar-language work (Lincos, CosmicOS, Lingua Cosmica) materially narrows the novelty claim;
+7. NEX-specific type-safety and call-by-need equivalence theorems remain open.
+
+## Stage 5 independent reconstruction
+
+Accepted frozen result:
 
 ```text
 cases total           942
@@ -30,37 +48,66 @@ semantic mismatches     0
 resource asymmetries    0
 ```
 
-This strongly supports independent reconstructability over the tested semantic surface. It is not a formal completeness proof.
-
-### Receiver assumptions
-
-PR #9 / ADR-0014 introduced versioned receiver profiles:
+Post-audit case composition:
 
 ```text
-A0 < A1 < A2(U)
+17   frozen corpus programs
+325  valid cases = 25 parameter sets x 13 fixed AST templates
+100  static-error cases = 25 parameter sets x 4 fixed error families
+500  randomized term shapes tested at wire level
 ```
 
-plus non-neutral engineering control `A_host(H)`.
+Accepted wording:
 
-Exact accounting is conditional:
+> strong differential-conformance evidence of reconstructability on the tested surface.
+
+This is not a formal proof and does not exclude correlated errors shared by both implementations.
+
+## Receiver assumptions
+
+Historical Stage 5 evidence remains in:
 
 ```text
-S | A
-B | A
-C | A
+stage5/receiver-assumptions/assumptions-v0.1.json
 ```
 
-and inseparable specification/bootstrap bits are counted once as `SB | A`.
+The current corrected model is:
 
-### Bootstrap feasibility
+```text
+stage5/receiver-assumptions/assumptions-v0.2.json
+```
 
-Stage 5.8 tested three candidate paths:
+with:
 
-- recursive rule description under `A1` — incomplete;
-- BLC as candidate basis under `A2(U=BLC)` — incomplete because no complete verified NEX-on-BLC interpreter exists;
-- Python 3.12 — verified host control only, not receiver-neutral bootstrap.
+```text
+A0       exact binary-frame prior
+A1       elementary discrete mathematics only
+A1(R)    A1 + exact formal rule calculus R
+A2(U)    A1 + exact universal binary machine U and framing
+A_host(H) non-neutral terrestrial host control
+```
 
-Accepted Stage 5.8 result:
+Exact accounting is stated as:
+
+```text
+C | A = |M_A|
+```
+
+with disjoint-role decomposition only when defensible:
+
+```text
+C | A = (S | A) + (B | A,S) + (P | A,S,B)
+```
+
+or joint specification/bootstrap:
+
+```text
+C | A = (SB | A) + (P | A,SB)
+```
+
+## Stage 5 bootstrap result
+
+The negative Stage 5.8 conclusion remains accepted:
 
 ```text
 accepted complete bootstrap candidates  0
@@ -76,37 +123,55 @@ Python NEX package source            28,832 bytes
 all frozen author-written files      52,859 bytes
 ```
 
-These sizes are explicitly **not** bootstrap cost.
+These values are not bootstrap cost.
 
-### Final Stage 5 decision
+## Stage 4 evidence that remains exact
 
-ADR-0015 closes Stage 5 as an evidence stage with a negative complete-bootstrap result.
+For frozen corpus v0.3:
 
-Established:
+```text
+programs   17
+AST nodes  345
+wire bits  1371
+```
 
-- NEX-1 v0.1 is independently reconstructable on the tested evidence surface;
-- receiver assumptions and accounting boundaries are explicit;
-- host source size is not `B`;
-- unknown bootstrap cost is not treated as zero.
+Constructor attribution remains:
 
-Still unknown:
+```text
+Prim  460 bits
+Var   286 bits
+App   264 bits
+Nat   244 bits
+Lam    84 bits
+Let    33 bits
+```
 
-- a complete accepted `B | A` or `SB | A`;
-- numerical total `C | A`;
-- sensitivity to the universal machine `U`;
-- full erased-HM versus explicit/hybrid total-cost comparison.
+These are corpus-specific measurements, not language-wide frequency estimates.
+
+The call-by-need experiment remains:
+
+```text
+CBN transition counter       226151
+call-by-need counter           2484
+counter reduction             98.90%
+```
+
+The metric is an implementation counter, not a direct CPU-time or bootstrap-size measure.
 
 ## Current normative state
 
-NEX-1 v0.1 remains unchanged by Stages 4–5. No v0.2 wire redesign, new Core primitives, mutable memory profile, production frontend, native backend, or self-hosting claim was introduced.
+NEX-1 v0.1 remains unchanged by Stages 4–5 and by the post-Stage-5 audit. No v0.2 wire redesign, new Core primitives, mutable-memory profile, production frontend, native backend, or self-hosting claim has been introduced.
 
-## Next recommended research stage
+The project now avoids presenting NEX as proven globally minimal. Public research language should use **compact experimental core** unless a particular minimality claim is explicitly proved under stated conditions.
 
-Construct an actual dependency-closed bootstrap artifact instead of continuing the Stage 5 feasibility audit.
+## Highest-priority next evidence
 
-Two clean directions remain:
+Before an incompatible NEX-1 redesign, prioritize:
 
-1. under `A1`, define an exact receiver-neutral rule-transmission language and encode/verify the complete NEX semantics in it;
-2. under `A2(U)`, freeze one exact universal machine and implement a complete conformance-verified NEX decoder/typechecker/evaluator for that machine.
+1. NEX-specific preservation/canonical-forms/progress-or-safety metatheory;
+2. a formal or mechanized argument that an allowed call-by-need implementation preserves NEX observations;
+3. bounded exhaustive testing of small closed well-typed terms across independent implementations;
+4. hold-out and externally specified workload families beyond the 17-program design corpus;
+5. one real dependency-closed bootstrap artifact under `A1(R)` or `A2(U)`.
 
-Only after such an artifact exists should the project return to numerical `B | A`, `C | A`, typing-bootstrap trade-offs, or compactness redesign.
+Only after those gaps are reduced should the project return to claims about total `C | A`, type-information trade-offs, or incompatible compactness redesigns.
