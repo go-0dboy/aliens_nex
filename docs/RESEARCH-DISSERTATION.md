@@ -1,6 +1,6 @@
-# NEX-1: A Compact Experimental Architecture-Neutral Typed Core for Information-Efficient Transmission of Computation
+# NEX-1: A Compact Architecture-Neutral Typed Core for Teaching and Transmitting Computation
 
-## Design, executable semantics, empirical validation, independent reconstruction, and receiver-conditioned accounting
+## Design, executable semantics, empirical validation, independent reconstruction, and receiver-conditioned teaching/bootstrap
 
 **Document type:** living dissertation-style research manuscript  
 **Canonical language:** English  
@@ -14,45 +14,54 @@
 
 ## Abstract
 
-This work studies whether executable computational knowledge can be transmitted to a receiver for whom no shared programming language, processor architecture, ABI, operating system, text encoding, or terrestrial runtime may be assumed. The project therefore studies not program payload alone, but the combined burden of describing a computational system, establishing enough machinery to execute it, and transmitting programs.
+This research asks whether an unknown receiver can be taught a formal computational system well enough to decode, type-check, execute, and eventually author programs in it, without assuming a shared terrestrial programming language, processor architecture, ABI, operating system, text encoding, or runtime.
 
-Historically this objective was written as
+NEX-1 v0.1 is the current target computational Core. It has six term constructors (`Var`, `Lam`, `App`, `Let`, `Nat`, `Prim`), zero-based de Bruijn indices, rank-1 Hindley–Milner inference, arbitrary-precision naturals, explicit general recursion through `fix`, a fixed typed primitive basis, a self-delimiting binary representation, and weak call-by-name semantics.
+
+The historical accounting shorthand
 
 ```text
-C = S + B + P,
+C = S + B + P
 ```
 
-where `S` denotes specification information, `B` receiver bootstrap information, and `P` program payload. The post-Stage-5 literature re-audit makes the exact interpretation stricter: numerical total cost is the bit length of one concrete transmitted object `M_A` under an explicit receiver-assumption profile `A`,
+is retained as a conceptual ledger for specification, bootstrap, and program payload. Exact numerical claims are stricter: under a declared receiver-assumption profile `A`, total transmitted cost is the length of one concrete transmitted object `M_A`,
 
 ```text
 C | A = |M_A|.
 ```
 
-A decomposition into `S`, `B`, and `P` is valid only when the transmitted roles are explicitly serialized and counted without overlap.
+A decomposition into `S`, `B`, and `P` is valid only when the corresponding transmitted roles are explicitly serialized and counted without overlap.
 
-NEX-1 v0.1 is a small statically typed functional Core with six term constructors (`Var`, `Lam`, `App`, `Let`, `Nat`, `Prim`), zero-based de Bruijn indices, rank-1 Hindley–Milner inference, arbitrary-precision naturals, a fixed primitive basis, explicit general recursion through `fix`, a self-delimiting binary representation, and weak call-by-name semantics.
+Stages 1–3 established executable wire, static, and dynamic semantics. Stage 4 froze benchmark corpora before optimization conclusions. On the accepted 17-program corpus, canonical NEX occupies 1,371 bits over 345 AST nodes; `Prim` contributes 460 bits (33.6%). Direct `Nat(255)` occupies 21 bits versus 2,300 bits for the tested repeated-`succ` construction. A root-principal-type envelope adds 134 bits, or 9.77% to program payload. On an identical three-program pure-lambda subset, Binary Lambda Calculus is smaller than NEX (30 versus 37 bits). An experimental call-by-need evaluator preserved all 17 accepted results while reducing the project-defined Go evaluator transition counter from 226,151 to 2,484; this is not a wall-clock speedup claim.
 
-Stages 1–3 established executable wire, static, and dynamic semantics. Stage 4 froze benchmark corpora before drawing optimization conclusions. On the accepted 17-program corpus, NEX occupies 1,371 bits over 345 AST nodes. `Prim` contributes 460 bits (33.6%) on that corpus. Direct `Nat(255)` occupies 21 bits versus 2,300 bits for the tested repeated-`succ` construction. A root-principal-type envelope adds 134 bits, or 9.77% to program payload. On an identical three-program pure-lambda subset, Binary Lambda Calculus is smaller than NEX (30 versus 37 bits). The experimental call-by-need evaluator preserved all 17 accepted observable results while reducing the project-defined Go evaluator transition counter from 226,151 to 2,484; this is not a wall-clock speedup claim.
+Stage 5 tested reconstruction from a frozen specification/conformance packet. A Python implementation was produced without access to `reference/go` and frozen before comparison. Post-freeze differential testing produced 942 matching portable observations, zero semantic mismatches, and zero resource asymmetries. This is strong differential-conformance evidence of reconstructability on the tested surface, not a proof of semantic correctness or specification completeness.
 
-Stage 5 tested reconstruction from a frozen specification/conformance packet. A Python implementation was produced without access to `reference/go` and frozen before comparison. Post-freeze differential testing produced 942 matching portable observations, zero semantic mismatches, and zero resource asymmetries. The re-audit narrows the interpretation: this is strong **differential-conformance evidence of reconstructability on the tested surface**, not a proof of specification completeness or semantic correctness.
+Stage 5 also made receiver assumptions explicit. The corrected current taxonomy distinguishes `A0` (exact binary frame), `A1` (elementary discrete mathematics), `A1(R)` (an exact formal rule calculus), `A2(U)` (an exact universal machine and framing), and `A_host(H)` (a terrestrial engineering control). No complete receiver-neutral bootstrap artifact has yet been accepted, so full `B | A` and total `C | A` remain unknown.
 
-Stage 5 also made receiver assumptions explicit. The corrected current taxonomy distinguishes an exact binary-frame prior `A0`, an elementary mathematical prior `A1`, a parameterized formal-rule-calculus prior `A1(R)`, a parameterized universal-machine prior `A2(U)`, and a non-neutral host control `A_host(H)`. No complete receiver-neutral bootstrap artifact has yet been accepted, so full `B | A` and total `C | A` remain numerically unknown.
+The post-Stage-5 literature re-audit did not reveal a fundamental defect in NEX-1 v0.1. It did clarify the next research problem. Lincos, DeVito–Oehrle, Lingua Cosmica, and especially CosmicOS show that an interstellar formal system is not only a grammar or interpreter: it is also a **teaching sequence**. NEX therefore needs a separate teaching/bootstrap layer that progressively establishes the meaning of the stable NEX-1 Core and provides receiver self-tests.
 
-A targeted post-Stage-5 literature re-audit found no defect that invalidates NEX-1 v0.1 or the recorded Stage 1–5 measurements. It did correct several claims: typed combinatory logic is a legitimate static-typing competitor; NEX is not proven globally minimal; prior work such as Lincos, CosmicOS, and Lingua Cosmica materially narrows novelty claims; the 17-program corpus is not representative of all software; and NEX-specific type-safety and call-by-need equivalence theorems remain open.
+The next stage should construct and measure that finite teaching artifact rather than immediately redesign the Core.
 
-**Keywords:** compact programming language, architecture-neutral computation, binary program representation, de Bruijn indices, Hindley–Milner, bootstrap, receiver assumptions, Binary Lambda Calculus, differential conformance, reproducible research.
+**Keywords:** architecture-neutral computation, teaching protocol, binary program representation, de Bruijn indices, Hindley–Milner, bootstrap, receiver assumptions, Binary Lambda Calculus, differential conformance, interstellar communication.
 
 ---
 
-# 1. Research problem and objective
+# 1. Research problem
 
-Conventional software assumes a large body of shared context: textual syntax, encodings, processor behavior, executable formats, operating systems, compilers, virtual machines, and data conventions. In an unknown-receiver setting, these are not free background facts; they are part of the interpretation problem.
+Conventional software assumes extensive shared context: source syntax, text encodings, processors, executable formats, operating systems, compilers, virtual machines, and data conventions. For an unknown receiver these are not free facts; they are part of the interpretation problem.
 
-A one-bit program is not information-efficient if it requires an enormous untransmitted interpreter. Conversely, an extremely small universal interpreter may make every later program unnecessarily large. The research object is therefore architecture-neutral representation and execution of general-purpose computation under severe information constraints. The subject is the trade-off among program representation, specification burden, receiver bootstrap, static typing, evaluation strategy, and explicitly declared receiver assumptions.
+A short program is not useful if its meaning depends on a large untransmitted interpreter. Conversely, a tiny interpreter may force all later programs to become unnecessarily large. More fundamentally, even a perfect interpreter artifact is useless if the receiver cannot determine what it is supposed to mean or how to validate its reconstruction.
 
-The goal is to construct and evaluate a compact typed executable Core while developing a reproducible method for deciding which costs are measured, which are conditional, and which remain unknown.
+The project therefore studies two coupled objects:
 
-The project does **not** claim that NEX is globally minimal or globally superior to external languages.
+1. **NEX-1 Core** — the exact target computational system;
+2. **a teaching/bootstrap message** — the finite transmitted sequence that establishes enough semantics for the receiver to reconstruct and use that Core.
+
+The central practical goal is:
+
+> given an explicit receiver prior, construct a finite message after which the receiver can demonstrably decode, type-check, execute, and construct NEX programs.
+
+Historical novelty is not a success criterion. Prior work is valuable insofar as it improves this construction.
 
 ---
 
@@ -60,58 +69,76 @@ The project does **not** claim that NEX is globally minimal or globally superior
 
 **RQ1.** Can NEX be given a deterministic, architecture-neutral, self-delimiting binary representation with executable conformance evidence?
 
-**RQ2.** Can closed NEX programs recover principal rank-1 types without ordinary transmitted term annotations?
+**RQ2.** Can closed NEX programs recover principal rank-1 types without ordinary transmitted type annotations?
 
 **RQ3.** Can weak call-by-name remain a simple normative semantics while a sharing implementation preserves portable observations?
 
-**RQ4.** Which constructs dominate program payload on the frozen corpus, and are `Let` and direct `Nat` literals empirically justified against the tested alternatives?
+**RQ4.** Which constructs dominate program payload on the frozen corpus, and are `Let` and direct `Nat` empirically justified against the tested alternatives?
 
-**RQ5.** How does NEX program payload compare with selected external encodings on explicitly shared subsets?
+**RQ5.** How does NEX payload compare with selected external encodings on explicitly shared subsets?
 
-**RQ6.** Can full transmitted cost already be evaluated numerically?
+**RQ6.** Can complete transmitted cost already be evaluated numerically?
 
 **RQ7.** Can a second implementation, produced without access to `reference/go`, reconstruct the same portable wire, static, and dynamic observations from a frozen packet?
 
 **RQ8.** Under which explicit receiver assumptions can a complete bootstrap be represented and measured without hiding an interpreter or double-counting transmitted bits?
 
-**RQ9.** After comparison with broader prior work, which NEX claims remain contributions, which are rediscoveries or combinations of known ideas, and which still require formal or empirical validation?
+**RQ9.** What finite teaching/bootstrap sequence is sufficient to move a receiver from an explicit prior profile to operational NEX competence?
+
+RQ9 is the main question for the next stage.
 
 ---
 
-# 3. Related work and novelty boundary
+# 3. Related work and design lessons
 
 ## 3.1 Computational representation and type theory
 
-De Bruijn indices provide the basis for transmitting bound-variable structure without names [1]. Binary Lambda Calculus provides a compact binary lambda representation and an external pure-lambda baseline [2]. Milner and Damas–Milner provide the theoretical basis for rank-1 let-polymorphism and principal type schemes [3,4]. Plotkin's PCF/LCF work provides a classical precedent for small typed languages with natural numbers and fixed-point recursion [5]. Elias supplies the universal-code family from which NEX uses gamma coding of `n+1` [6].
+De Bruijn indices provide nameless bound-variable references [SRC-0001]. Binary Lambda Calculus provides a compact binary lambda representation and external baseline [SRC-0002]. Milner and Damas–Milner provide the basis for rank-1 let-polymorphism and principal type schemes [SRC-0003, SRC-0004]. Plotkin's work provides classical typed-recursive-calculus and evaluation-strategy foundations [SRC-0005, SRC-0011]. Elias provides the integer-code family from which NEX uses gamma coding of `n+1` [SRC-0006].
 
-The post-Stage-5 re-audit adds an important correction: combinatory logic is not intrinsically incompatible with static typing. Hindley's 1969 work establishes principal type-scheme results for combinatory logic [18]. Pure SK/SKI therefore remains a legitimate typed competitor; NEX rejects it for v0.1 because of total representation/design trade-offs, not because it cannot support useful static typing.
+The re-audit corrected an earlier rationale: combinatory logic is not intrinsically incompatible with static typing. Hindley established principal type-scheme results for combinatory logic [SRC-0018]. SK/SKI therefore remains a legitimate competitor; NEX's v0.1 choice is a representation/design trade-off, not a claim that typed combinators are impossible.
 
-## 3.2 Evaluation strategy
+## 3.2 Call-by-need
 
-Plotkin distinguishes call-by-name from call-by-value [9]. Launchbury and Sestoft formalize lazy evaluation and implementation with sharing [10,11]. Maraist, Odersky, and Wadler provide a call-by-need calculus with the same observational equivalence relation as call-by-name for their studied lambda calculus [23]. This supports the direction of NEX's sharing experiment, but it is not automatically a theorem for NEX's exact `fix`, naturals, sums/products, and primitive-forcing rules.
+Launchbury and Sestoft formalize lazy evaluation and sharing [SRC-0012, SRC-0013]. Maraist, Odersky, and Wadler establish a strong observational relationship between call-by-need and call-by-name in their studied calculus [SRC-0023]. These sources motivate the NEX optimization experiment but do not replace a NEX-specific equivalence proof for its exact `fix`, naturals, sums/products, and forcing rules.
 
 ## 3.3 Description length and receiver assumptions
 
-Shannon supplies the communication-system boundary but deliberately separates engineering transmission from semantic meaning [15]. Kolmogorov and Chaitin establish that algorithmic/program-size descriptions are relative to an effective interpretation [16,17]. Rissanen's shortest-description work likewise treats model/description burden as part of the comparison [19]. These results motivate conditioning NEX accounting on an explicit profile rather than claiming a machine-free scalar information cost.
+Shannon separates engineering transmission from semantic meaning [SRC-0015]. Kolmogorov and Chaitin emphasize interpretation-relative algorithmic/program-size descriptions [SRC-0016, SRC-0017]. Rissanen similarly includes model/description burden in shortest-description reasoning [SRC-0019]. These results motivate the receiver-conditioned `C | A = |M_A|` formulation.
 
-## 3.4 Interstellar-language prior art
+## 3.4 Interstellar teaching languages
 
-NEX is not the first formal-language project aimed at an unknown extraterrestrial receiver. Freudenthal's **Lincos** (1960) is direct prior art in constructing a language for cosmic communication [20]. **CosmicOS** bootstraps mathematical and logical concepts and explicitly uses programs and simulations [21]. Work on **Lingua Cosmica** has applied constructive type theory to interstellar-message content [22].
+Freudenthal's **Lincos** [SRC-0020] demonstrates progressive semantic teaching through constrained examples. DeVito and Oehrle [SRC-0028] emphasize the role of assumed prior scientific knowledge. Work on **Lingua Cosmica** uses constructive type theory to constrain logical interpretation [SRC-0022]. **CosmicOS** [SRC-0021] is especially close to the NEX objective because it progressively introduces mathematics, logic, executable programs, and simulations.
 
-Consequently, NEX does not claim novelty for “a language for aliens,” for the use of programs in interstellar communication, or for introducing types into that domain.
+These projects are not treated as obstacles to NEX. They provide design lessons.
 
-The narrower candidate contribution is the combination of:
+The most important comparison is:
 
-- a compact typed binary Core with an executable specification;
-- exact canonical program-bit accounting;
-- explicit separation of program payload, specification, bootstrap, and receiver prior;
-- frozen comparative experiments that retain negative results;
-- a blind second implementation followed by post-freeze differential conformance;
-- refusal to replace unknown bootstrap cost with host-source proxies.
+| Question | CosmicOS emphasis | NEX emphasis |
+|---|---|---|
+| How does the receiver learn? | progressive executable curriculum | not yet a dedicated protocol |
+| Final computational system | Lisp-like programs/simulations | small typed Core |
+| Static checking | not centered on HM | central |
+| Exact canonical binary representation | not primary objective | primary objective |
+| Independent reconstruction test | not NEX-style | frozen blind Python implementation |
+| Exact bit ledger | not primary objective | central methodology |
 
-## 3.5 Independent implementations and differential testing
+The architectural conclusion is therefore:
 
-The Stage 5 protocol reduces implementation leakage, but two implementations agreeing is not a correctness proof. Knight and Leveson's multiversion experiment demonstrates that independently developed programs can exhibit correlated failures [24]. Differential testing is valuable when a simple oracle is unavailable, but it cannot reveal a fault shared by all compared implementations [27]. These results directly constrain the interpretation of NEX's `942/942` agreement.
+```text
+NEX Teaching / Bootstrap Message
+        -> NEX-1 Core competence
+        -> canonical NEX programs
+```
+
+The teaching representation may be redundant or pedagogical even if the final Core representation remains compact.
+
+## 3.5 Limits of assumed mathematics
+
+The receiver profiles are experimental conditions, not claims about extraterrestrial cognition. Exosemiotic work explicitly questions whether mathematics and science should be assumed to be conceptualized identically by another intelligence [SRC-0029]. Therefore `A1` is an explicit prior chosen for an experiment, not a universal fact.
+
+## 3.6 Independent implementations and differential testing
+
+Stage 5 reduces implementation leakage, but agreement between two implementations is not a proof oracle. Knight–Leveson show that independently developed versions can exhibit correlated failures [SRC-0024], and differential testing cannot reveal a defect shared by every implementation [SRC-0027]. This directly constrains the meaning of `942/942`.
 
 ---
 
@@ -131,37 +158,37 @@ Problem
  -> Research synthesis
 ```
 
-The repository is treated as durable project memory. The project distinguishes external facts, project decisions, reproducible measurements, inferences, hypotheses, and unknowns.
+The repository is durable project memory. Claims are classified as external facts, project decisions, reproducible measurements, evidence-based inferences, hypotheses, or unknowns.
 
-Comparative corpora are frozen before optimization conclusions. Negative results are preserved. Resource exhaustion is kept separate from malformed input, static rejection, and proof of divergence.
+Comparative corpora are frozen before optimization conclusions. Negative results are preserved. Resource refusal is kept separate from malformed input, static invalidity, and proof of divergence.
 
-For independent reconstruction, an allowlisted packet was frozen before the second implementation. The second implementation was content-hash frozen before `reference/go` became available. Differential testing then compared only portable observations.
+For independent reconstruction, an allowlisted packet was frozen before the second implementation. The second implementation was content-hash frozen before access to `reference/go`. Differential testing then compared only portable observations.
 
-For total accounting, the exact object is now written as:
+For total accounting:
 
 ```text
 C | A = |M_A|
 ```
 
-If roles are disjoint:
+with disjoint-role decomposition only when defensible:
 
 ```text
 C | A = (S | A) + (B | A,S) + (P | A,S,B)
 ```
 
-If specification and executable bootstrap are inseparable:
+or joint specification/bootstrap:
 
 ```text
 C | A = (SB | A) + (P | A,SB)
 ```
 
-This prevents unknown interpreters from disappearing into an undeclared prior and prevents the same bit from being counted twice.
+Every transmitted bit is counted once.
 
 ---
 
-# 5. NEX-1 v0.1 experimental object
+# 5. NEX-1 v0.1
 
-## 5.1 Terms and binding
+## 5.1 Terms
 
 ```text
 Term ::= Var(index)
@@ -172,7 +199,7 @@ Term ::= Var(index)
        | Prim(id)
 ```
 
-Bound variables use zero-based de Bruijn indices. Top-level programs are closed.
+Bound variables use zero-based de Bruijn indices.
 
 ## 5.2 Types
 
@@ -181,11 +208,9 @@ T ::= a | 1 | N | T -> T | T * T | T + T
 S ::= forall a1 ... an. T
 ```
 
-Static semantics use rank-1 HM inference with fresh instantiation, unification, occurs check, and generalization at `Let`.
+Static semantics use rank-1 HM inference with unification, occurs check, fresh instantiation, and `Let` generalization.
 
-The existing implementations are strong executable evidence. However, Milner's type-soundness results do not automatically prove NEX's exact primitive/evaluation system sound. A NEX-specific preservation/canonical-forms/progress-or-safety proof remains future work [26].
-
-If future profiles add mutable references or comparable effects, the v0.1 pure-Core generalization rule must be revisited; unrestricted HM polymorphism is not sound for ordinary create/update polymorphic references [25].
+The existing implementations are strong executable evidence, but NEX-specific canonical-forms/preservation/progress-or-safety proofs remain open [SRC-0026]. If future profiles add mutable references or comparable effects, the v0.1 generalization rule must be revisited [SRC-0025].
 
 ## 5.3 Core primitives
 
@@ -194,8 +219,6 @@ If future profiles add mutable references or comparable effects, the v0.1 pure-C
 4 pair  5 fst    6 snd    7 inl
 8 inr   9 case   10 unit
 ```
-
-`fix : forall a. (a -> a) -> a` permits general recursion and therefore divergence.
 
 ## 5.4 Wire representation
 
@@ -210,11 +233,11 @@ If future profiles add mutable references or comparable effects, the v0.1 pure-C
 1111 U(p)   Prim(p)
 ```
 
-The constructor prefix lengths are `2,2,2,3,4,4`, with Kraft sum exactly 1. The top-level constructor code space is therefore fully allocated. A future attempt to shorten the `Prim` constructor prefix must compensate elsewhere or change the grammar factorization; `Prim`'s large corpus contribution does not alone prove that its top-level prefix is the main inefficiency.
+Constructor prefix lengths are `2,2,2,3,4,4`, whose Kraft sum is 1. A future shorter `Prim` constructor prefix therefore requires compensating change elsewhere; `Prim`'s measured corpus cost should be decomposed into constructor-prefix and primitive-ID contributions before redesign.
 
 ## 5.5 Dynamic semantics
 
-The normative strategy is weak call-by-name. Arguments and `Let` values are delayed, reduction does not occur beneath `Lam` before application, primitive forcing is selective, and general recursion is explicit through `fix`.
+The normative strategy is weak call-by-name. Arguments and `Let` values are delayed, reduction does not occur beneath `Lam` before application, primitive forcing is selective, pair/sum payloads remain delayed, and recursion is explicit through `fix`.
 
 Call-by-need remains an allowed implementation strategy only when portable Core observations are preserved.
 
@@ -222,9 +245,7 @@ Call-by-need remains an allowed implementation strategy only when portable Core 
 
 # 6. Results of Stages 1–4
 
-Stages 1–3 produced executable wire, type, and evaluation conformance. Stage 4 froze the accepted empirical corpus before optimization conclusions.
-
-## 6.1 Corpus measurements
+Stages 1–3 produced executable wire, type, and evaluation conformance. Stage 4 froze an empirical corpus before optimization conclusions.
 
 For corpus v0.3:
 
@@ -232,7 +253,7 @@ For corpus v0.3:
 |---|---:|
 | Programs | 17 |
 | AST nodes | 345 |
-| Canonical NEX wire bits | 1,371 |
+| Canonical wire bits | 1,371 |
 
 Constructor attribution:
 
@@ -245,22 +266,22 @@ Constructor attribution:
 | `Lam` | 84 | 6.1% |
 | `Let` | 33 | 2.4% |
 
-These are exact properties of the frozen corpus, not estimates of constructor frequencies in “software in general.” The corpus is small and hand-designed; freezing removes post-result benchmark editing but not initial selection bias.
+These are properties of the frozen corpus, not frequency estimates for software in general.
 
-## 6.2 `Let`
+### `Let`
 
-The tested representation has a measurable break-even. For one 5-bit payload, `Let` loses at two and three uses, ties at four, and wins at eight. For the tested 14-bit payload it already saves bits at two uses. This justifies retaining `Let` as a meaningful design option but does not imply every local `Let` is wire-optimal.
+For the tested 5-bit payload, `Let` loses to duplication at two and three uses, ties at four, and wins at eight. For the tested 14-bit payload it saves bits at two uses. This supports retaining `Let` while acknowledging a real break-even.
 
-## 6.3 Direct natural literals
+### Direct naturals
 
 ```text
 Nat(255)          21 bits
 succ-chain(255) 2300 bits
 ```
 
-Direct `Nat` is therefore strongly supported against the tested repeated-`succ` construction. This does not establish Elias gamma or the literal representation as globally optimal among all integer codes.
+This strongly supports direct naturals against the tested repeated-`succ` alternative, but does not prove global optimality of gamma coding.
 
-## 6.4 Erased HM versus transmitted root type
+### Root type transmission
 
 ```text
 erased terms      1371 bits
@@ -269,9 +290,9 @@ hybrid total       1505 bits
                   +9.77%
 ```
 
-This establishes only `Delta P`. A compensating reduction in checker/specification/bootstrap burden has not been built or measured.
+Only `Delta P` is measured; any reduction in checker/bootstrap burden remains unconstructed.
 
-## 6.5 External baselines
+### External baselines
 
 On the identical three-program pure-lambda subset:
 
@@ -280,253 +301,203 @@ NEX  37 bits
 BLC  30 bits
 ```
 
-Therefore no universal NEX compactness claim is supported.
+No global winner follows. The Jot result is one deterministic translation, not a shortest-program search.
 
-The measured Jot result is 288 bits through one deterministic NEX-lambda -> SK -> Jot translation. It is not a shortest-Jot result.
+### CBN versus call-by-need
 
-The project-defined tiny postfix structural baseline measures 1,529 bits on the full 17-program corpus versus 1,371 for NEX, but it reuses NEX conventions and is not an independent total-cost comparison.
-
-## 6.6 Call-by-name versus call-by-need
-
-The experimental sharing evaluator preserved all 17 accepted observations. The reference instrumentation reported:
+All 17 accepted observables agreed. The project-defined evaluator counters were:
 
 ```text
-CBN transition counter        226151
-call-by-need counter            2484
-reduction                     98.90%
+CBN           226151
+call-by-need    2484
+reduction      98.90%
 ```
 
-This means 98.90% fewer counted evaluator transitions according to the project instrumentation. It is not a statement about wall-clock time, CPU instructions, allocation count, peak memory, or bootstrap size.
+This is a transition-counter reduction, not a wall-clock or CPU-speed claim.
 
 ---
 
 # 7. Stage 5 — independent reconstruction
 
-The second implementation received a frozen packet without access to the Go reference source. Its frozen archive is:
+The second implementation received a frozen packet without access to `reference/go` and was frozen before direct comparison.
+
+Frozen archive:
 
 ```text
 sha256:783e4186f9a8c024f00a732deae33b547c81ed4d7639c610a1e8bc5997eb3fbe
 ```
 
-Before direct comparison it passed all supplied packet vectors and 23 implementation tests.
-
-Post-freeze differential testing produced:
+Post-freeze comparison produced:
 
 ```text
-portable matches       942
-semantic mismatches      0
-resource asymmetries     0
+942 portable matches
+0 semantic mismatches
+0 resource asymmetries
 ```
 
-The 942 cases comprise:
+The 942 cases consist of:
 
 ```text
 17   frozen corpus programs
-325  valid cases = 25 numeric parameter sets x 13 fixed AST templates
+325  valid cases = 25 parameter sets x 13 AST templates
 100  static-error cases = 25 parameter sets x 4 error families
 500  randomized term shapes tested at wire level
 ```
 
-The accepted interpretation is therefore:
+The accepted conclusion is strong differential-conformance evidence of reconstructability on the tested surface.
 
-> strong differential-conformance evidence that the published packet is sufficient to reconstruct the tested portable behavior independently of the Go source.
-
-The result is not a proof that the specification is complete, nor that both implementations are correct on all inputs. Shared interpretation errors remain possible.
-
-One presentation-level ambiguity was recorded: precedence among multiple independent static errors is not normative. Both implementations currently perform scope checking before unknown-primitive diagnosis, but that coincidence was not promoted into language semantics.
+A further limitation is that the top-level portable observation `Function` is deliberately coarse. Future exhaustive testing should apply returned functions in generated contexts rather than relying only on the `Function` label.
 
 ---
 
-# 8. Receiver assumptions and bootstrap accounting
+# 8. Receiver assumptions and bootstrap
 
-## 8.1 Historical Stage 5 model
-
-The Stage 5 experiment froze `assumptions-v0.1.json`, with profiles `A0`, `A1`, `A2(U)`, and `A_host(H)`. It successfully made hidden receiver assumptions visible and prohibited host-source substitution for `B`.
-
-The later literature re-audit found one conceptual weakness: historical `A1` included the ability to interpret recursively defined rules without itself fixing a formal rule language.
-
-## 8.2 Corrected current model
-
-The current `assumptions-v0.2.json` separates that computational prior:
+The current corrected model is:
 
 ```text
-A0        exact finite ordered binary frame
-A1        A0 + elementary naturals and finite-sequence mathematics
-A1(R)     A1 + exact formal rule calculus R and binary serialization
-A2(U)     A1 + exact universal binary machine U and input framing
-A_host(H) terrestrial engineering control only
+A0       exact binary-frame prior
+A1       elementary naturals and finite-sequence mathematics
+A1(R)    A1 + exact formal rule calculus R and serialization
+A2(U)    A1 + exact universal machine U and framing
+A_host(H) terrestrial engineering control
 ```
 
-`A1(R)` and `A2(U)` are distinct stronger branches. Neither is assumed to arise automatically from elementary mathematics.
+Historical Stage 5 `assumptions-v0.1.json` is preserved unchanged; current work uses `assumptions-v0.2.json`.
 
-## 8.3 Bootstrap feasibility result
+Stage 5.8 tested three paths:
 
-Stage 5 examined three paths:
-
-- a recursive-rule description: incomplete because no exact transmitted formal calculus had been frozen;
-- BLC under `A2(U=BLC)`: incomplete because no complete frozen conformance-verified NEX interpreter exists in BLC;
-- Python under `A_host(Python3.12)`: finite and testable, but non-neutral.
-
-Host-control source measurements were:
-
-```text
-NEX Python package source           28,832 bytes
-all frozen author-written files     52,859 bytes
-```
-
-They are explicitly **not** bootstrap cost.
+- recursive rules under historical `A1`: incomplete because the rule language itself was unspecified;
+- BLC under `A2(U=BLC)`: incomplete because no complete verified NEX interpreter in BLC exists;
+- Python 3.12: finite engineering control but not receiver-neutral bootstrap.
 
 Accepted result:
 
 ```text
-accepted complete receiver-neutral bootstrap candidates  0
-full B | A known                                           false
-full SB | A known                                          false
-total C | A computable                                     false
+accepted complete bootstrap candidates  0
+full B | A known                        false
+full SB | A known                       false
+total C | A computable                  false
 ```
 
-The corrected `A1/A1(R)` distinction strengthens this negative result: the missing formal rule calculus is a real unresolved dependency rather than a free mathematical convention.
+This negative result is retained.
 
 ---
 
-# 9. Answers to the research questions
+# 9. Answers to current research questions
 
-**RQ1.** Supported for v0.1 by executable wire conformance and two implementations agreeing on the tested portable observations.
+**RQ1.** Supported for v0.1 by executable conformance and two agreeing implementations.
 
-**RQ2.** Functionally supported for the current pure Core; total-cost optimality of erased typing and a formal NEX type-safety theorem remain open.
+**RQ2.** Functionally supported; total-cost optimality and formal NEX-specific type safety remain unresolved.
 
-**RQ3.** Empirically supported on the frozen programs; a NEX-specific formal call-by-name/call-by-need equivalence theorem remains open.
+**RQ3.** Supported empirically on tested programs; a NEX-specific equivalence theorem remains open.
 
-**RQ4.** Answered only for the frozen corpus and tested alternatives: `Prim` contributes the most bits, `Let` has a break-even, and direct `Nat` strongly beats the tested repeated-`succ` representation.
+**RQ4.** Answered for the frozen corpus: `Prim` is largest there, `Let` has a break-even, and direct `Nat` strongly beats the tested repeated-`succ` construction.
 
-**RQ5.** Mixed: BLC is smaller on the shared pure-lambda subset; no global external winner has been established.
+**RQ5.** Mixed: BLC is smaller on the controlled pure-lambda subset; no global winner is established.
 
-**RQ6.** No. Program payload is exact for declared corpora/contracts, but complete receiver-conditioned setup/bootstrap and total message cost remain unknown.
+**RQ6.** No. Exact `P` exists for stated corpora, but complete `S | A`/`B | A`/`C | A` do not.
 
-**RQ7.** Strongly supported as differential-conformance evidence on the tested surface, not as a correctness theorem.
+**RQ7.** Strongly supported as differential-conformance evidence on the tested surface.
 
-**RQ8.** Methodologically clarified but numerically open: admissible prior profiles and accounting rules are explicit, while no complete neutral bootstrap exists.
+**RQ8.** Methodologically clarified but numerically open; no complete receiver-neutral bootstrap exists.
 
-**RQ9.** The broad ideas of interstellar formal language, executable messages, types, lambda/calculus encodings, and lazy evaluation all have substantial prior art. NEX's defensible contribution is the particular quantitative, typed, reproducible, receiver-conditioned methodology and its concrete experimental artifacts rather than invention of those underlying ideas.
+**RQ9.** Not yet answered. This is the primary next-stage question.
 
 ---
 
 # 10. Threats to validity
 
-- The accepted design corpus contains only 17 hand-designed programs.
-- Freezing prevents post-result edits but does not eliminate pre-freeze selection bias.
-- Some external comparisons use fixed translations rather than globally shortest programs.
-- The 325 generated-valid semantic cases use 13 structural templates; the 100 static-error cases use four error families.
-- The 500 randomized cases are wire-level, not full semantic workloads.
-- Differential agreement cannot reveal an error shared by both implementations.
-- Cognitive independence is procedural, not mathematically provable.
-- Runtime transition counters are implementation-specific and are not direct runtime or energy measurements.
-- No NEX-specific machine-checked type-safety proof currently exists.
-- No NEX-specific formal call-by-need equivalence proof currently exists.
-- Receiver profiles are experimental conditions, not claims about actual extraterrestrial knowledge.
-- The physical communication layer below `A0` is outside the current model.
-- No complete receiver-neutral bootstrap artifact exists.
-- Global optimality/minimality is not established.
+- The accepted design corpus contains only 17 programs and is hand-designed.
+- External translations such as Jot are fixed project translations, not globally shortest programs.
+- The 942 differential cases are structured families, not 942 independently designed semantic workloads.
+- Two independent implementations can share correlated errors.
+- `Function` is a deliberately coarse portable observation unless tested through application contexts.
+- Runtime counters are implementation-specific.
+- The explicit-typing alternative has not been implemented as a complete checker/bootstrap system.
+- Receiver profiles are research conditions, not claims about actual extraterrestrial knowledge.
+- The physical communication layer is outside `A0` and is not assigned zero cost.
+- No machine-checked proof establishes complete NEX semantic correctness or optimality.
 
 ---
 
-# 11. Contributions to date
+# 11. Contributions/results to date
 
-Subject to the limitations above, the project has produced:
+The project has produced:
 
-1. a compact architecture-neutral typed Core with a canonical binary representation;
+1. a compact architecture-neutral typed Core with canonical binary representation;
 2. executable separation of wire validity, scope validity, type validity, evaluation, and finite resource refusal;
 3. language-neutral wire/static/dynamic conformance artifacts;
-4. a frozen measurement methodology that retains negative and inconvenient results;
-5. exact constructor-level accounting and controlled `Let`, `Nat`, and type-information experiments;
-6. controlled external/structural comparisons with explicit domain restrictions;
-7. an instrumented CBN/call-by-need implementation experiment with precise metric boundaries;
-8. a blind independent implementation and post-freeze differential-conformance result;
-9. an explicit, versioned receiver-assumption taxonomy and no-double-counting ledger;
-10. a documented negative complete-bootstrap result instead of a proxy substitution;
-11. a living bilingual research record plus a separate post-Stage-5 literature audit that records corrections rather than rewriting historical evidence.
+4. frozen empirical methodology that preserves inconvenient and negative results;
+5. exact constructor-level wire attribution and controlled `Let`/`Nat` experiments;
+6. controlled BLC/Jot/structural comparisons with explicit limitations;
+7. a CBN/call-by-need observational experiment;
+8. a frozen independent implementation and 942-case post-freeze differential result;
+9. a versioned receiver-assumption model and conditional transmitted-bit accounting;
+10. a documented negative complete-bootstrap result;
+11. a literature-informed distinction between the stable Core and the missing teaching/bootstrap layer.
 
-These are project contributions; they are not claims that every component idea is novel.
-
----
-
-# 12. Conclusion and next evidence stage
-
-The post-Stage-5 re-audit did not reveal a hidden defect requiring rollback of NEX-1 v0.1. Its main effect is to make the research more conservative and more precise.
-
-The wire representation, pure-Core HM implementation, weak call-by-name evaluator, frozen Stage 4 measurements, independent Python checkpoint, `942/942` differential result, and negative bootstrap result all remain valid within their stated conditions. What changed is the interpretation around them: combinatory logic is recognized as a typed competitor; total description cost is explicitly conditional; the `A1` prior is weakened and parameterized when a rule calculus is needed; differential agreement is not confused with proof; and prior interstellar-language research is acknowledged directly.
-
-Before an incompatible NEX-1 redesign, the highest-value next evidence stage is:
-
-1. **NEX metatheory:** preservation, canonical forms, and an appropriate progress/safety theorem for the current pure Core;
-2. **evaluation equivalence:** a formal or mechanized NEX-specific argument that the allowed call-by-need implementation preserves portable observations;
-3. **broader conformance:** bounded exhaustive enumeration of small closed well-scoped/well-typed terms across independent implementations, plus hold-out and externally specified workloads;
-4. **bootstrap construction:** one dependency-closed artifact under an exact `A1(R)` or `A2(U)` profile.
-
-Only after these gaps are reduced should global compactness, total `C | A`, or incompatible Core/wire redesigns be argued from stronger evidence.
+These are project results, not claims that every underlying idea is historically new.
 
 ---
 
-# Glossary
+# 12. Next research stage: teaching NEX
 
-**Architecture-neutral** — specified without dependence on a particular processor, ABI, OS, or host runtime.
+The next stage should construct a **NEX Teaching / Bootstrap Message** as a separate layer over the stable Core.
 
-**Bootstrap (`B`)** — transmitted information required, under declared prior assumptions, to realize enough machinery to process the target system.
+The target pipeline is:
 
-**Call-by-name (CBN)** — non-strict evaluation in which arguments are delayed and may be recomputed.
+```text
+receiver prior A
+    -> finite teaching message T
+    -> reconstructed NEX competence
+    -> conformance/self-test
+    -> canonical NEX programs P
+```
 
-**Call-by-need** — non-strict evaluation with sharing/memoization.
+A candidate curriculum may introduce, in a progressively constrained order:
 
-**Canonical program payload (`P`)** — exact NEX wire length once the NEX contract is already fixed; a conditional description length, not a prior-free information quantity.
+1. binary symbols, sequence order, and framing assumptions;
+2. naturals and finite sequences;
+3. self-delimiting integer coding;
+4. structural composition / trees;
+5. natural values and simple primitive equations;
+6. application and functions;
+7. binding and the relationship between pedagogical notation and de Bruijn indices;
+8. products and sums;
+9. recursion;
+10. type constructors and judgments;
+11. principal type examples;
+12. canonical NEX wire encoding;
+13. transmitted conformance exercises for decoder, typechecker, and evaluator self-test.
 
-**Differential conformance** — comparing independent implementations on common inputs using portable observations; agreement is evidence, not a proof oracle.
+This order is a hypothesis, not yet an accepted protocol.
 
-**Receiver profile (`A`)** — explicit versioned prior knowledge/capability assumed outside the measured transmitted object.
+The stage must define an operational success criterion for receiver competence. A useful criterion is not philosophical “understanding” but reproducible capability: given specified exercises, the reconstructed system produces the expected canonical bits, type judgments/rejections, and observable results, and can construct valid programs for a held-out task family.
 
-**`A1(R)`** — elementary mathematical prior plus one exactly specified formal rule calculus `R` and its serialization.
+Supporting work should include NEX-specific metatheory, bounded-exhaustive cross-implementation testing, function application contexts, and hold-out workloads.
 
-**`A2(U)`** — elementary mathematical prior plus one exactly specified universal binary machine `U` and input framing.
-
-**`C | A = |M_A|`** — exact total length of one concrete transmitted object under receiver assumptions `A`.
-
-**Weak-head normal form (WHNF)** — evaluation far enough to reveal the outer computational form.
+No incompatible NEX-1 Core redesign should be introduced merely to make the curriculum easier; pedagogical notation may differ from the final canonical representation.
 
 ---
 
-# Bibliography
+# 13. Conclusion
 
-1. de Bruijn, N. G. (1972). *Lambda calculus notation with nameless dummies, a tool for automatic formula manipulation, with application to the Church-Rosser theorem.* `[SRC-0001]`
-2. Tromp, J. *Binary Lambda Calculus.* `[SRC-0002]`
-3. Milner, R. (1978). *A Theory of Type Polymorphism in Programming.* `[SRC-0003]`
-4. Damas, L.; Milner, R. (1982). *Principal Type-Schemes for Functional Programs.* `[SRC-0004]`
-5. Plotkin, G. D. (1977). *LCF Considered as a Programming Language.* `[SRC-0005]`
-6. Elias, P. (1975). *Universal codeword sets and representations of the integers.* `[SRC-0006]`
-7. Wells, J. B. (1999). *Typability and type checking in System F are equivalent and undecidable.* `[SRC-0007]`
-8. Schönfinkel, M. (1924). *Über die Bausteine der mathematischen Logik.* `[SRC-0009]`
-9. Plotkin, G. D. (1975). *Call-by-name, call-by-value and the lambda-calculus.* `[SRC-0011]`
-10. Launchbury, J. (1993). *A Natural Semantics for Lazy Evaluation.* `[SRC-0012]`
-11. Sestoft, P. (1997). *Deriving a lazy abstract machine.* `[SRC-0013]`
-12. Barker, C. (2001). *Iota and Jot: the simplest languages?* `[SRC-0014]`
-13. W3C WebAssembly Working Group. *WebAssembly Core Specification.* `[SRC-0008]`
-14. The Go Project. *The Go Programming Language Specification.* `[SRC-0010]`
-15. Shannon, C. E. (1948). *A Mathematical Theory of Communication.* `[SRC-0015]`
-16. Kolmogorov, A. N. (1965). *Three approaches to the definition of the concept “quantity of information”.* `[SRC-0016]`
-17. Chaitin, G. J. (1975). *A Theory of Program Size Formally Identical to Information Theory.* `[SRC-0017]`
-18. Hindley, J. R. (1969). *The Principal Type-Scheme of an Object in Combinatory Logic.* `[SRC-0018]`
-19. Rissanen, J. (1978). *Modeling by shortest data description.* `[SRC-0019]`
-20. Freudenthal, H. (1960). *Lincos: Design of a Language for Cosmic Intercourse, Part 1.* `[SRC-0020]`
-21. Fitzpatrick, P. *CosmicOS: a next-generation Contact message.* `[SRC-0021]`
-22. Ollongren, A.; Vakoch, D. A. (2011). *Typing logic contents using Lingua Cosmica.* `[SRC-0022]`
-23. Maraist, J.; Odersky, M.; Wadler, P. (1998). *The call-by-need lambda calculus.* `[SRC-0023]`
-24. Knight, J. C.; Leveson, N. G. (1986). *An Experimental Evaluation of the Assumption of Independence in Multiversion Programming.* `[SRC-0024]`
-25. Tofte, M. (1990). *Type Inference for Polymorphic References.* `[SRC-0025]`
-26. Wright, A. K.; Felleisen, M. (1994). *A Syntactic Approach to Type Soundness.* `[SRC-0026]`
-27. McKeeman, W. M. (1998). *Differential Testing for Software.* `[SRC-0027]`
+Stages 0–5 establish a stable experimental Core and substantial evidence that its explicit specification/conformance material is reconstructable. They do not yet solve the original communication problem completely.
 
-The detailed source-use and limitation notes are maintained in `docs/SOURCES.md`.
+The literature comparison makes the missing component precise. NEX has concentrated on the **final computational agreement**: exact terms, typing, evaluation, canonical bits, and conformance. Systems such as Lincos and CosmicOS show that a practical unknown-receiver message must also contain a **curriculum**.
+
+The next research task is therefore to build a finite transmitted curriculum that teaches the stable NEX-1 Core and makes successful reconstruction operationally testable. Once such an artifact exists, its exact bit length can finally replace speculative bootstrap proxies.
+
+---
+
+# Bibliography and source registry
+
+The durable bibliography with exact source usage and limitations is maintained in `docs/SOURCES.md`. Stable source IDs used in this manuscript include SRC-0001 through SRC-0029.
+
+The interstellar-teaching comparison is maintained separately in `docs/RELATED-WORK.md`.
 
 ---
 
 # Maintenance rule
 
-Per ADR-0012 and ADR-0016, future reproducible measurements, formal results, counterexamples, independent-conformance evidence, stage-level conclusions, or material literature corrections must update this canonical manuscript and its Russian mirror unless the corresponding change explicitly documents why no research-text update is required.
+Per ADR-0012, reproducible measurements, research-significant decisions, independent-conformance results, formal counterexamples/proofs, stage-level conclusions, or changes to the accounting model must update this canonical manuscript and its Russian mirror unless the corresponding PR explicitly explains why no manuscript change is required.
