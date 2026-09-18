@@ -2,7 +2,8 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Current state:** `Stage 4 — Complete; Stage 5 — Planned, not started`  
+**Active branch:** `stage5/independence-protocol`  
+**Current state:** `Stage 4 — Complete; Stage 5 — In progress (5.0/5.1 protocol checkpoint)`  
 **Living research dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md` (ADR-0012)
 
 ## Completed milestones
@@ -14,139 +15,126 @@
 - Stage 3 — dynamic semantics and reference evaluator — Complete by PR #5, merge `166cdc03282ea500263fdca7185f006f9b17a702`.
 - Stage 4 — empirical validation and benchmarking — Complete by PR #6, squash merge `ebffde6c8669f65dfcba98d31d261d59b48d4dd0`.
 
-## Stage 4 — Complete
+Stage 4 final PR head `871d0bc44dbf18854d5e58b15191799b11b834af` passed clean-checkout CI `35377200520`. Post-merge `main` commit `ebffde6c8669f65dfcba98d31d261d59b48d4dd0` passed push CI `35377892126`.
 
-Stage 4 is recorded in `docs/STAGE-4.md`; the research conclusions are synthesized in the living dissertation and ADR-0011.
+The final Stage 4 evidence and conclusions remain in `docs/STAGE-4.md`, ADR-0011, and the living dissertation. Key unresolved variables remain receiver-neutral specification cost `S` and bootstrap `B`; total `C = S + B + P` is not yet numerically defensible.
 
-The final PR head was:
-
-```text
-871d0bc44dbf18854d5e58b15191799b11b834af
-```
-
-It passed clean-checkout GitHub Actions run:
-
-```text
-35377200520  success
-```
-
-There were no open review threads or PR comments at the merge gate. The PR was mergeable and was squash-merged only after the full current head, including the dissertation/governance additions, had passed CI.
-
-The squash merge commit on `main` is:
-
-```text
-ebffde6c8669f65dfcba98d31d261d59b48d4dd0
-```
-
-Post-merge push verification on that exact `main` commit also passed:
-
-```text
-35377892126  reference-go  success
-```
-
-The commits after the verified merge are documentation-only Stage 4 closure and Stage 5 planning; they do not modify `reference/go`, benchmark corpora, conformance data, or NEX-1 v0.1 semantics.
-
-### Final Stage 4 evidence snapshot
-
-Frozen accepted corpus v0.3:
-
-```text
-programs   17
-wire_bits  1371
-ast_nodes  345
-```
-
-Exact wire attribution:
-
-```text
-Prim  460 bits  33.6%
-Var   286 bits  20.9%
-App   264 bits  19.3%
-Nat   244 bits  17.8%
-Lam    84 bits   6.1%
-Let    33 bits   2.4%
-```
-
-Important measured results:
-
-- `Let` has a real payload/reuse-dependent break-even rather than being universally beneficial or wasteful.
-- direct `Nat` strongly outperforms the tested repeated-`succ` construction; `Nat(255)` is 21 bits versus 2300 bits for the tested chain.
-- the experimental principal-root-type envelope adds 134 bits to 1371 term bits, `+9.77% Delta P`; it does not establish a bootstrap saving.
-- on the identical pure-lambda subset, BLC is 30 bits versus NEX 37 bits; no global NEX-over-BLC claim is supported.
-- the selected tiny postfix structural baseline is 1529 bits versus NEX 1371 bits on full v0.3, but it reuses NEX numeric/primitive assumptions.
-- experimental call-by-need preserves the same observable WHNF on all 17 accepted programs and reduces Go-reference transitions from 226151 to 2484 in aggregate (`98.90%`), but this is runtime/reference evidence, not transmission-cost evidence.
-- exact program cost `P` is measurable; receiver-neutral `S` and especially bootstrap `B` remain unresolved, therefore total `C = S + B + P` is not yet numerically defensible.
-
-### Stage 4 decision gate
-
-ADR-0011 records the evidence-supported decisions:
-
-- keep NEX-1 v0.1 stable;
-- keep direct `Nat` and `Let`;
-- keep erased HM for v0.1 while the total-cost typing comparison remains deferred;
-- keep weak call-by-name normative and allow observationally equivalent call-by-need optimization;
-- prioritize primitive-reference/profile encoding only as future compactness research, not as an immediate v0.1 change;
-- make no global minimality/superiority claim;
-- do not substitute host-source size for bootstrap `B`.
-
-ADR-0012 additionally established the living English/Russian dissertation and the mandatory research-synthesis checkpoint for future material evidence.
-
-## Remaining project-wide unknowns after Stage 4
-
-The highest-value unresolved evidence is now:
-
-1. **independent reconstructability** — there is still only one complete reference implementation, so specification/Go co-development may hide ambiguities;
-2. **receiver-neutral bootstrap** — no accepted transmitted artifact yet defines/measures `B`;
-3. **receiver-neutral specification cost** — Markdown byte size is not `S`;
-4. broader-corpus generalization of Stage 4 constructor distributions;
-5. formal proof of selected codec/type/evaluator properties;
-6. independent total-cost comparisons under common receiver assumptions.
-
-## Stage 5 — Planned; not started
-
-The planning document is `docs/STAGE-5.md`.
+## Stage 5 — In progress
 
 Working title:
 
 > **Independent reconstruction and receiver-neutral bootstrap**
 
-Stage 5 is intentionally an evidence stage, not a NEX-1 v0.2 redesign stage.
+Plan: `docs/STAGE-5.md`.
 
-The plan is split into:
+Stage 5 remains an evidence stage. No NEX-1 v0.2 redesign, new Core primitive, system profile, production frontend, native backend, or self-hosting work is authorized by this stage.
 
-```text
-5.0 independence protocol
-5.1 conformance packet completeness audit
-5.2 independent wire implementation
-5.3 independent static semantics
-5.4 independent dynamic semantics
-5.5 differential conformance after the independence checkpoint
-5.6 specification ambiguity audit / conformance hardening
-5.7 receiver-assumption model for bootstrap
-5.8 first measurable bootstrap candidate
-5.9 research decision gate
-```
+### 5.0 — independence protocol — Implemented on branch; pending PR verification
 
-The second implementation must be built from a frozen conformance/specification packet rather than by translating `reference/go`. Direct comparison against Go is postponed until the independent implementation reaches a declared freeze checkpoint.
+ADR-0013 records the first independent-reconstruction protocol.
 
-For bootstrap accounting, Stage 5 introduces the principle that any measured bootstrap value must be conditional on explicit receiver assumptions:
+Frozen NEX source snapshot:
 
 ```text
-B | A
+4f9c50aed13cdbdf72c9ce6510521477d49c05a5
 ```
 
-Unknown or undeclared assumptions must not disappear into an apparently exact bit count.
+First independent implementation target:
 
-## Stage 5 starting gate
+```text
+Python 3.12+
+standard library only
+```
 
-Do **not** start Stage 5 implementation merely because this plan exists.
+Python is selected to reduce implementation similarity to Go and because arbitrary-precision integers require no third-party package. Python source size is explicitly **not** bootstrap cost `B`.
 
-Before coding the second implementation:
+The packet allowlist includes only:
 
-1. review `docs/STAGE-5.md`;
-2. accept the independence protocol requirements;
-3. choose the independent implementation language/toolchain and record the choice if research-significant;
-4. generate/freeze the conformance packet;
-5. only then begin Stage 5.2.
+- canonical `docs/NEX-1-v0.1.md`;
+- wire/static/evaluation conformance JSON;
+- ADR-0002, ADR-0006, ADR-0007, ADR-0009;
+- packet-local observation/audit documents;
+- explicitly allowlisted primary theory.
 
-No NEX-1 v0.2 wire redesign, new Core primitive, system profile, production frontend, native backend, or self-hosting claim should begin before the Stage 5 evidence gate permits it.
+`reference/go/**`, Stage 4 experiment material, benchmark corpus, dissertation/status/stage-history documents, and ADR-0008's Go evaluator architecture are excluded as implementation guidance before the independent checkpoint.
+
+### Cognitive-independence limitation — Recorded
+
+The current co-development context already participated in the Go reference implementation. Therefore code authored here from remembered Go design **must not** be labelled independent implementation evidence.
+
+Strong Stage 5 independent evidence requires:
+
+```text
+fresh isolated implementation context
+or
+another implementer
+```
+
+receiving only the frozen packet and allowed theory.
+
+The current context is allowed to build protocol, packet, audit, CI, and neutral comparison infrastructure.
+
+### Frozen conformance packet — Implemented
+
+Packet metadata:
+
+```text
+stage5/conformance-packet-v0.1/manifest.json
+packet_id = nex1-independent-conformance-packet-v0.1
+```
+
+The manifest records exact Git blob hashes for every frozen source file.
+
+`stage5/build_packet.py`:
+
+- verifies the expected frozen source commit identity in the manifest;
+- verifies Git-blob hashes of all allowlisted source files;
+- validates conformance JSON schema IDs;
+- materializes only allowlisted source and packet-local files;
+- generates a SHA-256 content manifest for the standalone packet.
+
+`.github/workflows/stage5-independence.yml` verifies and materializes the packet with Python 3.12 and uploads the standalone packet as a workflow artifact.
+
+### 5.1 — conformance packet completeness audit — Implemented on branch
+
+Audit: `stage5/conformance-packet-v0.1/AUDIT.md`.
+
+The audit found no known missing Core semantic rule that blocks a first independent implementation, but it found two presentation-layer omissions:
+
+**F1 — principal type observation format.** Principal schemes are semantic up to alpha-renaming, while static conformance stores strings using `T0`, `T1`, ... . The canonical conformance text rule was not explicitly specified.
+
+**F2 — fixture JSON AST shape.** The conformance files demonstrated `kind/value/a/b` JSON objects but did not explicitly define that JSON mapping as a test-fixture contract.
+
+Both are resolved in:
+
+```text
+stage5/conformance-packet-v0.1/OBSERVATIONS.md
+```
+
+as packet-only comparison/fixture conventions. They do not alter NEX-1 v0.1 wire or semantics.
+
+Additional audit conclusions:
+
+- Algorithm W internal substitution/fresh-ID strategy remains deliberately implementation-specific; only normalized principal schemes are portable.
+- evaluator representation remains deliberately implementation-specific; ADR-0008 is excluded from the packet.
+- a global precedence rule for hypothetical terms containing multiple independent static defects is not invented. If differential testing makes such a rule necessary, Stage 5.6 will add the smallest portable conformance case.
+
+### Next gate
+
+Before Stage 5.2 can claim independent evidence:
+
+1. PR A (protocol + packet) must pass its dedicated clean-checkout CI;
+2. the materialized packet artifact must be frozen;
+3. a fresh isolated implementation context must receive only that packet and allowed external theory;
+4. independent wire/static/dynamic implementation must reach a declared pre-comparison commit;
+5. only then may `reference/go` be opened for differential conformance.
+
+## Remaining project-wide unknowns
+
+- whether a truly isolated second implementation reconstructs the same NEX behavior;
+- what specification ambiguities the independent attempt will expose;
+- actual receiver-neutral bootstrap artifact and conditional cost `B | A`;
+- receiver-neutral specification cost `S`;
+- broader-corpus generalization of Stage 4 constructor distributions;
+- formal proof of selected codec/type/evaluator properties;
+- independent total-cost comparisons under common receiver assumptions.
