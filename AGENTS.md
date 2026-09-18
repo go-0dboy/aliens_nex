@@ -10,8 +10,9 @@ Before making changes, read at least:
 4. `docs/DOMAIN.md`
 5. `docs/WORKFLOW.md`
 6. `docs/TESTING.md`
-7. relevant files in `docs/adr/`
-8. `docs/STATUS.md`
+7. `docs/SOURCES.md`
+8. relevant files in `docs/adr/`
+9. `docs/STATUS.md`
 
 ## Required working behavior
 
@@ -25,6 +26,23 @@ Before making changes, read at least:
 - Distinguish `verified`, `inferred`, `hypothesis`, and `not yet tested`.
 - Prefer one canonical representation over convenience duplicates.
 - Update `docs/STATUS.md` after a meaningful project stage.
+
+## Research source policy
+
+Per ADR-0004, `docs/SOURCES.md` is the canonical registry of external research sources used by the project.
+
+When work materially relies on a new external theorem, algorithm, encoding, standard, language model, implementation baseline, or empirical result, the same change MUST add or update the corresponding source entry in `docs/SOURCES.md`.
+
+AI agents MUST:
+
+- prefer primary papers, official standards, and author-maintained technical material where practical;
+- verify bibliographic identity and stable links/DOIs before registering a source;
+- record what NEX actually uses from the source;
+- distinguish the source's established result from NEX-specific inference or hypothesis;
+- record exact versions/commit identifiers when an external implementation becomes a benchmark baseline;
+- recheck mutable/living specifications when current content materially affects a decision.
+
+Do not add a link merely because it was read during research. The registry is for sources that materially influence project work.
 
 ## Documentation language policy
 
