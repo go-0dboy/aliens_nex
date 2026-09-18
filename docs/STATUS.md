@@ -12,7 +12,8 @@
 **Stage 3 completed by:** PR `#5 stage3: complete dynamic semantics and reference evaluator`  
 **Stage 3 merge commit:** `166cdc03282ea500263fdca7185f006f9b17a702`  
 **Active Stage 4 branch:** `stage4/empirical-validation`  
-**Active Stage 4 pull request:** `#6`
+**Active Stage 4 pull request:** `#6`  
+**Living research dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md` (ADR-0012)
 
 ## Stages 0–3 — Complete
 
@@ -198,9 +199,24 @@ ADR-0011 records the decisions supported by current evidence:
 - do not claim NEX is globally smallest or superior to BLC;
 - keep total-information superiority unresolved until an actual receiver-neutral bootstrap artifact makes `B` measurable.
 
+## Living research dissertation — Established
+
+ADR-0012 adds a cumulative dissertation-style research manuscript to the repository:
+
+- canonical English: `docs/RESEARCH-DISSERTATION.md`;
+- required Russian mirror: `docs/RESEARCH-DISSERTATION.ru.md`.
+
+The manuscript synthesizes the research problem, object/subject, goal, research questions, hypotheses, theoretical basis, methodology, Stages 0–4, reproducible measurements, negative results, limitations/threats to validity, current contributions, glossary, bibliography, and reproducibility artifacts.
+
+The dissertation is now a mandatory research-synthesis checkpoint. A PR that creates a material new measurement, research-significant decision, external baseline/source, independent conformance result, proof/counterexample, stage-level conclusion, revised `S/B/P/C` evidence, or falsification/qualification of an earlier hypothesis must update the English manuscript and Russian mirror, or explicitly document why no dissertation change is required.
+
+Direct quotations must not be invented; exact quotations may be used only after verifying source wording. Ordinary literature claims should be paraphrased and cited to primary/official sources registered in `docs/SOURCES.md`.
+
 ## Stage 4 scope review
 
 Stage 4 did not add new normative NEX-1 v0.1 term constructors, mutable memory/system calls, product frontend/parser work, native/bytecode compiler, machine profile, or self-hosting implementation. Experimental encoders/evaluators remain isolated from normative v0.1 semantics.
+
+The dissertation/process additions are documentation and research-governance work; they do not change normative NEX-1 v0.1 semantics or Stage 4 measurements.
 
 ## Remaining project-wide unknowns
 
@@ -216,4 +232,4 @@ Still intentionally unresolved:
 
 ## Next recommended step
 
-Review PR #6 as the completed Stage 4 implementation. If accepted, merge it, mark Stage 4 `Complete` on `main`, and only then design the next stage around the highest-value unresolved evidence: independent conformance implementation and a receiver-neutral bootstrap experiment. Do not begin a normative NEX-1 v0.2 redesign before that discussion.
+Review PR #6 as the completed Stage 4 implementation plus the new living research dissertation/process rule. If accepted, merge it, mark Stage 4 `Complete` on `main`, update the dissertation's Stage 4 evidence status from pending merge to merged, and only then design the next stage around the highest-value unresolved evidence: independent conformance implementation and a receiver-neutral bootstrap experiment. Do not begin a normative NEX-1 v0.2 redesign before that discussion.
