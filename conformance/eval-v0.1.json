@@ -1,0 +1,350 @@
+{
+  "schema": "nex-eval-conformance-v0.1",
+  "core_version": "NEX-1 Core v0.1",
+  "observation_note": "Results describe observable weak-head form only. Pair/sum payloads and function internals are not forced or serialized.",
+  "evaluation_vectors": [
+    {
+      "name": "nat-42",
+      "term": {"kind": "Nat", "value": "42"},
+      "result": {"kind": "Nat", "value": "42"}
+    },
+    {
+      "name": "identity-is-function",
+      "term": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
+      "result": {"kind": "Function"}
+    },
+    {
+      "name": "beta-identity-42",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}},
+        "b": {"kind": "Nat", "value": "42"}
+      },
+      "result": {"kind": "Nat", "value": "42"}
+    },
+    {
+      "name": "ignored-diverging-argument",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Lam", "a": {"kind": "Nat", "value": "7"}},
+        "b": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        }
+      },
+      "result": {"kind": "Nat", "value": "7"}
+    },
+    {
+      "name": "unused-let-value",
+      "term": {
+        "kind": "Let",
+        "a": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        },
+        "b": {"kind": "Nat", "value": "7"}
+      },
+      "result": {"kind": "Nat", "value": "7"}
+    },
+    {
+      "name": "unit",
+      "term": {"kind": "Prim", "value": "10"},
+      "result": {"kind": "Unit"}
+    },
+    {
+      "name": "succ-41",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "1"},
+        "b": {"kind": "Nat", "value": "41"}
+      },
+      "result": {"kind": "Nat", "value": "42"}
+    },
+    {
+      "name": "pred-zero",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "2"},
+        "b": {"kind": "Nat", "value": "0"}
+      },
+      "result": {"kind": "Nat", "value": "0"}
+    },
+    {
+      "name": "pred-five",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "2"},
+        "b": {"kind": "Nat", "value": "5"}
+      },
+      "result": {"kind": "Nat", "value": "4"}
+    },
+    {
+      "name": "ifz-zero-does-not-force-nonzero-branch",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "3"},
+            "b": {"kind": "Nat", "value": "0"}
+          },
+          "b": {"kind": "Nat", "value": "42"}
+        },
+        "b": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        }
+      },
+      "result": {"kind": "Nat", "value": "42"}
+    },
+    {
+      "name": "ifz-nonzero-does-not-force-zero-branch",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "3"},
+            "b": {"kind": "Nat", "value": "1"}
+          },
+          "b": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "0"},
+            "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+          }
+        },
+        "b": {"kind": "Nat", "value": "9"}
+      },
+      "result": {"kind": "Nat", "value": "9"}
+    },
+    {
+      "name": "partial-pair-is-function",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "4"},
+        "b": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        }
+      },
+      "result": {"kind": "Function"}
+    },
+    {
+      "name": "pair-does-not-force-fields",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "4"},
+          "b": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "0"},
+            "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+          }
+        },
+        "b": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        }
+      },
+      "result": {"kind": "Pair"}
+    },
+    {
+      "name": "fst-does-not-force-right",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "5"},
+        "b": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "4"},
+            "b": {"kind": "Nat", "value": "1"}
+          },
+          "b": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "0"},
+            "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+          }
+        }
+      },
+      "result": {"kind": "Nat", "value": "1"}
+    },
+    {
+      "name": "snd-does-not-force-left",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "6"},
+        "b": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "4"},
+            "b": {
+              "kind": "App",
+              "a": {"kind": "Prim", "value": "0"},
+              "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+            }
+          },
+          "b": {"kind": "Nat", "value": "2"}
+        }
+      },
+      "result": {"kind": "Nat", "value": "2"}
+    },
+    {
+      "name": "inl-does-not-force-payload",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "7"},
+        "b": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        }
+      },
+      "result": {"kind": "Inl"}
+    },
+    {
+      "name": "inr-does-not-force-payload",
+      "term": {
+        "kind": "App",
+        "a": {"kind": "Prim", "value": "8"},
+        "b": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        }
+      },
+      "result": {"kind": "Inr"}
+    },
+    {
+      "name": "case-inl-does-not-force-right-function",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "9"},
+            "b": {
+              "kind": "App",
+              "a": {"kind": "Prim", "value": "7"},
+              "b": {"kind": "Nat", "value": "5"}
+            }
+          },
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        },
+        "b": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        }
+      },
+      "result": {"kind": "Nat", "value": "5"}
+    },
+    {
+      "name": "case-inr-does-not-force-left-function",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "9"},
+            "b": {
+              "kind": "App",
+              "a": {"kind": "Prim", "value": "8"},
+              "b": {"kind": "Nat", "value": "6"}
+            }
+          },
+          "b": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "0"},
+            "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+          }
+        },
+        "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+      },
+      "result": {"kind": "Nat", "value": "6"}
+    },
+    {
+      "name": "case-selected-payload-remains-lazy",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {
+            "kind": "App",
+            "a": {"kind": "Prim", "value": "9"},
+            "b": {
+              "kind": "App",
+              "a": {"kind": "Prim", "value": "7"},
+              "b": {
+                "kind": "App",
+                "a": {"kind": "Prim", "value": "0"},
+                "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+              }
+            }
+          },
+          "b": {"kind": "Lam", "a": {"kind": "Nat", "value": "7"}}
+        },
+        "b": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {"kind": "Lam", "a": {"kind": "Var", "value": "0"}}
+        }
+      },
+      "result": {"kind": "Nat", "value": "7"}
+    },
+    {
+      "name": "fix-terminating-countdown-five",
+      "term": {
+        "kind": "App",
+        "a": {
+          "kind": "App",
+          "a": {"kind": "Prim", "value": "0"},
+          "b": {
+            "kind": "Lam",
+            "a": {
+              "kind": "Lam",
+              "a": {
+                "kind": "App",
+                "a": {
+                  "kind": "App",
+                  "a": {
+                    "kind": "App",
+                    "a": {"kind": "Prim", "value": "3"},
+                    "b": {"kind": "Var", "value": "0"}
+                  },
+                  "b": {"kind": "Nat", "value": "0"}
+                },
+                "b": {
+                  "kind": "App",
+                  "a": {"kind": "Prim", "value": "1"},
+                  "b": {
+                    "kind": "App",
+                    "a": {"kind": "Var", "value": "1"},
+                    "b": {
+                      "kind": "App",
+                      "a": {"kind": "Prim", "value": "2"},
+                      "b": {"kind": "Var", "value": "0"}
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "b": {"kind": "Nat", "value": "5"}
+      },
+      "result": {"kind": "Nat", "value": "5"}
+    }
+  ]
+}

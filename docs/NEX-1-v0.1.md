@@ -224,6 +224,14 @@ Within `body`, `x` is represented by `Var(0)`.
 
 `Let` is a primitive AST constructor because Hindley-Milner generalization occurs at let-bindings. Replacing every `let x = a in b` with `App(Lam(b), a)` would change typing behavior.
 
+Dynamic evaluation of `Let` is non-strict. Conceptually:
+
+```text
+Let(value, body) -> body[0 := value]
+```
+
+`value` MUST NOT be evaluated merely because the binding is created. An environment-based implementation may instead extend the runtime environment for `body` with a delayed binding for `value`.
+
 ---
 
 ## 9. Natural numbers
@@ -244,19 +252,19 @@ Large values are encoded directly in binary form by the wire integer code descri
 
 NEX-1 Core v0.1 reserves primitive IDs `0..10` exactly as follows.
 
-| ID | Name | Type scheme |
-|---:|---|---|
-| 0 | `fix` | `forall a. (a -> a) -> a` |
-| 1 | `succ` | `N -> N` |
-| 2 | `pred` | `N -> N` |
-| 3 | `ifz` | `forall a. N -> a -> a -> a` |
-| 4 | `pair` | `forall a b. a -> b -> a * b` |
-| 5 | `fst` | `forall a b. a * b -> a` |
-| 6 | `snd` | `forall a b. a * b -> b` |
-| 7 | `inl` | `forall a b. a -> a + b` |
-| 8 | `inr` | `forall a b. b -> a + b` |
-| 9 | `case` | `forall a b c. (a + b) -> (a -> c) -> (b -> c) -> c` |
-| 10 | `unit` | `1` |
+| ID | Name | Arity | Type scheme |
+|---:|---|---:|---|
+| 0 | `fix` | 1 | `forall a. (a -> a) -> a` |
+| 1 | `succ` | 1 | `N -> N` |
+| 2 | `pred` | 1 | `N -> N` |
+| 3 | `ifz` | 3 | `forall a. N -> a -> a -> a` |
+| 4 | `pair` | 2 | `forall a b. a -> b -> a * b` |
+| 5 | `fst` | 1 | `forall a b. a * b -> a` |
+| 6 | `snd` | 1 | `forall a b. a * b -> b` |
+| 7 | `inl` | 1 | `forall a b. a -> a + b` |
+| 8 | `inr` | 1 | `forall a b. b -> a + b` |
+| 9 | `case` | 3 | `forall a b c. (a + b) -> (a -> c) -> (b -> c) -> c` |
+| 10 | `unit` | 0 | `1` |
 
 Primitive IDs `11..31` are reserved for future Core revisions and MUST NOT be assigned by external profiles.
 
@@ -266,6 +274,8 @@ Profile-specific primitives MUST use IDs `>= 32`.
 
 ## 11. Primitive semantics
 
+Core primitives are curried. A primitive supplied with fewer arguments than its arity is a function value in weak-head normal form. Supplied arguments are delayed until the saturated primitive rule requires them.
+
 ### 11.1 Natural numbers
 
 ```text
@@ -274,6 +284,8 @@ pred 0       -> 0
 pred (n + 1) -> n
 ```
 
+`succ` and `pred` force their argument far enough to obtain a natural number.
+
 ### 11.2 Zero branch
 
 ```text
@@ -281,7 +293,7 @@ ifz 0       z s -> z
 ifz (n + 1) z s -> s
 ```
 
-Only the selected branch is required to evaluate.
+`ifz` forces its first argument far enough to distinguish zero from a positive natural. It MUST evaluate only the selected branch; the unselected branch MUST NOT be evaluated merely by the `ifz` rule.
 
 ### 11.3 Products
 
@@ -292,6 +304,8 @@ fst (pair a b) -> a
 snd (pair a b) -> b
 ```
 
+Constructing `pair a b` MUST NOT force either field. `fst` and `snd` force the pair expression far enough to expose the pair constructor and then demand only the selected field. The unselected field MUST NOT be evaluated merely by projection.
+
 ### 11.4 Sums
 
 Conceptually:
@@ -301,6 +315,8 @@ inl a : A + B
 inr b : A + B
 ```
 
+Constructing `inl a` or `inr b` MUST NOT force the payload.
+
 Reduction:
 
 ```text
@@ -308,13 +324,19 @@ case (inl a) f g -> f a
 case (inr b) f g -> g b
 ```
 
+`case` forces the scrutinee far enough to expose `inl` or `inr`. It MUST evaluate only the selected branch function. The unselected branch MUST NOT be evaluated by the `case` rule. The selected payload is passed to the selected function according to ordinary call-by-name application and therefore remains delayed until that function demands it.
+
 ### 11.5 Fixed point
 
 ```text
 fix f -> f (fix f)
 ```
 
-`fix` provides general recursion and therefore permits non-terminating programs.
+`fix` provides general recursion and therefore permits non-terminating programs. The recursive argument `fix f` is passed according to ordinary call-by-name application and MUST NOT be pre-evaluated merely by the fixed-point rule.
+
+### 11.6 Unit
+
+`unit` is an immediate value of type `1` and has arity zero.
 
 ---
 
@@ -330,11 +352,63 @@ The principal beta rule is conceptually:
 App(Lam(body), argument) -> body[0 := argument]
 ```
 
+The corresponding `Let` rule is conceptually:
+
+```text
+Let(value, body) -> body[0 := value]
+```
+
+Neither rule requires evaluating the substituted expression first.
+
 Implementations SHOULD avoid literal capture-prone substitution and MAY use environments, closures, explicit substitutions, graph reduction, or call-by-need.
 
 An implementation MAY use call-by-need memoization provided that the observable Core result is the same as the reference semantics.
 
 Evaluation does not reduce under `Lam` until the lambda is applied.
+
+### 12.1 Weak-head normal forms
+
+Reference evaluation is required only to expose the outer computational form. The observable Core weak-head forms are:
+
+```text
+lambda/function
+natural number
+unit
+pair constructor with delayed fields
+inl constructor with delayed payload
+inr constructor with delayed payload
+unsaturated primitive function
+```
+
+A conforming implementation MAY represent these forms using host-specific closures, environments, thunks, heaps, or other internal objects. Those runtime representations are not part of the NEX wire format and are not portable observations.
+
+### 12.2 Primitive forcing
+
+The normative forcing behavior is summarized below.
+
+| Primitive | Forced by the rule | Remains delayed unless later demanded |
+|---|---|---|
+| `fix f` | `f` only as required for ordinary application | recursive `fix f` argument |
+| `succ n` | `n` to `N` | — |
+| `pred n` | `n` to `N` | — |
+| `ifz n z s` | `n`, then selected branch | unselected branch |
+| `pair a b` | nothing | both fields |
+| `fst p` | `p` to pair WHNF, then selected field | right field |
+| `snd p` | `p` to pair WHNF, then selected field | left field |
+| `inl a` | nothing | payload |
+| `inr b` | nothing | payload |
+| `case s f g` | `s` to sum WHNF, then selected function | unselected function; payload until selected function demands it |
+| `unit` | nothing | — |
+
+### 12.3 Divergence and implementation resource limits
+
+Because `fix` permits general recursion, a valid well-typed program may diverge.
+
+A practical evaluator MAY impose implementation resource limits such as transition/fuel, recursion-depth, memory, or allocation limits. Exceeding such a limit is an implementation refusal. It MUST NOT be reported as a malformed wire term, scope error, type error, unknown primitive, or normal Core result.
+
+Finite resource exhaustion does not in general prove that a program diverges: the same valid program may terminate with larger resources.
+
+The exact step/fuel counting convention is implementation-specific and is not a portable Core observable. Conformance tests MUST NOT require different evaluators to exhaust a resource budget after the same number of internal steps.
 
 ---
 
@@ -429,6 +503,8 @@ A Core payload is valid only if all of the following are true:
 6. the top-level term is closed.
 
 Termination is not required. A valid NEX-1 program may diverge because `fix` provides general recursion.
+
+Evaluator resource exhaustion is not a validity condition. A valid program remains valid if a particular implementation refuses to continue because of an implementation resource limit.
 
 ---
 
@@ -828,8 +904,11 @@ A conforming **NEX-1 Type Checker** MUST:
 A conforming **NEX-1 Evaluator** MUST:
 
 - accept only valid, well-typed closed Core terms;
-- implement the Core primitive semantics;
-- produce results observationally equivalent to the reference weak call-by-name semantics for terminating Core programs.
+- implement the Core primitive semantics and arities;
+- preserve the forcing/non-strictness rules in sections 11 and 12;
+- treat unsaturated primitives as function weak-head forms;
+- produce results observationally equivalent to the reference weak call-by-name semantics for terminating Core programs;
+- keep implementation resource-limit refusal distinct from Core validity and normal results.
 
 ---
 
@@ -892,6 +971,9 @@ NEX-1 is a new experimental design, but the individual foundations are establish
 - Robin Milner, *A Theory of Type Polymorphism in Programming* (1978): polymorphic static type inference.
 - Luis Damas and Robin Milner, *Principal Type-Schemes for Functional Programs* (1982): principal type schemes for Hindley-Milner style typing.
 - Gordon Plotkin, PCF and related work on typed functional computation with natural numbers and fixed points.
+- Gordon Plotkin, *Call-by-name, call-by-value and the lambda-calculus* (1975): operational distinction between evaluation strategies.
+- John Launchbury, *A Natural Semantics for Lazy Evaluation* (1993): lazy evaluation with sharing.
+- Peter Sestoft, *Deriving a Lazy Abstract Machine* (1997): environment/closure-based lazy machine derivation and call-by-need implementation background.
 - WebAssembly Core Specification: a modern example of separating a portable computational core from embedding/environment interaction.
 
 Useful primary references:
@@ -900,6 +982,9 @@ Useful primary references:
 - https://tromp.github.io/cl/Binary_lambda_calculus.html
 - https://doi.org/10.1016/0022-0000(78)90014-4
 - https://doi.org/10.1145/582153.582176
+- https://doi.org/10.1016/0304-3975(75)90017-1
+- https://doi.org/10.1145/158511.158618
+- https://doi.org/10.1017/S0956796897002712
 - https://www.w3.org/TR/wasm-core/
 
 ---

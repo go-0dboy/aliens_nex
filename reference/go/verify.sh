@@ -14,3 +14,4 @@ go test ./...
 go test -run '^$' -fuzz=FuzzSubstitutionComposition -fuzztime=1s ./nex
 go test -run '^$' -fuzz=FuzzUnifyProducesEqualAppliedTypes -fuzztime=1s ./nex
 go test -run '^$' -fuzz=FuzzInferenceSuccessfulSchemeIsClosedAndStable -fuzztime=1s ./nex
+go test -run '^$' -fuzz=FuzzEvaluationDeterministicObservation -fuzztime=1s ./nex
