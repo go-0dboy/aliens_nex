@@ -1,7 +1,8 @@
 # Stage 3 — Dynamic semantics and evaluator
 
-**Status:** In progress  
-**Branch:** `stage3/dynamic-semantics`
+**Status:** Complete  
+**Completed by:** PR `#5 stage3: complete dynamic semantics and reference evaluator`  
+**Merge commit:** `166cdc03282ea500263fdca7185f006f9b17a702`
 
 Stage 3 begins after wire decoding and static validation are already complete. Its job is to define and implement the observable execution semantics of a valid NEX-1 Core program without expanding into a frontend, optimizer, machine profile, compiler, or self-hosting system.
 
@@ -275,6 +276,8 @@ Before Stage 3 is complete:
 - clean-checkout CI passes;
 - the final diff contains no frontend, optimizer, native/bytecode compiler, machine/system profile, mutable-memory system, or self-hosting implementation.
 
+All of the above completion checks were satisfied before PR #5 was merged. The merged Stage 3 implementation also passed clean-checkout CI on `main` as run `35365823377`.
+
 ## Reference versus optimized evaluation
 
 Reference Stage 3 is deliberately call-by-name without thunk memoization. This keeps the executable reference close to the normative reduction strategy.
@@ -296,3 +299,5 @@ Stage 3 MUST NOT add:
 ## Definition of done
 
 Stage 3 is complete when a decoded, statically valid NEX-1 Core term can be evaluated according to the clarified weak call-by-name contract to an observable WHNF, or can diverge / be refused because of explicitly separate implementation resource limits, with implementation-independent evaluation vectors and repeatable CI evidence.
+
+Stage 3 satisfies this definition of done.
