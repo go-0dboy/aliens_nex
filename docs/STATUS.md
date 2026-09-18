@@ -187,11 +187,46 @@ Most benchmark programs whose inferred top-level type is simply `N` require only
 
 Measured conclusion: transmitting this particular root principal-type envelope costs +9.77% over erased terms on v0.3. Unmeasured question: whether any explicit/hybrid verification design can save enough real bootstrap information to compensate for that program overhead. A distinct checker/verification design is required before making that claim.
 
+### Stage 4.5 — external / structural baselines — Complete first reproducible set
+
+`docs/experiments/stage4-baselines.md` defines the comparison rules before interpreting results.
+
+BLC and Jot are compared only on the identical pure-lambda subset (`identity`, `constant`, `composition`), so the comparison does not silently charge BLC/Jot for Church encodings of NEX `Nat`/`Prim`. Jot uses one deterministic standard bracket-abstraction path (`lambda -> SK -> Barker Jot`) and is **not** a shortest-program claim. The tiny stack baseline is project-defined, reuses NEX `U(n)` and primitive IDs, and therefore measures a structural encoding alternative rather than an independent bootstrap.
+
+Clean-checkout CI `35372182772` generated:
+
+```text
+Pure lambda subset, 3 programs
+NEX                         37 bits
+BLC                         30 bits
+Jot via fixed SK translation 288 bits
+```
+
+Per-program pure-lambda values:
+
+```text
+identity      NEX 5   BLC 4   Jot 20
+constant      NEX 9   BLC 7   Jot 41
+composition   NEX 23  BLC 19  Jot 227
+```
+
+Measured conclusion: BLC is 7 bits smaller than NEX on this narrow identical pure-lambda subset. The Jot figure demonstrates the cost of the chosen deterministic bracket-abstraction translation only; it is not evidence about optimal Jot encodings.
+
+For the full frozen v0.3 corpus:
+
+```text
+NEX canonical wire     1371 bits
+tiny postfix stack     1529 bits
+delta                   +158 bits
+delta percent           +11.52%
+```
+
+Measured conclusion: this particular 3-bit postfix structural baseline is larger than NEX on v0.3. Because it reuses NEX integer and primitive conventions, this does not establish a total-information-cost advantage over an independently bootstrapped stack machine.
+
 ## Remaining Stage 4 work
 
 Still pending:
 
-- 4.5 reproducible BLC / SKI-Jot / tiny typed stack baselines;
 - 4.6 call-by-name versus call-by-need comparison;
 - 4.7 bootstrap accounting model;
 - 4.8 generated final experimental report;
@@ -211,4 +246,4 @@ Still intentionally unverified:
 
 ## Next recommended step
 
-Proceed to Stage 4.5. Use primary sources and explicitly documented translation/encoding rules for each external baseline. Compare program payloads without treating baseline interpreter/decoder assumptions as free, and keep hand-optimized examples separate from documented canonical translations.
+Proceed to Stage 4.6 without changing normative NEX-1 v0.1 semantics. Implement an explicitly experimental call-by-need evaluator with sharing/memoization, require observable agreement with the reference call-by-name evaluator on the accepted corpus, and compare transitions / repeated thunk forcing as reference-only implementation metrics.
