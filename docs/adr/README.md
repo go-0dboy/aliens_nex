@@ -26,6 +26,7 @@ An ADR is therefore required for any decision that materially changes one or mor
 - [ADR-0004: Maintain a research source registry](0004-research-source-registry.md)
 - [ADR-0005: Use Go for the first reference implementation](0005-go-reference-implementation.md)
 - [ADR-0006: Keep decoder resource limits separate from wire validity](0006-decoder-resource-limits.md)
+- [ADR-0007: Keep ordinary type annotations out of the NEX-1 v0.1 canonical wire format](0007-erased-type-annotations-v0.1.md)
 
 ## Status values
 
