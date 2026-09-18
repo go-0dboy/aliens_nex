@@ -2,14 +2,16 @@
 
 **Date:** 2026-09-18  
 **Baseline branch:** `main`  
-**Documentation work branch:** `docs/adr-workflow`
+**Documentation work branch:** `docs/adr-workflow`  
+**Active pull request:** `#1 docs: establish ADRs and project workflow`
 
 ## Proven / present in repository
 
 - NEX-1 Core v0.1 draft specification exists in `docs/NEX-1-v0.1.md`.
 - The repository README identifies the total-information-cost design objective.
-- ADR process and initial architectural rationale are being added on `docs/adr-workflow`.
-- Development, testing, domain-language, and architecture guidance are being added on the same branch.
+- ADR process and initial architectural rationale are present on `docs/adr-workflow`.
+- Development, testing, domain-language, architecture, AI-agent, and continuation guidance are present on the same branch.
+- PR #1 contains documentation/process changes only; it does not modify the NEX-1 v0.1 specification or implementation code.
 
 ## Current architectural baseline
 
@@ -53,4 +55,4 @@ The purpose of the first milestone is to prove that the canonical wire grammar i
 
 ## Next recommended step
 
-After the ADR/workflow documentation is reviewed and merged, create one implementation PR for the integer codec + term encoder/decoder + initial golden vectors only.
+Review and merge PR #1. Then create one separate implementation PR for the integer codec + term encoder/decoder + initial golden vectors only.
