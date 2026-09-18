@@ -69,13 +69,18 @@ func ValidateType(t *Type) error {
 		return ErrInvalidType
 	}
 	switch t.Kind {
-	case TypeVar, TypeUnit, TypeNat:
+	case TypeVar:
 		if t.A != nil || t.B != nil {
 			return ErrInvalidType
 		}
 		return nil
+	case TypeUnit, TypeNat:
+		if t.Var != 0 || t.A != nil || t.B != nil {
+			return ErrInvalidType
+		}
+		return nil
 	case TypeFunc, TypeProduct, TypeSum:
-		if t.A == nil || t.B == nil {
+		if t.Var != 0 || t.A == nil || t.B == nil {
 			return ErrInvalidType
 		}
 		if err := ValidateType(t.A); err != nil {
