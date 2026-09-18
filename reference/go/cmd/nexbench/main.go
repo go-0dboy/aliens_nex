@@ -38,10 +38,11 @@ type corpus struct {
 }
 
 type portableReport struct {
-	WireBits     int                   `json:"wire_bits"`
-	ASTNodes     int                   `json:"ast_nodes"`
-	Constructors nex.ConstructorCounts `json:"constructors"`
-	Observation  observation           `json:"observation"`
+	WireBits          int                     `json:"wire_bits"`
+	ASTNodes          int                     `json:"ast_nodes"`
+	Constructors      nex.ConstructorCounts   `json:"constructors"`
+	WireByConstructor nex.ConstructorWireBits `json:"wire_bits_by_constructor"`
+	Observation       observation             `json:"observation"`
 }
 
 type referenceReport struct {
@@ -58,12 +59,13 @@ type programReport struct {
 }
 
 type aggregateReport struct {
-	Programs     int                   `json:"programs"`
-	WireBits     int                   `json:"wire_bits"`
-	ASTNodes     int                   `json:"ast_nodes"`
-	Constructors nex.ConstructorCounts `json:"constructors"`
-	Transitions  uint64                `json:"reference_evaluation_transitions"`
-	MaxEvalDepth uint32                `json:"reference_max_evaluation_depth"`
+	Programs          int                     `json:"programs"`
+	WireBits          int                     `json:"wire_bits"`
+	ASTNodes          int                     `json:"ast_nodes"`
+	Constructors      nex.ConstructorCounts   `json:"constructors"`
+	WireByConstructor nex.ConstructorWireBits `json:"wire_bits_by_constructor"`
+	Transitions       uint64                  `json:"reference_evaluation_transitions"`
+	MaxEvalDepth      uint32                  `json:"reference_max_evaluation_depth"`
 }
 
 type report struct {
@@ -97,6 +99,7 @@ func main() {
 		CorpusStatus:  c.Status,
 		Notes: []string{
 			"portable_exact values are architecture-neutral properties of the canonical NEX term/wire encoding",
+			"wire_bits_by_constructor attributes each bit to the local constructor encoding that emitted it and sums exactly to wire_bits",
 			"reference_only values describe the Go reference evaluator and are not Core performance claims",
 			"reference implementation size is not treated as bootstrap transmission cost",
 		},
@@ -133,10 +136,11 @@ func main() {
 			Description:    p.Description,
 			Classification: p.Classification,
 			Portable: portableReport{
-				WireBits:     metrics.WireBits,
-				ASTNodes:     metrics.ASTNodes,
-				Constructors: metrics.Constructors,
-				Observation:  observed,
+				WireBits:          metrics.WireBits,
+				ASTNodes:          metrics.ASTNodes,
+				Constructors:      metrics.Constructors,
+				WireByConstructor: metrics.WireByConstructor,
+				Observation:       observed,
 			},
 			Reference: referenceReport{
 				EvaluationTransitions: stats.Transitions,
@@ -305,6 +309,12 @@ func addAggregate(a *aggregateReport, p programReport) {
 	a.Constructors.Let += p.Portable.Constructors.Let
 	a.Constructors.Nat += p.Portable.Constructors.Nat
 	a.Constructors.Prim += p.Portable.Constructors.Prim
+	a.WireByConstructor.Var += p.Portable.WireByConstructor.Var
+	a.WireByConstructor.Lam += p.Portable.WireByConstructor.Lam
+	a.WireByConstructor.App += p.Portable.WireByConstructor.App
+	a.WireByConstructor.Let += p.Portable.WireByConstructor.Let
+	a.WireByConstructor.Nat += p.Portable.WireByConstructor.Nat
+	a.WireByConstructor.Prim += p.Portable.WireByConstructor.Prim
 	a.Transitions += p.Reference.EvaluationTransitions
 	if p.Reference.MaxEvaluationDepth > a.MaxEvalDepth {
 		a.MaxEvalDepth = p.Reference.MaxEvaluationDepth
