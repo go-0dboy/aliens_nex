@@ -1,17 +1,17 @@
-name: wire-foundation
+name: reference-go
 
 on:
   pull_request:
     paths:
       - 'reference/go/**'
-      - 'conformance/wire-v0.1.json'
+      - 'conformance/*.json'
       - '.github/workflows/wire-foundation.yml'
   push:
     branches:
       - main
     paths:
       - 'reference/go/**'
-      - 'conformance/wire-v0.1.json'
+      - 'conformance/*.json'
       - '.github/workflows/wire-foundation.yml'
 
 permissions:
@@ -30,6 +30,6 @@ jobs:
           go-version-file: reference/go/go.mod
           cache-dependency-path: reference/go/go.mod
 
-      - name: Verify wire reference implementation
+      - name: Verify Go reference implementation
         working-directory: reference/go
         run: sh verify.sh
