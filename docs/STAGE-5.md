@@ -1,6 +1,7 @@
 # Stage 5 — Independent reconstruction and receiver-neutral bootstrap
 
-**Status:** Planned; not started  
+**Status:** In progress — Stage 5.0/5.1 implementation complete on protocol branch; independent implementation not started  
+**Branch:** `stage5/independence-protocol`  
 **Prerequisite:** Stage 4 complete  
 **Primary purpose:** test whether NEX-1 v0.1 can be reconstructed independently from its specification/conformance artifacts and begin replacing the unknown bootstrap term `B` with explicit, assumption-conditioned artifacts rather than host-language proxies.
 
@@ -17,7 +18,33 @@ The total-information objective remains:
 C = S + B + P
 ```
 
-Stage 5 MUST NOT set `B = 0`, MUST NOT substitute Go/Rust/C source size for `B`, and MUST NOT claim an unconditional receiver-neutral `B` if the artifact still depends on undeclared assumptions.
+Stage 5 MUST NOT set `B = 0`, MUST NOT substitute Go/Rust/C/Python source size for `B`, and MUST NOT claim an unconditional receiver-neutral `B` if the artifact still depends on undeclared assumptions.
+
+## Current checkpoint — 2026-09-18
+
+Stage 5.0 and Stage 5.1 have been started and implemented on `stage5/independence-protocol`.
+
+Accepted protocol decisions are recorded in ADR-0013:
+
+- freeze the first implementation packet against source commit `4f9c50aed13cdbdf72c9ce6510521477d49c05a5`;
+- use Python 3.12+ standard library only for the first independent implementation;
+- exclude `reference/go/**` and other implementation/experiment material until the independent checkpoint;
+- intentionally exclude ADR-0008 because it describes Go evaluator architecture rather than required NEX runtime structure;
+- permit only the explicitly allowlisted primary theory during the blind implementation phase;
+- require a fresh isolated implementation context or different implementer before any result is labelled independent evidence.
+
+The packet lives under `stage5/conformance-packet-v0.1/` and has a machine-readable manifest with exact Git blob hashes. `stage5/build_packet.py` verifies those hashes and materializes a standalone packet; CI publishes the result as an artifact.
+
+The Stage 5.1 completeness audit found two presentation-layer gaps, not Core semantic contradictions:
+
+1. principal type schemes were semantically defined but canonical textual alpha-normalization (`T0`, `T1`, ...) was not explicitly specified for conformance output;
+2. the JSON AST shape used by conformance fixtures was demonstrated but not explicitly documented as a packet fixture contract.
+
+Both are resolved in `stage5/conformance-packet-v0.1/OBSERVATIONS.md` as packet-only observation/fixture conventions. They do not change NEX-1 v0.1 wire or semantics.
+
+A third finding is intentionally left unspecified: no global error-precedence rule is invented for hypothetical terms containing multiple independent static defects. If differential testing later makes such precedence portable and relevant, Stage 5.6 will add the smallest conformance rule needed.
+
+The next implementation gate is Stage 5.2, but it MUST occur in a fresh isolated context because the current co-development context already knows the Go implementation and therefore cannot honestly produce cognitively independent evidence.
 
 ## Stage 5.0 — independence protocol
 
@@ -330,4 +357,6 @@ Stage 5 is complete only when all applicable items are true:
 
 ## Starting gate
 
-Do **not** start the independent implementation until the Stage 5 plan is reviewed and the independence protocol is accepted. The first implementation action should be Stage 5.0/5.1, not coding a second evaluator from memory.
+The Stage 5 plan and Stage 5.0/5.1 protocol are now accepted for the protocol branch. Do **not** begin the independent implementation in this contaminated co-development context.
+
+The first Stage 5.2 implementation action must occur in a fresh isolated implementation context that receives only the materialized packet and allowed theory. Its pre-comparison commit must be frozen before `reference/go` is opened for differential testing.
