@@ -1,0 +1,51 @@
+{
+  "schema": "nex-selfhost-interleaved-pair-result",
+  "version": "0.1",
+  "candidate": "interleaved-pair-v0.1.json",
+  "core_version": "NEX-1 v0.1",
+  "decision": "rejected_as_primary_recursive_meta_representation_under_frozen_budget",
+  "budgets": {
+    "python_need_max_transitions": 5000000,
+    "python_need_max_depth": 4000,
+    "go_need_max_transitions": 5000000,
+    "go_need_max_depth": 20000
+  },
+  "summary": {
+    "canonical_functions": 3,
+    "canonical_bits_separate_terms": 1531,
+    "execution_cases": 27,
+    "python_need_resource_refusals": 6,
+    "go_need_resource_refusals": 4,
+    "go_cbn_resource_refusals": 14,
+    "python_go_need_values_compared": 21,
+    "portable_mismatches_on_returned_values": 0
+  },
+  "go_need_refusal_case_ids": [
+    "meta_pair_interleaved:7",
+    "meta_pair_interleaved:8",
+    "unpair_left_interleaved:8",
+    "unpair_right_interleaved:8"
+  ],
+  "python_need_refusal_case_ids": [
+    "meta_pair_interleaved:7",
+    "meta_pair_interleaved:8",
+    "unpair_left_interleaved:7",
+    "unpair_left_interleaved:8",
+    "unpair_right_interleaved:7",
+    "unpair_right_interleaved:8"
+  ],
+  "go_need_refusal_inputs": [
+    {"function": "meta_pair_interleaved", "args": [27, 39], "reason": "depth limit exceeded"},
+    {"function": "meta_pair_interleaved", "args": [95, 111], "reason": "depth limit exceeded"},
+    {"function": "unpair_left_interleaved", "args": [14847], "reason": "depth limit exceeded"},
+    {"function": "unpair_right_interleaved", "args": [14847], "reason": "depth limit exceeded"}
+  ],
+  "interpretation": [
+    "bit interleaving removes the pow2-adic recursive code-size explosion",
+    "the NEX implementation still requires derived parity/halving over numeric codes",
+    "under the frozen sharing budgets several moderate codes exhaust evaluator depth",
+    "no returned portable value disagreed with the mathematical oracle",
+    "the result is evidence against this representation as the primary practical self-hosting basis, not evidence of semantic invalidity or a proved Core limitation"
+  ],
+  "next_experiment": "functional finite streams using the fixed type N -> N with 0/1 data and 2 as EOF"
+}
