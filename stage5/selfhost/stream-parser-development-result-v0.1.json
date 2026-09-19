@@ -1,0 +1,38 @@
+{
+  "schema": "nex-selfhost-stream-parser-development-result",
+  "version": "0.1",
+  "date": "2026-09-19",
+  "stage": "5.12f",
+  "core_version": "NEX-1 v0.1",
+  "candidate": "stage5/selfhost/stream-parser-v0.1.json",
+  "candidate_git_blob_sha": "44b9d85f8bbe522d8b637c977c3fb39520c2c10f",
+  "contract": "stage5/selfhost/parser-contract-v0.1.json",
+  "contract_git_blob_sha": "5566cecca370906ad3f837bd68bba54941c4a14b",
+  "development_workload": "stage5/selfhost/parser-development-v0.1.json",
+  "development_git_blob_sha": "ccdf1bd61980956aa7b211843d4d321a67acf5f3",
+  "holdout_workload": "stage5/selfhost/parser-holdout-v0.1.json",
+  "holdout_git_blob_sha": "352e37b682230f196b3b4414932b7625dd24bfa7",
+  "holdout_status": "preregistered_unexecuted",
+  "github_actions": {
+    "workflow": "stage5-self-sufficiency",
+    "run_id": 35433974244,
+    "job_id": 105873398120
+  },
+  "measurements": {
+    "canonical_functions": 4,
+    "canonical_bits_separate_terms": 11361,
+    "development_cases": 27,
+    "projected_nat_observations": 108,
+    "python_call_by_need_resource_refusals": 0,
+    "go_call_by_need_resource_refusals": 0,
+    "go_normative_cbn_resource_refusals": 16,
+    "python_go_need_values_matched": 108,
+    "largest_python_need_transition_count": 7339,
+    "largest_python_need_case": "skip-nested:a",
+    "largest_go_need_transition_count": 3171,
+    "largest_go_need_case": "skip-nested:a"
+  },
+  "decision": "development_pass",
+  "interpretation": "The unchanged v0.1 candidate passed the complete preregistered development workload under both sharing controls. Normative CBN refusals remain resource measurements and do not invalidate the candidate under the frozen acceptance rule. The holdout has not been executed.",
+  "next_gate": "run the explicit historical checkpoint regression; only if it is green may the unchanged candidate be executed once against parser-holdout-v0.1.json"
+}
