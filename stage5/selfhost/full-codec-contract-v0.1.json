@@ -1,0 +1,84 @@
+{
+  "schema": "nex-selfhost-full-codec-contract",
+  "version": "0.1",
+  "status": "preregistered_before_full_codec_candidate_v0.1",
+  "core_version": "NEX-1 v0.1",
+  "representation_contract": "stage5/selfhost/meta-representation-v0.3.json",
+  "purpose": "Complete Stage 5.12 by implementing canonical Term wire decode/encode in unchanged NEX-1 v0.1 over the accepted operational representation.",
+  "interfaces": {
+    "FiniteBits": "(N -> N) * N",
+    "FiniteNatTokens": "(N -> N) * N",
+    "CodecResult": "N * ((N -> N) * N)",
+    "decodeTerm": "((N -> N) * N) -> (N * ((N -> N) * N))",
+    "encodeTerm": "((N -> N) * N) -> (N * ((N -> N) * N))"
+  },
+  "status_codes": {
+    "Ok": 0,
+    "WireUnexpectedEOF": 1,
+    "WireTrailingData": 2,
+    "MalformedMeta": 3
+  },
+  "success_contract": {
+    "decodeTerm": "Ok payload is canonical FiniteNatTokens Term v0.3; output tokens are a semantic preorder-token transformation of wire, not an opaque copy/reference to original Bits.",
+    "encodeTerm": "Ok payload is canonical FiniteBits; output wire is reconstructed from Term tokens and must equal NEX-1 v0.1 canonical wire extensionally including EOF at length."
+  },
+  "failure_contract": {
+    "decodeTerm": {
+      "WireUnexpectedEOF": "input finite wire ends before one complete Term is decoded",
+      "WireTrailingData": "one complete Term ends before the declared/input stream EOF",
+      "MalformedMeta": "reserved for a violated admitted FiniteBits meta-representation invariant; ordinary truncated canonical wire remains WireUnexpectedEOF"
+    },
+    "encodeTerm": {
+      "MalformedMeta": "Term token sequence is empty, truncated, has an unknown tag, or has trailing tokens after one complete Term"
+    },
+    "error_payload": "canonical empty finite stream/token value; status is the portable discriminator"
+  },
+  "term_tokens": {
+    "Var": "[0,index]",
+    "Lam": "[1] ++ Term(body)",
+    "App": "[2] ++ Term(function) ++ Term(argument)",
+    "Let": "[3] ++ Term(value) ++ Term(body)",
+    "Nat": "[4,value]",
+    "Prim": "[5,id]"
+  },
+  "laws": [
+    "decodeTerm(encodeTerm(term)) == term for every admitted canonical Term value on the frozen test surface",
+    "encodeTerm(decodeTerm(bits)) == canonical(bits) for every successfully decoded canonical wire value on the frozen test surface",
+    "function-valued stream equality is extensional over every declared element plus required out-of-range/EOF behavior; observing only Function is never acceptance evidence"
+  ],
+  "candidate_discipline": {
+    "development_workload": "stage5/selfhost/full-codec-development-v0.1.json",
+    "holdout_workload": "stage5/selfhost/full-codec-holdout-v0.1.json",
+    "after_first_candidate_execution": "any algorithmic or candidate-wire change requires full-codec candidate v0.2 and a new preregistered holdout",
+    "holdout_rule": "holdout may execute once only after frozen development success, bounded-exhaustive success, unchanged candidate identity, and a green historical checkpoint",
+    "no_budget_increase_after_result": true,
+    "no_failed_case_deletion": true
+  },
+  "resource_budgets": {
+    "python_call_by_need": {"max_transitions": 5000000, "max_depth": 8000},
+    "go_call_by_need": {"max_transitions": 5000000, "max_depth": 20000},
+    "go_normative_cbn": {"max_transitions": 5000000, "max_depth": 20000, "role": "measurement; refusals recorded separately under the existing Stage 5.12 protocol"}
+  },
+  "bounded_exhaustive_class": {
+    "status": "frozen_before_candidate_execution",
+    "maximum_ast_nodes": 3,
+    "leaf_set": ["Var(0)", "Nat(0)", "Prim(0)"],
+    "constructors": ["Var", "Lam", "App", "Let", "Nat", "Prim"],
+    "generation_rule": "all ordered Terms with 1..3 AST nodes whose leaves belong to the frozen leaf_set and whose internal constructors are Lam/App/Let where the node bound permits",
+    "expected_term_count": 27,
+    "required_checks": [
+      "Direct Go and Direct Python canonical wire agree",
+      "NEX decodeTerm accepts canonical wire and returns exactly the canonical token sequence",
+      "NEX encodeTerm accepts canonical tokens and returns exactly canonical wire",
+      "both Stage 5.12 round-trip laws hold extensionally"
+    ]
+  },
+  "forbidden_shortcuts": [
+    "decodeTerm returning/copying an opaque original wire object instead of canonical Term tokens",
+    "encodeTerm delegating constructor/U encoding decisions to a host callback",
+    "host AST/list/byte-array used as semantic state inside the NEX candidate",
+    "new Core primitive/type former/term constructor",
+    "changing canonical NEX-1 v0.1 wire"
+  ],
+  "completion_boundary": "Stage 5.13 remains blocked until this contract, development, exhaustive class, one-shot holdout, final regression, and documentation review all pass and Stage 5.12 is explicitly marked Complete."
+}
