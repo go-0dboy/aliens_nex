@@ -94,6 +94,23 @@ jobs:
       - name: Keep Stage 6 planning artifact valid while inactive
         run: python stage6/validate_plan.py
 
+  active-candidate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Check active functional stream artifact
+        run: python stage5/selfhost/build_functional_stream.py --check
+
+      - name: Verify active functional stream candidate
+        run: python stage5/selfhost/verify_functional_stream.py
+
   implementation-regression:
     runs-on: ubuntu-24.04
     steps:
