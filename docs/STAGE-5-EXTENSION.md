@@ -114,9 +114,9 @@ docs/experiments/stage5-selfhost-meta-representation-v0.3.md
 
 ## 5.12 — self wire codec
 
-**Status:** Active.
+**Status:** Complete.
 
-Implement in NEX:
+Implemented in NEX:
 
 ```text
 encodeU / decodeU
@@ -125,20 +125,86 @@ encodeTerm / decodeTerm
 
 where transmitted/canonical bit strings use accepted v0.3 `Bits` and internal terms use accepted v0.3 `Term` tokens.
 
-Required checks:
+Required laws were checked extensionally:
 
 ```text
 decodeTerm(encodeTerm(term)) == term
 encodeTerm(decodeTerm(bits)) == canonical(bits)
 ```
 
-Compare against existing Go/Python wire behavior and conformance vectors.
+The accepted full codec is `full-codec-v0.3`. It preserves NEX-1 v0.1, the canonical wire, the accepted Stage 5.11 carriers, and the frozen resource budgets.
 
-The detailed closeout order is frozen in `docs/STAGE-5.12-CLOSEOUT.md`. Stage 5.13 remains blocked until 5.12 is formally Complete.
+Candidate identity:
+
+```text
+decodeTerm   6,198 bits
+encodeTerm   6,124 bits
+total       12,322 bits as two separately serialized closed terms
+```
+
+The first two full-codec candidates remain negative evidence:
+
+- v0.1 passed development/exhaustive but was rejected on its preregistered holdout at `law2:deepmixed:stream`, Python need `5,000,001 > 5,000,000` transitions;
+- v0.2 was rejected on frozen development at the same historical case and limit, showing that local residual-index traversal had not removed repeated source reparsing.
+
+v0.3 was preregistered before implementation with a fresh unseen holdout. It changed only the algorithmic organization: recursive traversal constructs compositional functional fragments once, rather than exposing a token view that reparses the source wire across distinct index queries.
+
+Official v0.3 development result:
+
+```text
+24 valid + 12 decode errors + 12 encode errors
+120 compound forced Nat observations
+Python need refusals    0
+Go need refusals        0
+Python/Go need        120/120
+largest Python need   265,933  law2:deepmixed
+largest Go need       117,098  law2:deepmixed
+```
+
+Frozen complete 1..3-node Term class:
+
+```text
+complete terms                         27/27
+Direct Python canonical round trips   27/27
+Direct Go round trips/token checks    27/27
+NEX forced law observations          108/108
+Python need refusals                       0
+Go need refusals                           0
+```
+
+Pre-holdout historical checkpoint `35441259575` / job `105892338355` completed green across historical 5.12a–f, immutable v0.1/v0.2 results, frozen v0.3 development/exhaustive, independent Python, and Go reference/Stage 4 checks.
+
+The unchanged v0.3 candidate then passed its one-shot preregistered unseen holdout in workflow `35441600023`, job `105893253759`:
+
+```text
+7 valid + 3 decode errors + 3 encode errors
+34 compound forced Nat observations
+Python need refusals     0
+Go need refusals         0
+Python/Go need         34/34
+Go CBN refusals          30
+largest Python need   487,579  law2:v3-deep3
+largest Go need       212,893  law2:v3-deep3
+```
+
+The 30 normative Go CBN resource refusals remain explicit operational-cost evidence; they were not converted into successful values and do not alter the frozen sharing-control acceptance rule.
+
+Durable evidence:
+
+```text
+stage5/selfhost/full-codec-preholdout-result-v0.3.json
+stage5/selfhost/full-codec-holdout-result-v0.3.json
+stage5/selfhost/verify_full_codec_result_v0_3.py
+docs/experiments/stage5-selfhost-full-codec-v0.3.md
+```
+
+The detailed closeout discipline remains recorded in `docs/STAGE-5.12-CLOSEOUT.md`.
+
+**Stage 5.12 result: Complete.** Stage 5.13 may now be planned as the next sequential substage, but is not implemented by this closeout.
 
 ## 5.13 — self structural validation
 
-**Status:** Planned; blocked by Stage 5.12.
+**Status:** Planned; Stage 5.12 predecessor complete.
 
 Implement in NEX:
 
@@ -338,7 +404,7 @@ This extension is complete only when:
 
 - [x] 5.10 contract and ADR exist;
 - [x] 5.11 machine-readable operational meta-representation exists and is validated;
-- [ ] NEX self codec exists;
+- [x] NEX self codec exists;
 - [ ] NEX self structural validator exists;
 - [ ] NEX self HM inference exists;
 - [ ] NEX self evaluator exists;
