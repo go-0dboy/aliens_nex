@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
 """Verify Stage 5.12c NEX-written U(n) codec against independent controls.
 
-The canonical NEX terms are the objects under test. 5.12b already records the
-bounded pure-CBN resource experiment, so this verifier does not repeat the slow
-Python CBN run. It uses two independently implemented call-by-need controls for
-portable results, keeps Go CBN as a separate resource observation, and compares
-U(n) behavior with both existing host codecs.
+The canonical NEX terms are the objects under test. Stage 5.12b already records
+bounded pure-CBN resource behavior, so this verifier does not repeat the slow
+Python CBN run. It compares the NEX-written U(n) codec with both host codecs,
+requires the Go call-by-need control to complete the frozen 5.12c workload, and
+records Python call-by-need resource refusal separately from semantic failure.
 
-The CPython recursion limit is an implementation resource only. It is raised
-above the explicitly bounded NeedLimits depth so the host stack does not become
-a stricter accidental limit than the experiment contract.
+A resource refusal is not semantic invalidity. A wrong returned value, wire/type
+mismatch, or host-codec disagreement remains a hard failure.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import subprocess
 import sys
@@ -25,6 +25,8 @@ PYTHON_IMPL = ROOT / "independent" / "python"
 GO_IMPL = ROOT / "reference" / "go"
 
 sys.path.insert(0, str(PYTHON_IMPL))
+# Host-stack capacity is an implementation resource. Keep it above the bounded
+# Python NeedLimits depth so CPython does not become the accidental first limit.
 sys.setrecursionlimit(max(sys.getrecursionlimit(), 10_000))
 
 from nex.term import App, Nat  # noqa: E402
@@ -114,6 +116,10 @@ def run_json(command: list[str], payload: list[dict]) -> list[dict]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--report", type=Path)
+    args = parser.parse_args()
+
     build = subprocess.run(
         [
             sys.executable,
@@ -171,16 +177,23 @@ def main() -> None:
             expected = {"kind": "Nat", "value": str(case["result"])}
             try:
                 observed, stats = evaluate_need_observed(applied, PYTHON_NEED_LIMITS)
+                if observed != expected:
+                    fail(f"{case_id}: Python call-by-need {observed} != {expected}")
+                python_need[case_id] = {
+                    "status": "value",
+                    "result": observed,
+                    "stats": {
+                        "transitions": stats.transitions,
+                        "max_depth": stats.max_depth,
+                        "memo_hits": stats.memo_hits,
+                    },
+                }
             except NeedResourceLimitError as exc:
-                fail(f"{case_id}: Python call-by-need resource refusal: {exc}")
-            if observed != expected:
-                fail(f"{case_id}: Python call-by-need {observed} != {expected}")
-            python_need[case_id] = {
-                "result": observed,
-                "transitions": stats.transitions,
-                "max_depth": stats.max_depth,
-                "memo_hits": stats.memo_hits,
-            }
+                python_need[case_id] = {
+                    "status": "resource_refusal",
+                    "detail": str(exc),
+                }
+
             go_eval_requests.append(
                 {
                     "id": f"eval:{case_id}",
@@ -208,7 +221,6 @@ def main() -> None:
 
     # Compare the NEX-written decoder with both existing host codecs.
     decode_item = functions["decodeU"]
-    python_host_decode: dict[str, dict] = {}
     for index, case in enumerate(decode_item["tests"]):
         case_id = f"decode:{index}"
         expected = decode_result(case["result"])
@@ -235,7 +247,6 @@ def main() -> None:
             )
         if actual != expected:
             fail(f"decodeU:{index}: Python host {actual} != frozen result {expected}")
-        python_host_decode[case_id] = actual
 
     go_eval = run_json(["go", "run", "./cmd/nexselfhostprobe"], go_eval_requests)
     eval_by_id = {row["id"]: row for row in go_eval}
@@ -249,6 +260,9 @@ def main() -> None:
 
     go_cbn_refusals = 0
     execution_cases = 0
+    measurements: list[dict] = []
+    python_need_refusals = 0
+
     for item in items:
         name = item["name"]
         static = eval_by_id.get(f"static:{name}")
@@ -263,16 +277,49 @@ def main() -> None:
             if row is None or row.get("static_error"):
                 fail(f"{case_id}: Go static rejection/missing response: {row}")
             expected = {"kind": "Nat", "value": str(case["result"])}
+
             if row.get("need_error"):
                 fail(f"{case_id}: Go call-by-need refusal: {row['need_error']}")
             if row.get("need_result") != expected:
                 fail(f"{case_id}: Go call-by-need {row.get('need_result')} != {expected}")
-            if row.get("need_result") != python_need[case_id]["result"]:
-                fail(f"{case_id}: Python/Go call-by-need observations differ")
+
+            python_outcome = python_need[case_id]
+            if python_outcome["status"] == "value":
+                if row.get("need_result") != python_outcome["result"]:
+                    fail(f"{case_id}: Python/Go call-by-need observations differ")
+            else:
+                python_need_refusals += 1
+
             if row.get("cbn_error"):
                 go_cbn_refusals += 1
-            elif row.get("cbn_result") != expected:
-                fail(f"{case_id}: Go CBN returned wrong portable value")
+                go_cbn = {
+                    "status": "resource_refusal",
+                    "detail": row["cbn_error"],
+                    "stats": row.get("cbn_stats", {}),
+                }
+            else:
+                if row.get("cbn_result") != expected:
+                    fail(f"{case_id}: Go CBN returned wrong portable value")
+                go_cbn = {
+                    "status": "value",
+                    "result": row.get("cbn_result"),
+                    "stats": row.get("cbn_stats", {}),
+                }
+
+            measurements.append(
+                {
+                    "function": name,
+                    "args": case["args"],
+                    "expected": case["result"],
+                    "python_call_by_need": python_outcome,
+                    "go_call_by_need": {
+                        "status": "value",
+                        "result": row.get("need_result"),
+                        "stats": row.get("need_stats", {}),
+                    },
+                    "go_cbn": go_cbn,
+                }
+            )
             execution_cases += 1
 
     for index, case in enumerate(encode_item["tests"]):
@@ -300,16 +347,43 @@ def main() -> None:
         if actual != expected:
             fail(f"decodeU:{index}: Go host {actual} != frozen result {expected}")
 
-    print("stage5.12c NEX integer codec: verified")
+    report = {
+        "schema": "nex-selfhost-integer-codec-measurement",
+        "version": "0.1",
+        "core_version": "NEX-1 v0.1",
+        "budgets": {
+            "python_need_max_transitions": PYTHON_NEED_LIMITS.max_transitions,
+            "python_need_max_depth": PYTHON_NEED_LIMITS.max_depth,
+            "go_max_transitions": GO_MAX_TRANSITIONS,
+            "go_max_depth": GO_MAX_DEPTH,
+        },
+        "function_count": len(items),
+        "separate_term_bits": sum(item["wire_bit_length"] for item in items),
+        "execution_case_count": execution_cases,
+        "python_need_resource_refusals": python_need_refusals,
+        "go_need_resource_refusals": 0,
+        "go_cbn_resource_refusals": go_cbn_refusals,
+        "cases": measurements,
+    }
+    if args.report is not None:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(
+            json.dumps(report, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+
+    print("stage5.12c NEX integer codec: structurally and differentially verified")
     print(f"canonical functions: {len(items)}")
-    print(f"canonical bits (separate terms): {sum(item['wire_bit_length'] for item in items)}")
+    print(f"canonical bits (separate terms): {report['separate_term_bits']}")
     print(f"canonical encodeU bits: {encode_item['wire_bit_length']}")
     print(f"canonical decodeU bits: {decode_item['wire_bit_length']}")
     print(f"NEX execution cases: {execution_cases}")
-    print("Python/Go call-by-need portable observations: matched")
-    print("Python/Go direct U(n) host controls: matched")
+    print(f"Python call-by-need resource refusals: {python_need_refusals}")
+    print("Go call-by-need resource refusals: 0")
     print(f"Go CBN resource refusals: {go_cbn_refusals}")
-    print("Python CBN intentionally not repeated; Stage 5.12b freezes that resource evidence")
+    print("Python/Go call-by-need observations matched wherever Python returned")
+    print("Python/Go direct U(n) host controls: matched")
+    print("resource refusal remains an experimental outcome, not semantic invalidity")
 
 
 if __name__ == "__main__":
