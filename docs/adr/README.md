@@ -40,6 +40,19 @@ An ADR is required for decisions that materially change or reinterpret one or mo
 - [ADR-0017: Separate the NEX teaching/bootstrap protocol from the stable NEX-1 Core](0017-separate-teaching-protocol-from-core.md)
 - [ADR-0018: Require a pre-Stage-6 NEX Core self-sufficiency gate](0018-pre-stage6-core-self-sufficiency-gate.md)
 
+## Post-Stage-5 decision lineage
+
+The later ADRs refine one another rather than rewriting historical Stage 5 evidence:
+
+```text
+ADR-0015  closes historical Stage 5 with a negative complete-bootstrap result
+    -> ADR-0016  corrects claims and receiver assumptions; current model becomes v0.2
+       -> ADR-0017  separates teaching/bootstrap from the stable NEX-1 Core
+          -> ADR-0018  inserts mandatory self-sufficiency stages 5.10–5.20 before Stage 6
+```
+
+Therefore wording in ADR-0015/0016 about the then-next construction or teaching stage is historical context, not the current execution order. The authoritative continuation is `docs/STATUS.md`: Stage 5.11 and 5.12 are Complete, Stage 5.13 is Planned next, and Stage 6 remains Planned until the 5.20 gate permits activation.
+
 ## Status values
 
 Each ADR MUST use one of:
