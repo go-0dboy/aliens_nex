@@ -1,0 +1,31 @@
+name: stage5-self-sufficiency-holdout
+
+on:
+  pull_request:
+    paths:
+      - 'stage5/selfhost/holdout-trigger-v0.1.txt'
+  push:
+    branches: [ main ]
+    paths:
+      - 'stage5/selfhost/holdout-trigger-v0.1.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  functional-stream-v0-2-holdout:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Validate frozen experiment protocol
+        run: python stage5/selfhost/validate_experiment_protocol.py
+
+      - name: Execute preregistered functional-stream v0.2 holdout
+        run: python stage5/selfhost/verify_functional_stream_holdout_v0_1.py
