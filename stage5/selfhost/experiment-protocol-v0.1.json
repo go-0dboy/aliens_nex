@@ -1,0 +1,70 @@
+{
+  "schema": "nex-selfhost-experiment-protocol",
+  "version": "0.1",
+  "date": "2026-09-19",
+  "scope": "post-Stage-5 self-sufficiency work, beginning with Stage 5.12e",
+  "core_version": "NEX-1 v0.1",
+  "status": "frozen-before-functional-stream-v0.2-runtime",
+  "invariants": [
+    "NEX-1 v0.1 Core is not changed to make a candidate pass",
+    "resource refusal is recorded separately from semantic invalidity",
+    "resource budgets are not increased after observing a candidate result",
+    "failed or slow cases are not deleted from the same candidate version",
+    "a candidate that fails hold-out is rejected; any semantic or algorithmic change requires a new candidate version and a new hold-out set",
+    "verifier-only repairs are allowed only when they do not change candidate wire, workload inputs, expected semantic results, or resource budgets",
+    "all cases observed before this protocol are development evidence and are never relabeled as hold-out"
+  ],
+  "resource_budgets": {
+    "python_call_by_need": {
+      "max_transitions": 5000000,
+      "max_depth": 8000
+    },
+    "go_call_by_need": {
+      "max_transitions": 5000000,
+      "max_depth": 20000
+    },
+    "go_normative_cbn": {
+      "max_transitions": 5000000,
+      "max_depth": 20000,
+      "acceptance_role": "measurement_only_for_representation_candidate; refusals do not by themselves imply semantic invalidity"
+    }
+  },
+  "historical_classification": {
+    "foundation-v0.1": "verified checkpoint",
+    "meta-sequence-v0.1": "verified development/resource checkpoint",
+    "integer-codec-v0.1": "verified checkpoint",
+    "interleaved-pair-v0.1": "rejected candidate with reproduced negative result",
+    "functional-stream-v0.1": "development candidate already observed; failed frozen sharing transition budget on repeat length 32/128",
+    "all_pre_protocol_cases": "development_or_historical_evidence_not_holdout"
+  },
+  "active_candidate": {
+    "artifact": "stage5/selfhost/functional-stream-v0.2.json",
+    "builder": "stage5/selfhost/build_functional_stream_v0_2.py",
+    "verifier": "stage5/selfhost/verify_functional_stream_v0_2.py",
+    "representation": "Stream = N -> N, values 0/1 with EOF=2",
+    "algorithm_change_from_v0.1": "repeat uses direct indexed recursion over (count,index) rather than recursively materializing a cons chain",
+    "runtime_status_at_protocol_freeze": "not yet executed by CI"
+  },
+  "development_workload": {
+    "source": "tests embedded in stage5/selfhost/functional-stream-v0.2.json",
+    "classification": "previously observed workload; suitable for regression/development only",
+    "acceptance": [
+      "canonical wire round-trip succeeds",
+      "Python and Go principal types match frozen expectations",
+      "all fully applied cases return frozen Nat observations",
+      "Python and Go call-by-need have zero resource refusals under frozen budgets",
+      "Python and Go call-by-need observations agree on all cases",
+      "Go CBN resource outcomes are reported separately"
+    ]
+  },
+  "holdout": {
+    "file": "stage5/selfhost/functional-stream-holdout-v0.1.json",
+    "execution_rule": "do not run until functional-stream-v0.2 passes its frozen development workload and the candidate artifact is unchanged after that pass",
+    "failure_rule": "if any semantic mismatch or call-by-need resource refusal occurs, reject functional-stream-v0.2; do not modify v0.2 and rerun the same hold-out"
+  },
+  "ci_policy": {
+    "active_candidate": "fast contract plus active candidate check on candidate changes",
+    "historical_regression": "run at explicit research checkpoints, frozen-evidence changes, and before merge; it is not required to block each active-candidate edit",
+    "final_merge": "requires current candidate evidence, historical regression, research re-audit, and dissertation synchronization to be green/current"
+  }
+}
