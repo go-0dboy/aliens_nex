@@ -34,11 +34,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Compile active Stage 5.12 v0.2 tooling
+      - name: Compile active Stage 5.12 tooling
         run: |
           python -m py_compile stage5/selfhost/validate_meta_representation_v0_3.py
           python -m py_compile stage5/selfhost/validate_experiment_protocol.py
           python -m py_compile stage5/selfhost/validate_full_codec_contract_v0_2.py
+          python -m py_compile stage5/selfhost/validate_full_codec_contract_v0_3.py
           python -m py_compile stage5/selfhost/build_full_codec_v0_2.py
           python -m py_compile stage5/selfhost/verify_full_codec_static_v0_2.py
           python -m py_compile stage5/selfhost/verify_full_codec_development_v0_2.py
@@ -48,7 +49,9 @@ jobs:
         run: python stage5/selfhost/validate_meta_representation_v0_3.py
       - name: Validate frozen anti-tuning protocol
         run: python stage5/selfhost/validate_experiment_protocol.py
-      - name: Validate active Stage 5.12 v0.2 preregistration
-        run: python stage5/selfhost/validate_full_codec_contract_v0_2.py
-      - name: Preserve frozen Stage 5.12 v0.2 identity
-        run: python stage5/selfhost/build_full_codec_v0_2.py --check
+      - name: Preserve rejected Stage 5.12 v0.2 preregistration and identity
+        run: |
+          python stage5/selfhost/validate_full_codec_contract_v0_2.py
+          python stage5/selfhost/build_full_codec_v0_2.py --check
+      - name: Validate Stage 5.12 v0.3 preregistration before candidate implementation
+        run: python stage5/selfhost/validate_full_codec_contract_v0_3.py
