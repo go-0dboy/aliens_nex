@@ -3,7 +3,7 @@
 **Date:** 2026-09-19  
 **Baseline branch:** `main`  
 **Active work:** Post-Stage-5 NEX Core self-sufficiency extension (5.10–5.20)  
-**Current state:** `Stages 0–5 complete; 5.10 contract accepted; 5.11 N-only meta-representation validated; 5.12a arithmetic foundation verified; 5.12b pair/sequence sharing requirement corroborated by Python and Go; self wire codec next; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
+**Current state:** `Stages 0–5 complete; 5.10 accepted; 5.11 representation work versioned; 5.12a/b/c verified; 5.12d interleaved pair rejected under frozen budgets; 5.12e functional-stream v0.1 rejected on development resource budget; v0.2 frozen under anti-tuning protocol and awaiting first runtime execution; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
 **Active decision:** ADR-0018  
 **Living dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md`
 
@@ -126,8 +126,8 @@ ADR-0018 inserts an executable evidence gate before Stage 6 activation:
 
 ```text
 5.10 contract and gate                 accepted in ADR-0018
-5.11 NEX-in-NEX meta-representation   validated checkpoint
-5.12 self wire codec                   active; prerequisites verified/corroborated
+5.11 NEX-in-NEX meta-representation   versioned/validated checkpoints
+5.12 self wire codec                   active; integer codec verified; recursive representation under controlled experiment
 5.13 self structural validation        planned
 5.14 self HM type inference            planned
 5.15 self evaluator                    planned
@@ -138,25 +138,24 @@ ADR-0018 inserts an executable evidence gate before Stage 6 activation:
 5.20 decision gate                     planned
 ```
 
-### 5.11 validated artifact
+### 5.11 meta-representation checkpoints
 
-The first meta-representation candidate is deliberately austere:
+The original candidate is:
 
 ```text
 stage5/selfhost/meta-representation-v0.1.json
 stage5/selfhost/validate_meta_representation.py
-docs/experiments/stage5-selfhost-meta-representation.md
 ```
 
-Every frozen meta-object uses only NEX mathematical naturals `N` as its physical Core carrier. Finite products and sequences are encoded numerically; no recursive type, list primitive, host AST, host byte array, new Core primitive, or wire change is assumed.
+Every frozen meta-object uses only NEX mathematical naturals `N` as its physical Core carrier. No recursive type, list primitive, host AST, host byte array, new Core primitive, or wire change is assumed.
 
-The repository validator checks Core-dependency closure, tag contracts, bounded pair/sequence injectivity/round trips, and all bit sequences of length 0..5. The dedicated `stage5-self-sufficiency` workflow and the historical Stage 5 regression/re-audit workflows are green on the validated checkpoint.
+During 5.12 it became clear that v0.1 fixed tag inventories and payload shapes but did not explicitly freeze the outer tagged-value formula. Historical v0.1 remains unchanged. `meta-representation-v0.2.json` makes the candidate formula explicit as `tagged(tag,payload)=pair(tag,payload)` and is separately validated.
 
-This result is intentionally narrow: it establishes a concrete representation candidate, not a self-hosting claim and not an efficiency claim.
+This versioning records clarification rather than silently rewriting prior evidence.
 
 ### 5.12a executable arithmetic foundation
 
-The first actual canonical NEX programs for the self-hosting workstream are frozen in:
+Frozen artifacts:
 
 ```text
 stage5/selfhost/build_foundation.py
@@ -176,7 +175,7 @@ pow2         : N -> N
 shift_right  : N -> N -> N
 ```
 
-CI verified:
+Verified result:
 
 ```text
 canonical functions                         6
@@ -185,13 +184,11 @@ test applications per implementation        22
 Python/Go wire/type/Nat observations        matched
 ```
 
-The `756` figure is a local engineering size of six separately serialized helper terms. It is **not** a bootstrap cost, not a minimal library size, and not a contribution to `B | A` or total `C | A`.
-
-The helper generator uses readable names only as engineering notation; the exact research objects are canonical NEX wire strings. No arithmetic helper was added as a Core primitive.
+The `756` figure is a local engineering size, not bootstrap cost and not `B | A` or `C | A`.
 
 ### 5.12b N-only pair/sequence execution and sharing checkpoint
 
-The exact candidate required by `meta-representation-v0.1.json` was implemented as seven further closed canonical NEX terms:
+Seven canonical NEX terms implement the first pair/sequence candidate:
 
 ```text
 meta_pair
@@ -203,33 +200,20 @@ seq_head
 seq_tail
 ```
 
-Artifacts:
+They occupy 3,290 canonical bits when counted separately.
+
+Frozen workload result:
 
 ```text
-stage5/selfhost/build_meta_sequence.py
-stage5/selfhost/meta-sequence-v0.1.json
-stage5/selfhost/python_need.py
-stage5/selfhost/verify_meta_sequence.py
-stage5/selfhost/meta-sequence-measurement-summary-v0.1.json
-stage5/selfhost/meta-sequence-measurement-summary-v0.2.json
-docs/experiments/stage5-selfhost-meta-sequence.md
-docs/experiments/stage5-selfhost-sharing-corroboration.md
-reference/go/cmd/nexselfhostprobe/main.go
+measurement cases                          37
+Python CBN resource refusals                8
+Go CBN resource refusals                    5
+Python call-by-need resource refusals       0
+Go call-by-need resource refusals           0
+Python/Go need observation mismatches       0
 ```
 
-The seven terms occupy 3,290 canonical bits when counted separately. This remains an engineering measurement, not a bootstrap or total-information cost.
-
-The original bounded workload showed:
-
-```text
-measurement cases                     37
-Python CBN resource refusals           8
-Go CBN resource refusals               5
-Go call-by-need resource refusals      0
-portable mismatches on returned values 0
-```
-
-The largest successful Go contrast was:
+Largest successful Go contrast:
 
 ```text
 unpair_right(27)
@@ -238,35 +222,169 @@ call-by-need              1,793
 ratio                  ~2709.24x
 ```
 
-A second memoizing evaluator was then implemented in Python outside the frozen `independent/python` tree and the exact same 37-case workload was rerun. Corroboration result:
+Accepted interpretation remains:
+
+- the representation is executable on the bounded workload;
+- naive normative CBN is operationally poor;
+- two independently implemented sharing controls agree on all 37 returned observations;
+- sharing is an engineering feasibility condition for this representation;
+- this is not a proof of CBN/call-by-need equivalence and not a Core-defect finding.
+
+### 5.12c NEX-written integer codec
+
+The self-hosting workstream then implemented the integer part of canonical NEX wire in NEX itself.
+
+Artifacts:
 
 ```text
-Python call-by-need resource refusals   0
-Go call-by-need resource refusals       0
-Python/Go need observation mismatches   0
-cases agreed                            37/37
+stage5/selfhost/build_integer_codec.py
+stage5/selfhost/integer-codec-v0.1.json
+stage5/selfhost/verify_integer_codec.py
+docs/experiments/stage5-selfhost-integer-codec.md
 ```
 
-The updated full measurement report from workflow run `35428624295` has SHA-256:
+Verified measurements:
 
 ```text
-4f6baafe007f785f2a274abd6905f4961dfa49b3eabebe85835c32d51f58683b
+canonical functions                         6
+canonical bits, counted as separate terms  11,881
+canonical encodeU bits                      3,860
+canonical decodeU bits                      4,249
+NEX execution cases                            25
+Python call-by-need resource refusals           1
+Go call-by-need resource refusals               0
+Go CBN resource refusals                       13
+Python/Go need observations                 matched wherever Python returned
+Python/Go direct U(n) host controls          matched
 ```
 
-Accepted interpretation at this checkpoint:
+The single Python sharing refusal remains an implementation-resource outcome; the Go sharing control and both direct host codec controls corroborate the returned semantics. This checkpoint does not yet include complete `Term` encode/decode.
 
-- the N-only representation remains an executable expressiveness construction;
-- pure CBN execution is already operationally poor on several small encoded values;
-- resource refusal is not semantic invalidity and is not evidence by itself of a Core defect;
-- two separately implemented sharing controls complete the frozen workload and agree on every portable observation;
-- sharing is therefore an explicit engineering feasibility condition for this representation;
-- the result still does not prove NEX-specific CBN/call-by-need equivalence.
+### 5.12d recursive numeric pairing alternatives
 
-Decision: retain `meta-representation-v0.1` as the working 5.12 basis with the sharing condition explicit. The self wire codec may now proceed to NEX-written `encodeU/decodeU` while preserving CBN resource results and both sharing controls as evidence.
+Attempting to extend numeric pairing from small sequences to recursive ASTs exposed a distinct problem.
 
-### Required final implementation target
+For the original pow2-adic pair,
 
-The workstream targets an exact canonical NEX implementation `I` with:
+```text
+pair(a,b) = 2^a * (2*b+1) - 1
+```
+
+recursive use can make the bit length of an outer code depend on the **numeric value** of an already encoded subtree. This is operationally unsuitable for materializing realistic self ASTs.
+
+A bit-interleaving bijection was therefore implemented as a versioned executable candidate. It avoids the size explosion, but its NEX implementation depends on repeated parity/halving of packed naturals.
+
+Frozen result:
+
+```text
+canonical functions                     3
+canonical bits                        1,531
+execution cases                          27
+Python call-by-need resource refusals     6
+Go call-by-need resource refusals         4
+Go CBN resource refusals                 14
+Python/Go need values compared            21
+returned semantic mismatches               0
+```
+
+The Go sharing refusals are depth refusals on the predeclared workload, including `pair(27,39)`, `pair(95,111)` and unpairing `14847`.
+
+Decision: the interleaved candidate is **rejected as the primary recursive representation under the frozen budgets**. The rejection is reproduced by `verify_interleaved_pair_result.py`; limits were not raised to make the candidate pass.
+
+This is evidence about the representation/available derived operations, not yet evidence of a fundamental NEX Core limitation.
+
+### 5.12e functional-stream representation experiment
+
+To avoid packing recursive data into one huge natural, the next candidate uses functions already present in NEX:
+
+```text
+Stream = N -> N
+0 = bit 0
+1 = bit 1
+2 = EOF
+```
+
+#### v0.1 — cons-chain development candidate
+
+The v0.1 artifact is structurally reproducible and typeable. Its recursive `repeat` producer materializes a `cons` chain.
+
+Under the unchanged Python call-by-need budget of 5,000,000 transitions, the following development cases refuse at transition `5,000,001`:
+
+```text
+repeat(0,32)(31)
+repeat(0,32)(32)
+repeat(1,128)(127)
+repeat(1,128)(128)
+```
+
+v0.1 is therefore a recorded negative development checkpoint. `verify_functional_stream_v0_1_result.py` preserves that exact result.
+
+#### v0.2 — frozen indexed candidate, not yet runtime-executed
+
+v0.2 keeps the same stream contract but replaces only `repeat` with direct indexed recursion over `(count,index)`; it does not build the recursive cons chain first.
+
+Artifacts:
+
+```text
+stage5/selfhost/build_functional_stream_v0_2.py
+stage5/selfhost/functional-stream-v0.2.json
+stage5/selfhost/verify_functional_stream_v0_2.py
+```
+
+At the protocol checkpoint, its effective 10 terms occupy 1,634 bits counted separately; `stream_repeat` is 134 bits and `repeat_query` is 236 bits.
+
+Crucially, v0.2 has not yet been runtime-executed. Before that first execution the experiment rules and a separate hold-out were preregistered.
+
+### 5.12 experimental protocol — frozen before v0.2 runtime
+
+Artifacts:
+
+```text
+stage5/selfhost/experiment-protocol-v0.1.json
+stage5/selfhost/validate_experiment_protocol.py
+docs/experiments/stage5-selfhost-experiment-protocol.md
+stage5/selfhost/functional-stream-holdout-v0.1.json
+```
+
+Rules now enforced:
+
+- all cases already observed before the protocol are development/historical evidence, never retroactive hold-out;
+- Python need budget is fixed at 5,000,000 transitions / depth 8,000;
+- Go need and Go CBN budgets are fixed at 5,000,000 transitions / depth 20,000;
+- limits cannot be increased after seeing a candidate result;
+- failing cases cannot be deleted from the same candidate version;
+- algorithmic change requires a new candidate version;
+- verifier-only repair is allowed only if candidate wire, inputs, expected semantics and budgets do not change;
+- v0.2 must first pass the already observed development workload unchanged;
+- only then may the preregistered 11-case hold-out be executed;
+- a hold-out failure rejects v0.2; tuning the same v0.2 against that hold-out is forbidden.
+
+This protocol was introduced specifically to prevent benchmark chasing and make either positive or negative evidence interpretable.
+
+### CI scheduling after the protocol checkpoint
+
+The expensive historical chain is no longer the feedback loop for every active-candidate edit.
+
+```text
+stage5-self-sufficiency.yml
+  -> contract/protocol/reproducibility
+  -> active candidate only
+
+stage5-self-sufficiency-regression.yml
+  -> explicit checkpoint / frozen-evidence regression
+  -> 5.12a/b/c
+  -> reproduced 5.12d rejection
+  -> reproduced functional-stream v0.1 rejection
+  -> independent Python / Go historical verification
+```
+
+`stage5/selfhost/checkpoint-trigger.txt` provides an explicit way to request a full historical checkpoint before merge or at a research boundary.
+
+This changes scheduling, not the final quality gate.
+
+## Required final implementation target
+
+The workstream still targets an exact canonical NEX implementation `I` with:
 
 ```text
 Decode
@@ -280,7 +398,7 @@ and self-processing checks over `code(I)`.
 
 A native `NEX -> x86/ARM/WASM` compiler is not part of this gate. Such a backend requires a separately declared target/profile.
 
-### Decision outcomes reserved for 5.20
+## Decision outcomes reserved for 5.20
 
 ```text
 supported
@@ -305,7 +423,7 @@ receiver prior A
 
 Stage 6 remains **Planned**, not Active, while the 5.10–5.20 gate is unresolved.
 
-### Existing Stage 6 planning artifacts
+Existing Stage 6 planning artifacts remain:
 
 ```text
 docs/STAGE-6.md
@@ -314,41 +432,7 @@ stage6/validate_plan.py
 docs/adr/0017-separate-teaching-protocol-from-core.md
 ```
 
-`curriculum-plan-v0.1.json` remains a planning artifact, **not** an accepted teaching message and not a source of `T_bits`.
-
-### Operational competence target retained for Stage 6
-
-When Stage 6 is eventually activated, a receiver experiment is not successful merely because it can execute supplied examples. It must demonstrate:
-
-1. canonical decode;
-2. canonical encode;
-3. static checking / principal types;
-4. evaluation to portable observations;
-5. self-test capability;
-6. construction of valid NEX programs for held-out tasks.
-
-The final item distinguishes “can run NEX” from “can program in NEX”.
-
-### Initial lesson-order hypothesis retained
-
-```text
-binary/framing
- -> naturals/sequences
- -> self-delimiting integers
- -> structure/trees
- -> primitive equations
- -> application/functions
- -> binding/de Bruijn
- -> products/sums
- -> recursion
- -> types/judgments
- -> principal-type examples
- -> canonical NEX wire
- -> self-tests
- -> held-out construction
-```
-
-This remains a Stage 6 hypothesis, not part of NEX-1 semantics.
+`curriculum-plan-v0.1.json` remains a planning artifact, not an accepted teaching message and not a source of `T_bits`.
 
 ## Supporting evidence work
 
@@ -363,8 +447,13 @@ These support confidence in the target Core but do not replace either the self-s
 
 ## Research synthesis status
 
-ADR-0018 and the 5.12b resource/sharing result are research-significant. Both living dissertation versions must incorporate the pre-Stage-6 self-sufficiency question and this sharing qualification in this pull request before merge. Historical Stage 5 evidence and the post-Stage-5 literature audit remain unchanged.
+ADR-0018 and the 5.12 representation/resource findings are research-significant. Both living dissertation versions must incorporate the pre-Stage-6 self-sufficiency question, the sharing qualification, and the representation/resource results before this PR can leave draft.
 
-## Next recommended step
+## Next step — fixed by the protocol
 
-Implement and freeze NEX-written `encodeU/decodeU` on the validated N-only representation, verify canonical gamma-code round trips against both existing wire implementations, and run the resulting NEX terms under both sharing controls while continuing to record pure-CBN resource behavior separately.
+1. validate the new experiment protocol and both functional-stream artifacts;
+2. obtain a green historical checkpoint regression with the v0.1 negative result reproduced;
+3. execute `functional-stream-v0.2` against the already observed development workload with frozen budgets;
+4. if v0.2 fails, reject it without changing its limits or deleting cases;
+5. if v0.2 passes, execute the preregistered 11-case hold-out **once** without changing v0.2;
+6. only after that decision may the project choose the representation basis for the next `Term`/wire parser experiment.
