@@ -19,7 +19,7 @@
     "MalformedMeta": 3
   },
   "success_contract": {
-    "decodeTerm": "Ok payload is canonical FiniteNatTokens Term v0.3; output tokens are a semantic preorder-token transformation of wire, not an opaque copy/reference to original Bits.",
+    "decodeTerm": "Ok payload is canonical FiniteNatTokens Term v0.3; output tokens are a semantic preorder-token transformation of wire, not an opaque copy/reference to original Bits and not an opaque original wire shortcut.",
     "encodeTerm": "Ok payload is canonical FiniteBits; output wire is reconstructed from Term tokens and must equal NEX-1 v0.1 canonical wire extensionally including EOF at length."
   },
   "failure_contract": {
