@@ -2,8 +2,8 @@
 """Validate the preregistered Stage 5.12f stream-parser contract/workloads.
 
 This is a host mathematical oracle only. It exists before any NEX parser
-candidate and must not be confused with execution of the preregistered holdout
-against that future candidate.
+candidate and validates the frozen preregistration artifacts independently of
+later candidate execution results, which are recorded separately.
 """
 
 from __future__ import annotations
@@ -218,7 +218,7 @@ def main() -> None:
 
     print("stage5.12f parser contract: valid and preregistered")
     print(f"development cases: {dev_count}")
-    print(f"holdout cases: {holdout_count} (host-oracle validated, NEX-candidate unexecuted)")
+    print(f"holdout registration: {holdout_count} cases, host-oracle validated and frozen; execution result is recorded separately")
     print("constructor heads covered: Var Lam App Let Nat Prim")
     print("resource budgets: inherited unchanged from experiment-protocol-v0.1")
 
