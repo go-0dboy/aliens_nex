@@ -71,7 +71,7 @@ def main() -> None:
     print("stage5.12 experiment protocol: valid and frozen")
     print("resource budgets: frozen")
     print("historical cases: development/not hold-out")
-    print("functional-stream v0.2 hold-out cases: 11 preregistered, unexecuted")
+    print("functional-stream v0.2 hold-out registration: 11 cases, frozen; execution result is recorded separately")
 
 
 if __name__ == "__main__":
