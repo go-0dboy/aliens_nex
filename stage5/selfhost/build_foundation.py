@@ -303,17 +303,20 @@ def main() -> None:
     if args.check == args.write:
         parser.error("choose exactly one of --check or --write")
 
-    expected = canonical_json(generated_artifact())
+    expected = generated_artifact()
     if args.write:
-        ARTIFACT.write_text(expected, encoding="utf-8")
+        ARTIFACT.write_text(canonical_json(expected), encoding="utf-8")
         print(f"wrote {ARTIFACT.relative_to(ROOT)}")
         return
 
-    actual = ARTIFACT.read_text(encoding="utf-8")
+    try:
+        actual = json.loads(ARTIFACT.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"cannot parse {ARTIFACT.relative_to(ROOT)}: {exc}") from None
     if actual != expected:
         raise SystemExit(
             "foundation-v0.1.json does not match build_foundation.py; "
-            "run with --write and review the diff"
+            "run with --write and review the semantic diff"
         )
     print("stage5.12 foundation artifact: reproducible")
 
