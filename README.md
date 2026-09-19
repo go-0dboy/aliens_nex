@@ -21,7 +21,7 @@ Stages 0–5 are complete. NEX-1 v0.1 currently has:
 - a negative complete-bootstrap result: no accepted receiver-neutral `B | A` exists yet;
 - a living bilingual dissertation and a post-Stage-5 literature re-audit.
 
-A post-Stage-5 **Core self-sufficiency workstream (5.10–5.20)** is now active under ADR-0018. It tests whether the unchanged NEX-1 v0.1 Core can express a complete implementation of its own portable wire, static, and dynamic semantics before the teaching experiment begins. Stage 6 remains **Planned**.
+A post-Stage-5 **Core self-sufficiency workstream (5.10–5.20)** is active under ADR-0018. It tests whether the unchanged NEX-1 v0.1 Core can express a complete implementation of its own portable wire, static, and dynamic semantics before the teaching experiment begins. Stages 5.10–5.12 are **Complete**; Stage 5.13 structural validation is the next **Planned** substage. Stage 6 remains **Planned** until the 5.20 gate permits activation.
 
 Authoritative current state: [docs/STATUS.md](docs/STATUS.md).
 
@@ -151,7 +151,7 @@ ADR-0018 requires executable evidence before Stage 6 activation. The workstream 
 5.20 decision gate
 ```
 
-The first 5.11 candidate represents every frozen meta-object through NEX `N`, using numeric encodings for finite products, sequences, terms, types, schemes, and results. This deliberately tests the existing Core before considering recursive types or new primitives.
+The accepted Stage 5.11 operational representation uses finite functional carriers `FiniteBits = (N -> N) * N` and `FiniteNatTokens = (N -> N) * N`; recursive internal objects use canonical natural-token streams rather than recursively packed naturals. Stage 5.12 then accepted NEX-written full Term codec v0.3 on its frozen bounded surfaces without changing the Core, wire, carriers, or resource budgets.
 
 The target is a canonical NEX implementation `I` that can decode/encode, validate, infer, evaluate, and process its own canonical representation. A native x86/ARM/WASM compiler is not required by this architecture-neutral gate.
 

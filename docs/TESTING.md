@@ -51,7 +51,7 @@ Random testing supplements, but does not replace, systematic structural coverage
 
 ### Bounded exhaustive tests
 
-The post-Stage-5 literature audit makes this a high-priority future layer.
+This is now an established evidence layer as well as a future workstream: Stage 5.12 used a precisely complete frozen 27-Term class for the full codec. Broader scope/static/evaluation classes and stronger function-application contexts remain future work.
 
 For a chosen size bound, enumerate all or a precisely defined complete class of small terms, then classify/filter by:
 

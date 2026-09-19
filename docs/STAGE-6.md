@@ -1,9 +1,9 @@
 # Stage 6 — Teaching NEX to an unknown receiver
 
-**Status:** Planned / protocol checkpoint  
+**Status:** Planned; blocked by the ADR-0018 Stage 5.20 gate  
 **Date:** 2026-09-19  
-**Prerequisite:** Stages 0–5 complete; post-Stage-5 re-audit merged  
-**Decision:** ADR-0017
+**Prerequisite:** Stage 5.20 outcome explicitly permits Stage 6 activation; Stages 5.11 and 5.12 are Complete, Stage 5.13 is the next Planned self-sufficiency substage  
+**Decisions:** ADR-0017 teaching/Core separation; ADR-0018 pre-Stage-6 self-sufficiency gate
 
 ## Purpose
 
@@ -11,7 +11,7 @@ Stage 6 addresses the original project goal more directly:
 
 > construct a finite transmitted teaching/bootstrap sequence that can take a receiver from an explicit prior profile to demonstrable ability to decode, type-check, execute, and construct NEX programs.
 
-Stage 6 keeps NEX-1 v0.1 stable. It investigates a separate teaching layer above the Core rather than changing the Core merely for pedagogical convenience.
+Stage 6 keeps NEX-1 v0.1 stable. It investigates a separate teaching layer above the Core rather than changing the Core merely for pedagogical convenience. ADR-0018 delays execution of this plan until the 5.10–5.20 self-sufficiency extension reaches its decision gate; completion of 5.11 and 5.12 does not by itself activate Stage 6.
 
 ## 6.0 — freeze the experiment contract
 

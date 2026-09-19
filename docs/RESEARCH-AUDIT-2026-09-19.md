@@ -3,6 +3,8 @@
 **Scope:** Stages 0–5, NEX-1 v0.1, empirical conclusions, independent-reconstruction evidence, receiver assumptions, and relevant literature.  
 **Normative effect:** none on NEX-1 v0.1 semantics.  
 **Decision record:** ADR-0016.
+**Subsequent sequencing note (2026-09-19):** this audit predates ADR-0018. Its recommendation to proceed directly toward Stage 6 teaching was later superseded **only in sequencing** by the mandatory post-Stage-5 self-sufficiency extension 5.10–5.20. The audit's Stage 0–5 findings remain historical evidence. Current continuation is defined by `docs/STATUS.md`; Stage 5.11 and 5.12 are Complete, Stage 5.13 is Planned next, and Stage 6 remains Planned until the 5.20 gate.  
+
 
 ## 1. Executive conclusion
 

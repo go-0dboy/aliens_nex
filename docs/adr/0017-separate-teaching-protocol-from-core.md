@@ -3,6 +3,8 @@
 **Status:** Accepted  
 **Date:** 2026-09-19
 
+**Follow-up sequencing decision:** ADR-0018 was accepted later on the same date and inserts the mandatory 5.10–5.20 Core self-sufficiency gate before Stage 6 may become Active. ADR-0017 remains Accepted: its teaching/Core separation is unchanged; only activation timing is controlled by ADR-0018. Current continuation: 5.11 and 5.12 Complete, 5.13 Planned.
+
 ## Context
 
 Stages 0–5 established a stable NEX-1 v0.1 Core, exact wire/static/dynamic contracts, empirical measurements, and strong differential-conformance evidence that a second implementation can reconstruct the tested behavior from a frozen packet.

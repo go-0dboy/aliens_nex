@@ -1,6 +1,6 @@
 # Stage 5.12 closeout — self wire codec completed before Stage 5.13
 
-**Status:** Complete, contingent only on the final trigger-only regression associated with the Stage 5.12 closeout head  
+**Status:** Complete  
 **Date:** 2026-09-19  
 **Core:** NEX-1 v0.1 unchanged  
 **Parent decision:** ADR-0018  
@@ -315,13 +315,22 @@ The Stage 5.12 completion checklist is satisfied as follows:
 - [x] both living dissertation versions incorporate the completed 5.12 result and limitations;
 - [x] PR changed-file audit finds no normative Core-spec change and no Stage 5.13 implementation;
 - [x] heavy CI was optimized without weakening the frozen evidence contract;
-- [ ] final Stage 5.12 historical regression is green on the closeout head.
+- [x] final Stage 5.12 historical regression is green on the closeout evidence head.
 
-The final unchecked item is deliberately satisfied by a **last trigger-only commit** changing `stage5/selfhost/checkpoint-trigger.txt`. That commit does not alter candidate code, contracts, workloads, results, or documentation. If that historical regression is green, this document's `Status: Complete` condition is satisfied without any post-regression branch mutation.
+The final trigger-only historical regression completed successfully on the Stage 5.12 closeout evidence head:
+
+```text
+head      4977e87feb53a04c98f9f60feed9c4847524c788
+workflow  35442303266
+job       105895125195
+result    success
+```
+
+It reproduced/validated Stage 5.12a–f, immutable v0.1/v0.2 negative evidence, frozen v0.3 identity/development/exhaustive evidence, the accepted one-shot holdout result without rerunning the holdout, independent Python, and Go/frozen Stage 4 evidence. Subsequent documentation-only reconciliation does not alter candidate code, contracts, workloads, result artifacts, or the evidence head recorded above.
 
 ## Stage boundary after closeout
 
-Once the final checkpoint is green:
+After the successful final checkpoint:
 
 ```text
 Stage 5.11  Complete

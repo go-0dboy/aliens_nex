@@ -234,3 +234,7 @@ This is not interpreted as semantic invalidity. It is further evidence that shar
 NEX-1 v0.1 remains unchanged.
 
 The next research step must not silently broaden this result into a complete decoder. Before further implementation, the project should explicitly choose and preregister the representation/interface required to carry structural information from the wire traversal into Stage 5.13 structural validation while preserving the anti-tuning and versioning rules established in 5.12e–f.
+
+## Subsequent status
+
+This remains the historical Stage 5.12f parser checkpoint. The later operational meta-representation v0.3 and accepted full-codec v0.3 completed Stage 5.12 under the same anti-tuning discipline. The current next substage is Stage 5.13 structural validation; the parser checkpoint itself is not reinterpreted as proof of that later stage.

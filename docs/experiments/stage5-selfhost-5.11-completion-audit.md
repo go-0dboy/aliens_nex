@@ -146,3 +146,7 @@ Historical v0.1/v0.2 remain unchanged as evidence. v0.3 supersedes them only for
 This completion does not imply that Stage 5.12 is complete. The next permitted work is Gate 1 onward in `docs/STAGE-5.12-CLOSEOUT.md`: freeze the exact full-codec interface/workloads, then implement and verify NEX-written `decodeTerm` and `encodeTerm` against the accepted v0.3 `Term` representation.
 
 Stage 5.13 remains Planned and blocked until Stage 5.12 is Complete.
+
+## Subsequent status
+
+The sequencing condition recorded above was later satisfied: Stage 5.12 is now Complete with accepted full-codec v0.3, and Stage 5.13 is Planned as the next sequential substage. This note does not rewrite the audit's point-in-time reasoning.

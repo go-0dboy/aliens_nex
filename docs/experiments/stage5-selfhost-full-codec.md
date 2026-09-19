@@ -1,9 +1,10 @@
 # Stage 5.12 — full NEX-written Term codec
 
-**Status:** candidate v0.1 frozen; first development execution in progress  
+**Status:** Historical v0.1 record; candidate later rejected on its one-shot preregistered holdout  
 **Date:** 2026-09-19  
 **Core:** NEX-1 v0.1 unchanged  
 **Prerequisite:** Stage 5.11 Complete (`meta-representation-v0.3`)  
+**Subsequent status:** v0.1 was rejected on holdout; v0.2 was rejected on frozen development; v0.3 was accepted and Stage 5.12 is Complete. The body below preserves the v0.1 freeze-time design and planned gate for provenance. Current completion evidence is in `docs/experiments/stage5-selfhost-full-codec-v0.3.md` and `docs/STAGE-5.12-CLOSEOUT.md`.  
 
 ## Question
 
@@ -151,7 +152,7 @@ Go CBN       5,000,000 transitions / depth 20,000
 
 Python/Go sharing refusals or semantic mismatches are acceptance failures. Go CBN remains a separately recorded measurement channel under the frozen Stage 5.12 protocol.
 
-## Remaining gate
+## Historical remaining gate at v0.1 freeze time
 
 Candidate v0.1 must still pass, without candidate-wire changes:
 

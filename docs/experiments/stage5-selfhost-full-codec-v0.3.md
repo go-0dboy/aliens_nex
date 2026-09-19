@@ -205,6 +205,20 @@ The 30 normative Go CBN resource refusals remain explicit operational-cost evide
 
 ## Stage boundary
 
+## Final closeout regression
+
+After the one-shot holdout was frozen as immutable evidence and documentation/diff review was completed, the final trigger-only historical regression succeeded:
+
+```text
+head      4977e87feb53a04c98f9f60feed9c4847524c788
+workflow  35442303266
+job       105895125195
+result    success
+```
+
+The run reproduced/validated historical Stage 5.12a–f, immutable full-codec v0.1/v0.2 negative evidence, frozen v0.3 identity/development/exhaustive evidence, the accepted holdout result without rerunning the one-shot holdout, independent Python, and Go/frozen Stage 4 evidence.
+
+
 The accepted evidence establishes the Stage 5.12 target:
 
 - NEX-written `decodeTerm` converts canonical NEX wire into the accepted internal Term token representation;
