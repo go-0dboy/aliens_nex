@@ -183,8 +183,8 @@
       {"constructor": "Var", "payload": 0, "code": 0},
       {"constructor": "Var", "payload": 3, "code": 6},
       {"constructor": "Lam", "payload": 0, "code": 1},
-      {"constructor": "Nat", "payload": 2, "code": 68},
-      {"constructor": "Prim", "payload": 10, "code": 10751}
+      {"constructor": "Nat", "payload": 2, "code": 79},
+      {"constructor": "Prim", "payload": 10, "code": 671}
     ]
   }
 }
