@@ -63,6 +63,7 @@ jobs:
           python -m py_compile stage5/selfhost/verify_stream_parser_holdout.py
           python -m py_compile stage5/selfhost/verify_stream_parser_result.py
           python -m py_compile stage5/selfhost/build_full_codec.py
+          python -m py_compile stage5/selfhost/verify_full_codec_static.py
 
       - name: Validate historical Stage 5.11 meta-representation v0.1
         run: python stage5/selfhost/validate_meta_representation.py
@@ -82,8 +83,11 @@ jobs:
       - name: Validate preregistered Stage 5.12 full codec contract/workloads
         run: python stage5/selfhost/validate_full_codec_contract.py
 
-      - name: Emit Stage 5.12 full codec candidate identity without executing it
-        run: python stage5/selfhost/build_full_codec.py --emit
+      - name: Preserve frozen Stage 5.12 full codec candidate identity
+        run: python stage5/selfhost/build_full_codec.py --check
+
+      - name: Verify Stage 5.12 full codec candidate statically without executing it
+        run: python stage5/selfhost/verify_full_codec_static.py
 
       - name: Preserve Stage 5.12a foundation reproducibility
         run: python stage5/selfhost/build_foundation.py --check
@@ -143,6 +147,9 @@ jobs:
 
       - name: Validate preregistered Stage 5.12 full codec contract/workloads
         run: python stage5/selfhost/validate_full_codec_contract.py
+
+      - name: Preserve frozen Stage 5.12 full codec candidate identity
+        run: python stage5/selfhost/build_full_codec.py --check
 
       - name: Check accepted Stage 5.12f parser artifact
         run: python stage5/selfhost/build_stream_parser.py --check
