@@ -1,8 +1,15 @@
 #!/usr/bin/env python3
-"""Verify Stage 5.12c NEX-written U(n) codec against host controls.
+"""Verify Stage 5.12c NEX-written U(n) codec against independent controls.
 
-The NEX terms are the objects under test. Python/Go codec functions are only
-independent engineering controls for differential comparison.
+The canonical NEX terms are the objects under test. 5.12b already records the
+bounded pure-CBN resource experiment, so this verifier does not repeat the slow
+Python CBN run. It uses two independently implemented call-by-need controls for
+portable results, keeps Go CBN as a separate resource observation, and compares
+U(n) behavior with both existing host codecs.
+
+The CPython recursion limit is an implementation resource only. It is raised
+above the explicitly bounded NeedLimits depth so the host stack does not become
+a stricter accidental limit than the experiment contract.
 """
 
 from __future__ import annotations
@@ -18,8 +25,8 @@ PYTHON_IMPL = ROOT / "independent" / "python"
 GO_IMPL = ROOT / "reference" / "go"
 
 sys.path.insert(0, str(PYTHON_IMPL))
+sys.setrecursionlimit(max(sys.getrecursionlimit(), 10_000))
 
-from nex.eval import EvaluationLimits, EvaluationResourceLimitError, evaluate_observed  # noqa: E402
 from nex.term import App, Nat  # noqa: E402
 from nex.typesys import infer_principal, render_scheme  # noqa: E402
 from nex.wire import (  # noqa: E402
@@ -32,7 +39,6 @@ from nex.wire import (  # noqa: E402
 )
 from python_need import NeedLimits, NeedResourceLimitError, evaluate_need_observed  # noqa: E402
 
-PYTHON_CBN_LIMITS = EvaluationLimits(max_steps=5_000_000, max_depth=700)
 PYTHON_NEED_LIMITS = NeedLimits(max_transitions=5_000_000, max_depth=2_000)
 GO_MAX_TRANSITIONS = 5_000_000
 GO_MAX_DEPTH = 20_000
@@ -87,9 +93,33 @@ def apply_naturals(term, arguments: list[int]):
     return result
 
 
+def run_json(command: list[str], payload: list[dict]) -> list[dict]:
+    completed = subprocess.run(
+        command,
+        cwd=GO_IMPL,
+        input=json.dumps(payload),
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if completed.returncode != 0:
+        fail(f"{' '.join(command)} failed: {completed.stderr.strip()}")
+    try:
+        result = json.loads(completed.stdout)
+    except json.JSONDecodeError as exc:
+        fail(f"cannot parse {' '.join(command)} output: {exc}")
+    if not isinstance(result, list):
+        fail(f"{' '.join(command)} did not return a JSON array")
+    return result
+
+
 def main() -> None:
     build = subprocess.run(
-        [sys.executable, str(ROOT / "stage5" / "selfhost" / "build_integer_codec.py"), "--check"],
+        [
+            sys.executable,
+            str(ROOT / "stage5" / "selfhost" / "build_integer_codec.py"),
+            "--check",
+        ],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -104,33 +134,41 @@ def main() -> None:
     if data.get("core_version") != "NEX-1 v0.1":
         fail("artifact does not target exact NEX-1 v0.1")
 
-    functions = {item["name"]: item for item in data["functions"]}
-    if "encodeU" not in functions or "decodeU" not in functions:
-        fail("encodeU/decodeU missing from artifact")
+    expected_names = [
+        "seq_length",
+        "seq_reverse",
+        "binary_rev",
+        "prepend_zeros",
+        "encodeU",
+        "decodeU",
+    ]
+    items = data.get("functions", [])
+    if [item.get("name") for item in items] != expected_names:
+        fail("unexpected integer-codec function inventory/order")
+    functions = {item["name"]: item for item in items}
 
     go_eval_requests: list[dict] = []
-    go_direct_requests: list[dict] = []
     python_need: dict[str, dict] = {}
-    python_cbn: dict[str, dict] = {}
 
-    for item in data["functions"]:
+    for item in items:
+        name = item["name"]
         bits = item["wire_bits"]
         if len(bits) != item["wire_bit_length"]:
-            fail(f"{item['name']}: wire length mismatch")
+            fail(f"{name}: wire length mismatch")
         term = decode_exact(bits)
         if encode_term(term) != bits:
-            fail(f"{item['name']}: canonical wire round-trip mismatch")
+            fail(f"{name}: canonical wire round-trip mismatch")
         inferred = render_scheme(infer_principal(term))
         if inferred != item["expected_type"]:
-            fail(f"{item['name']}: principal type {inferred!r} != {item['expected_type']!r}")
+            fail(f"{name}: principal type {inferred!r} != {item['expected_type']!r}")
 
+        go_eval_requests.append({"id": f"static:{name}", "level": "static", "bits": bits})
         for index, case in enumerate(item["tests"]):
-            case_id = f"{item['name']}:{index}"
+            case_id = f"{name}:{index}"
             applied = apply_naturals(term, case["args"])
             if render_scheme(infer_principal(applied)) != "N":
                 fail(f"{case_id}: fully applied term is not N")
             expected = {"kind": "Nat", "value": str(case["result"])}
-
             try:
                 observed, stats = evaluate_need_observed(applied, PYTHON_NEED_LIMITS)
             except NeedResourceLimitError as exc:
@@ -141,19 +179,11 @@ def main() -> None:
                 "result": observed,
                 "transitions": stats.transitions,
                 "max_depth": stats.max_depth,
+                "memo_hits": stats.memo_hits,
             }
-
-            try:
-                observed_cbn = evaluate_observed(applied, PYTHON_CBN_LIMITS)
-                if observed_cbn != expected:
-                    fail(f"{case_id}: Python CBN {observed_cbn} != {expected}")
-                python_cbn[case_id] = {"status": "value", "result": observed_cbn}
-            except EvaluationResourceLimitError as exc:
-                python_cbn[case_id] = {"status": "resource_refusal", "detail": str(exc)}
-
             go_eval_requests.append(
                 {
-                    "id": case_id,
+                    "id": f"eval:{case_id}",
                     "level": "eval",
                     "bits": bits,
                     "args": case["args"],
@@ -162,121 +192,124 @@ def main() -> None:
                 }
             )
 
+    # Compare the NEX-written encoder with both existing host codecs.
     encode_item = functions["encodeU"]
+    go_host_requests: list[dict] = []
     for index, case in enumerate(encode_item["tests"]):
         n = case["args"][0]
         expected_bits = case["bits"]
         if encode_u(n) != expected_bits:
-            fail(f"encodeU:{index}: Python host EncodeU disagrees with frozen expected bits")
+            fail(f"encodeU:{index}: Python host encoder disagrees with expected bits")
         if bits_text(case["result"]) != expected_bits:
-            fail(f"encodeU:{index}: frozen internal Bits code disagrees with expected bits")
-        go_direct_requests.append(
+            fail(f"encodeU:{index}: N-only result does not represent expected bits")
+        go_host_requests.append(
             {"id": f"encode:{index}", "operation": "encode", "value": str(n)}
         )
 
+    # Compare the NEX-written decoder with both existing host codecs.
     decode_item = functions["decodeU"]
+    python_host_decode: dict[str, dict] = {}
     for index, case in enumerate(decode_item["tests"]):
+        case_id = f"decode:{index}"
         expected = decode_result(case["result"])
         if "items" in case:
             try:
                 decode_u("2")
                 fail("Python host accepted an invalid bit character")
             except InvalidBitError:
-                python_host = {"kind": "invalid_bit"}
-            go_direct_requests.append(
-                {"id": f"decode:{index}", "operation": "decode", "items": case["items"]}
+                actual = {"kind": "invalid_bit"}
+            go_host_requests.append(
+                {"id": case_id, "operation": "decode", "items": case["items"]}
             )
         else:
             raw = case["bits"]
             try:
                 value, consumed = decode_u(raw)
-                python_host = {"kind": "ok", "value": value, "rest_bits": raw[consumed:]}
+                actual = {"kind": "ok", "value": value, "rest_bits": raw[consumed:]}
             except TruncatedError:
-                python_host = {"kind": "truncated"}
+                actual = {"kind": "truncated"}
             except InvalidBitError:
-                python_host = {"kind": "invalid_bit"}
-            go_direct_requests.append(
-                {"id": f"decode:{index}", "operation": "decode", "bits": raw}
+                actual = {"kind": "invalid_bit"}
+            go_host_requests.append(
+                {"id": case_id, "operation": "decode", "bits": raw}
             )
-        if python_host != expected:
-            fail(f"decodeU:{index}: Python host {python_host} != frozen result {expected}")
+        if actual != expected:
+            fail(f"decodeU:{index}: Python host {actual} != frozen result {expected}")
+        python_host_decode[case_id] = actual
 
-    go_eval = subprocess.run(
-        ["go", "run", "./cmd/nexselfhostprobe"],
-        cwd=GO_IMPL,
-        input=json.dumps(go_eval_requests),
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    if go_eval.returncode != 0:
-        fail(f"Go NEX evaluator probe failed: {go_eval.stderr.strip()}")
-    eval_by_id = {row["id"]: row for row in json.loads(go_eval.stdout)}
+    go_eval = run_json(["go", "run", "./cmd/nexselfhostprobe"], go_eval_requests)
+    eval_by_id = {row["id"]: row for row in go_eval}
+    if len(eval_by_id) != len(go_eval_requests):
+        fail("Go selfhost probe response IDs/count differ")
 
-    go_direct = subprocess.run(
-        ["go", "run", "./cmd/nexucontrol"],
-        cwd=GO_IMPL,
-        input=json.dumps(go_direct_requests),
-        text=True,
-        capture_output=True,
-        check=False,
-    )
-    if go_direct.returncode != 0:
-        fail(f"Go direct U control failed: {go_direct.stderr.strip()}")
-    direct_by_id = {row["id"]: row for row in json.loads(go_direct.stdout)}
+    go_host = run_json(["go", "run", "./cmd/nexucontrol"], go_host_requests)
+    host_by_id = {row["id"]: row for row in go_host}
+    if len(host_by_id) != len(go_host_requests):
+        fail("Go U host-control response IDs/count differ")
 
     go_cbn_refusals = 0
-    for request in go_eval_requests:
-        case_id = request["id"]
-        row = eval_by_id.get(case_id)
-        if row is None:
-            fail(f"missing Go eval response {case_id}")
-        expected_value = next(
-            case["result"]
-            for item in data["functions"]
-            for index, case in enumerate(item["tests"])
-            if f"{item['name']}:{index}" == case_id
-        )
-        expected = {"kind": "Nat", "value": str(expected_value)}
-        if row.get("need_error"):
-            fail(f"{case_id}: Go call-by-need resource/error: {row['need_error']}")
-        if row.get("need_result") != expected:
-            fail(f"{case_id}: Go call-by-need {row.get('need_result')} != {expected}")
-        if row.get("need_result") != python_need[case_id]["result"]:
-            fail(f"{case_id}: Python/Go call-by-need mismatch")
-        if row.get("cbn_error"):
-            go_cbn_refusals += 1
-        elif row.get("cbn_result") != expected:
-            fail(f"{case_id}: Go CBN returned wrong value")
+    execution_cases = 0
+    for item in items:
+        name = item["name"]
+        static = eval_by_id.get(f"static:{name}")
+        if static is None or static.get("static_error"):
+            fail(f"{name}: Go static rejection/missing response: {static}")
+        if static.get("type") != item["expected_type"]:
+            fail(f"{name}: Go type {static.get('type')!r} != {item['expected_type']!r}")
+
+        for index, case in enumerate(item["tests"]):
+            case_id = f"{name}:{index}"
+            row = eval_by_id.get(f"eval:{case_id}")
+            if row is None or row.get("static_error"):
+                fail(f"{case_id}: Go static rejection/missing response: {row}")
+            expected = {"kind": "Nat", "value": str(case["result"])}
+            if row.get("need_error"):
+                fail(f"{case_id}: Go call-by-need refusal: {row['need_error']}")
+            if row.get("need_result") != expected:
+                fail(f"{case_id}: Go call-by-need {row.get('need_result')} != {expected}")
+            if row.get("need_result") != python_need[case_id]["result"]:
+                fail(f"{case_id}: Python/Go call-by-need observations differ")
+            if row.get("cbn_error"):
+                go_cbn_refusals += 1
+            elif row.get("cbn_result") != expected:
+                fail(f"{case_id}: Go CBN returned wrong portable value")
+            execution_cases += 1
 
     for index, case in enumerate(encode_item["tests"]):
-        row = direct_by_id[f"encode:{index}"]
-        if row.get("error") or row.get("bits") != case["bits"]:
+        row = host_by_id.get(f"encode:{index}")
+        if row is None or row.get("error") or row.get("bits") != case["bits"]:
             fail(f"encodeU:{index}: Go host control disagrees: {row}")
 
     for index, case in enumerate(decode_item["tests"]):
-        row = direct_by_id[f"decode:{index}"]
+        row = host_by_id.get(f"decode:{index}")
+        if row is None:
+            fail(f"decodeU:{index}: missing Go host response")
         expected = decode_result(case["result"])
         if expected["kind"] == "ok":
-            go_host = {
-                "kind": "ok",
-                "value": int(row["value"]),
-                "rest_bits": row.get("rest_bits", ""),
-            } if not row.get("error") else {"kind": row["error"]}
+            actual = (
+                {
+                    "kind": "ok",
+                    "value": int(row["value"]),
+                    "rest_bits": row.get("rest_bits", ""),
+                }
+                if not row.get("error")
+                else {"kind": row["error"]}
+            )
         else:
-            go_host = {"kind": row.get("error", "")}
-        if go_host != expected:
-            fail(f"decodeU:{index}: Go host {go_host} != frozen result {expected}")
+            actual = {"kind": row.get("error", "")}
+        if actual != expected:
+            fail(f"decodeU:{index}: Go host {actual} != frozen result {expected}")
 
-    python_cbn_refusals = sum(1 for row in python_cbn.values() if row["status"] == "resource_refusal")
     print("stage5.12c NEX integer codec: verified")
+    print(f"canonical functions: {len(items)}")
+    print(f"canonical bits (separate terms): {sum(item['wire_bit_length'] for item in items)}")
     print(f"canonical encodeU bits: {encode_item['wire_bit_length']}")
     print(f"canonical decodeU bits: {decode_item['wire_bit_length']}")
-    print(f"NEX test applications: {len(go_eval_requests)}")
+    print(f"NEX execution cases: {execution_cases}")
     print("Python/Go call-by-need portable observations: matched")
-    print("Python/Go direct U codec controls: matched")
-    print(f"Python CBN resource refusals: {python_cbn_refusals}")
+    print("Python/Go direct U(n) host controls: matched")
     print(f"Go CBN resource refusals: {go_cbn_refusals}")
+    print("Python CBN intentionally not repeated; Stage 5.12b freezes that resource evidence")
 
 
 if __name__ == "__main__":
