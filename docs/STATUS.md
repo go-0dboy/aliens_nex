@@ -3,7 +3,7 @@
 **Date:** 2026-09-19  
 **Baseline branch:** `main`  
 **Active work:** Post-Stage-5 NEX Core self-sufficiency extension (5.10–5.20)  
-**Current state:** `Stages 0–5 complete; 5.10 accepted; 5.11 representation work versioned; 5.12a/b/c verified; 5.12d interleaved pair rejected under frozen budgets; 5.12e functional-stream v0.1 rejected; v0.2 passed frozen development and preregistered hold-out workloads and is accepted provisionally for the tested finite-bit-stream surface; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
+**Current state:** `Stages 0–5 complete; 5.10 accepted; 5.11 representation work versioned; 5.12a/b/c verified; 5.12d interleaved pair rejected under frozen budgets; 5.12e functional-stream v0.1 rejected and v0.2 accepted provisionally on frozen development+hold-out surfaces; 5.12f NEX-written stream parser passed frozen development and preregistered hold-out and is accepted for bounded canonical-wire traversal; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
 **Active decision:** ADR-0018  
 **Living dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md`
 
@@ -100,7 +100,7 @@ ADR-0018 inserts an executable evidence gate before Stage 6 activation:
 ```text
 5.10 contract and gate                 accepted
 5.11 NEX-in-NEX meta-representation   versioned/validated checkpoints
-5.12 self wire codec                   active
+5.12 self wire codec                   active; bounded stream traversal accepted
 5.13 self structural validation        planned
 5.14 self HM type inference            planned
 5.15 self evaluator                    planned
@@ -341,25 +341,135 @@ stage5/selfhost/functional-stream-v0.2-holdout-result-v0.1.json
 docs/experiments/stage5-selfhost-functional-stream.md
 ```
 
+## 5.12f — NEX-written cursor/parser over functional streams
+
+Before implementation, the project preregistered the parser interface, 27 development cases, 12 separate hold-out cases, unchanged resource budgets, and a host oracle:
+
+```text
+stage5/selfhost/parser-contract-v0.1.json
+stage5/selfhost/parser-development-v0.1.json
+stage5/selfhost/parser-holdout-v0.1.json
+stage5/selfhost/validate_parser_contract.py
+```
+
+The fixed interface is:
+
+```text
+BitStream    = N -> N
+Cursor       = N
+ParserResult = N * (N * (N * N))
+             = (status, a, b, nextOffset)
+```
+
+The four NEX-written operations are:
+
+```text
+decodeUAt
+readHead
+skipTerm
+exactTerm
+```
+
+All infer:
+
+```text
+(N -> N) -> N -> (N * (N * (N * N)))
+```
+
+Frozen candidate size as separately serialized terms:
+
+```text
+decodeUAt    752 bits
+readHead    2165 bits
+skipTerm    3964 bits
+exactTerm   4480 bits
+-------------------
+total      11361 bits
+```
+
+The 11,361-bit figure is an engineering size, not `B | A`, `C | A`, or a minimal self-hosting library.
+
+### Development result
+
+First official development run: workflow `35433974244`, job `105873398120`.
+
+```text
+development cases                         27
+projected ParserResult fields            108
+Python call-by-need resource refusals      0
+Go call-by-need resource refusals          0
+Go normative CBN resource refusals        16
+Python/Go need values matched            108/108
+largest Python need transitions          7,339  skip-nested:a
+largest Go need transitions              3,171  skip-nested:a
+```
+
+All four `ParserResult` fields were forced and compared; observing only the outer `Pair` does not count as success.
+
+The result was frozen together with candidate/contract/workload Git blob identities. A full historical checkpoint was then triggered. Workflow run `35434076839` completed successfully and reproduced 5.12a–f development evidence, independent Python, and Go/frozen Stage 4 evidence.
+
+### Preregistered hold-out result
+
+Only after that green checkpoint was the parser hold-out trigger changed. The unchanged candidate was executed once in workflow run `35434195939`, job `105873992224`.
+
+Frozen identities verified immediately before execution:
+
+```text
+candidate  44b9d85f8bbe522d8b637c977c3fb39520c2c10f
+hold-out   352e37b682230f196b3b4414932b7625dd24bfa7
+```
+
+Result:
+
+```text
+hold-out cases                            12
+projected ParserResult fields             48
+Python call-by-need resource refusals      0
+Go call-by-need resource refusals          0
+Go normative CBN resource refusals        18
+Python/Go need values matched             48/48
+largest Python need transitions          15,151  skip-let-complex:a
+largest Go need transitions               6,392  skip-let-complex:a
+```
+
+Decision: `stream-parser-v0.1` is **accepted as the bounded canonical-wire traversal checkpoint on the frozen development and preregistered hold-out surfaces**.
+
+This establishes that unchanged NEX-1 v0.1 can decode canonical `U(n)` fields, distinguish all six term constructors, recursively traverse complete canonical term structure, and detect premature EOF/trailing data using a functional `BitStream` and natural cursor.
+
+It does **not** establish a materialized recursive `Term`, complete `decodeTerm`/`encodeTerm`, scope validation, primitive-ID validity, HM inference, evaluation, integrated self-hosting, self-processing, or receiver-neutral bootstrap.
+
+Normative Go CBN refused 16 development projections and 18 hold-out projections under the frozen budget. Both sharing controls completed every acceptance observation. This is recorded as further evidence that sharing is an engineering feasibility condition, not as semantic invalidity or a Core defect.
+
+Durable evidence:
+
+```text
+stage5/selfhost/stream-parser-v0.1.json
+stage5/selfhost/stream-parser-development-result-v0.1.json
+stage5/selfhost/stream-parser-holdout-result-v0.1.json
+stage5/selfhost/verify_stream_parser_result.py
+docs/experiments/stage5-selfhost-stream-parser.md
+```
+
 ## CI structure after the protocol checkpoint
 
-Fast active feedback and expensive historical checks are separated.
+Fast accepted-checkpoint validation and expensive historical checks are separated.
 
 ```text
 stage5-self-sufficiency.yml
   -> protocol/contracts/reproducibility
-  -> active candidate
+  -> validate frozen 5.12f result without rerunning hold-out
 
 stage5-self-sufficiency-regression.yml
   -> cheap trigger job on ordinary commits
   -> heavy historical regression only when latest commit changes checkpoint-trigger.txt
+  -> reproduce development evidence and validate frozen hold-out result
 
 stage5-self-sufficiency-holdout.yml
   -> cheap trigger job on ordinary commits
-  -> hold-out execution only when latest commit changes holdout-trigger-v0.1.txt
+  -> one-shot hold-out jobs only when the matching explicit trigger changes
 ```
 
-The latest-commit trigger behavior has been verified: ordinary commits run only the cheap trigger job and skip the heavy regression/hold-out job.
+The latest-commit trigger behavior has been verified. The parser hold-out is now represented by its frozen result and blob identities; ordinary regression does not re-execute the one-shot hold-out.
 
 This changes scheduling only; the final merge gate still requires current historical evidence and research synthesis.
 
@@ -397,15 +507,8 @@ Existing Stage 6 planning artifacts remain planning artifacts, not accepted teac
 
 ## Research synthesis / next step
 
-The next technical experiment is **not** another unregistered representation tweak. Before code, Stage 5.12 must define and freeze a cursor/parser experiment over `Stream = N -> N`:
+Stage 5.12f has closed the immediate question of whether a fixed-type functional stream can support bounded recursive traversal of actual canonical NEX term wire. The next step must not silently equate traversal with a complete decoder.
 
-1. exact cursor/parser interface;
-2. exact result representation compatible with unchanged NEX-1 v0.1;
-3. development inputs and expected observations;
-4. frozen resource budgets;
-5. separate preregistered hold-out;
-6. versioning rule for any post-execution algorithmic change.
+Before further implementation, the project must explicitly define how structural information produced by wire traversal will be represented and consumed by Stage 5.13 structural validation while preserving the existing anti-tuning discipline. In particular, the next contract must state whether validation will operate directly over `(BitStream, Cursor)`/parser results or whether a new versioned materialized representation is required.
 
-Only after that contract is committed should the parser be executed for acceptance evidence.
-
-Both living dissertation versions must incorporate ADR-0018, the pre-Stage-6 self-sufficiency question, the sharing qualification, the rejected numeric representations, and the accepted functional-stream checkpoint before PR #16 can leave draft.
+Stage 6 remains Planned. Both living dissertation versions must include the accepted 5.12f checkpoint and its CBN/sharing qualification before PR #16 can leave draft.
