@@ -38,58 +38,60 @@ jobs:
           python-version: '3.12'
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.23.x'
+          go-version: '1.26.x'
 
       - name: Materialize frozen packet for independent verifier
         run: python stage5/build_packet.py --output independent/python/packet
-
-      - name: Verify Stage 5.12a foundation across Python and Go
+      - name: Verify Stage 5.12a foundation
         run: python stage5/selfhost/verify_foundation.py
-
-      - name: Measure Stage 5.12b meta-sequence across CBN and call-by-need
-        run: python stage5/selfhost/verify_meta_sequence.py --report /tmp/meta-sequence-measurements.json
-
-      - name: Upload Stage 5.12b measurement artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: stage5-selfhost-meta-sequence-measurements
-          path: /tmp/meta-sequence-measurements.json
-          if-no-files-found: error
-
-      - name: Verify Stage 5.12c NEX integer codec
+      - name: Verify Stage 5.12b meta-sequence
+        run: python stage5/selfhost/verify_meta_sequence.py
+      - name: Verify Stage 5.12c integer codec
         run: python stage5/selfhost/verify_integer_codec.py
-
-      - name: Reproduce Stage 5.12d interleaved-pair rejection
+      - name: Preserve Stage 5.12d rejection
         run: python stage5/selfhost/verify_interleaved_pair_result.py
-
-      - name: Reproduce Stage 5.12e functional-stream v0.1 rejection
+      - name: Preserve Stage 5.12e v0.1 rejection
         run: python stage5/selfhost/verify_functional_stream_v0_1_result.py
-
-      - name: Reproduce accepted Stage 5.12e functional-stream v0.2 development result
+      - name: Reproduce accepted Stage 5.12e v0.2 development
         run: python stage5/selfhost/verify_functional_stream_v0_2.py
+      - name: Validate Stage 5.12f contract and frozen result
+        run: |
+          python stage5/selfhost/validate_parser_contract.py
+          python stage5/selfhost/verify_stream_parser_result.py
 
-      - name: Validate Stage 5.12f parser contract/workloads
-        run: python stage5/selfhost/validate_parser_contract.py
+      - name: Preserve rejected full-codec v0.1 without re-executing it
+        run: |
+          python stage5/selfhost/validate_full_codec_contract.py
+          python stage5/selfhost/build_full_codec.py --check
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('stage5/selfhost')
+          expected = {
+              'full-codec-development-result-v0.1.json': ('development_passed_candidate_frozen', None),
+              'full-codec-exhaustive-result-v0.1.json': ('bounded_exhaustive_passed_candidate_frozen', None),
+              'full-codec-holdout-result-v0.1.json': ('rejected_on_preregistered_holdout', 'rejected'),
+          }
+          for name, (status, decision) in expected.items():
+              data = json.loads((root / name).read_text())
+              assert data['status'] == status, (name, data.get('status'))
+              if decision is not None:
+                  assert data['decision'] == decision, (name, data.get('decision'))
+          print('full-codec v0.1 immutable results: valid')
+          PY
 
-      - name: Reproduce Stage 5.12f parser v0.1 development result
-        run: python stage5/selfhost/verify_stream_parser.py
-
-      - name: Validate frozen Stage 5.12f holdout result without re-executing holdout
-        run: python stage5/selfhost/verify_stream_parser_result.py
-
-      - name: Verify frozen Stage 5.12 full-codec identity and static typing
-        run: python stage5/selfhost/verify_full_codec_static.py
-
-      - name: Reproduce Stage 5.12 full-codec development result
-        run: python stage5/selfhost/verify_full_codec_development.py
-
-      - name: Reproduce Stage 5.12 complete bounded-exhaustive codec class
-        run: python stage5/selfhost/verify_full_codec_exhaustive.py
+      - name: Validate active full-codec v0.2 identity
+        run: |
+          python stage5/selfhost/validate_full_codec_contract_v0_2.py
+          python stage5/selfhost/build_full_codec_v0_2.py --check
+      - name: Reproduce active full-codec v0.2 development
+        run: python stage5/selfhost/verify_full_codec_development_v0_2.py
+      - name: Reproduce active full-codec v0.2 bounded exhaustive class
+        run: python stage5/selfhost/verify_full_codec_exhaustive_v0_2.py
 
       - name: Verify independent Python implementation
         working-directory: independent/python
         run: python verify.py
-
       - name: Verify Go reference and frozen Stage 4 evidence
         working-directory: reference/go
         run: sh verify.sh
