@@ -1,0 +1,35 @@
+{
+  "schema": "nex-selfhost-full-codec-holdout-result",
+  "version": "0.1",
+  "status": "rejected_on_preregistered_holdout",
+  "core_version": "NEX-1 v0.1",
+  "workflow_run_id": 35438634183,
+  "workflow_job_id": 105885518945,
+  "workflow_head_sha": "8d64d83ccf00e41cd3c741df35f52def12079859",
+  "frozen_git_blobs": {
+    "generator": "5b22788957e386b75f354c4d67595f144675b6af",
+    "candidate_artifact": "52ba615fff7c714b7f3f1cb87a9c045f777b11ed",
+    "contract": "87ed4f457112a6e90e1956d40c746cb2ab139847",
+    "development_workload": "3f4ede2c638c184c318b9ade9580eb4ce187f1e6",
+    "holdout_workload": "0823fc9a59888c429615da6df654e8b4eb1a0eb1"
+  },
+  "preconditions": {
+    "development_passed": true,
+    "bounded_exhaustive_passed": true,
+    "pre_holdout_historical_regression_run_id": 35438217786,
+    "pre_holdout_historical_regression_job_id": 105884455817,
+    "pre_holdout_historical_regression_passed": true
+  },
+  "failure": {
+    "class": "call_by_need_resource_refusal",
+    "implementation": "independent Python sharing control",
+    "case": "law2:deepmixed:stream",
+    "resource": "transitions",
+    "observed": 5000001,
+    "limit": 5000000,
+    "message": "transition limit exceeded: 5000001 > 5000000"
+  },
+  "interpretation": "The one-shot v0.1 holdout failed the frozen acceptance rule because a call-by-need resource refusal occurred. This is an operational rejection under the frozen budget, not evidence of semantic invalidity or a NEX-1 Core defect.",
+  "anti_tuning_consequence": "full-codec-v0.1 is rejected and must not be modified or rerun against this holdout as an acceptance candidate. Any algorithmic successor is v0.2 and requires a new preregistered holdout.",
+  "decision": "rejected"
+}
