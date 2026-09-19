@@ -29,8 +29,14 @@ from nex.eval import (  # noqa: E402
 from nex.term import App, Nat  # noqa: E402
 from nex.typesys import infer_principal, render_scheme  # noqa: E402
 from nex.wire import decode_exact, encode_term  # noqa: E402
+from python_need import (  # noqa: E402
+    NeedLimits,
+    NeedResourceLimitError,
+    evaluate_need_observed,
+)
 
 PYTHON_LIMITS = EvaluationLimits(max_steps=5_000_000, max_depth=700)
+PYTHON_NEED_LIMITS = NeedLimits(max_transitions=5_000_000, max_depth=2_000)
 GO_MAX_TRANSITIONS = 5_000_000
 GO_MAX_DEPTH = 20_000
 
@@ -87,7 +93,8 @@ def main() -> None:
         fail("unexpected function inventory/order")
 
     go_requests: list[dict] = []
-    python_outcomes: dict[str, dict] = {}
+    python_cbn_outcomes: dict[str, dict] = {}
+    python_need_outcomes: dict[str, dict] = {}
 
     for item in functions:
         name = item["name"]
@@ -114,19 +121,47 @@ def main() -> None:
             if applied_type != "N":
                 fail(f"{case_id}: applied Python type {applied_type!r}, expected 'N'")
             expected = {"kind": "Nat", "value": str(case["result"])}
+
             try:
                 observation = evaluate_observed(applied, PYTHON_LIMITS)
                 if observation != expected:
                     fail(
-                        f"{case_id}: Python observation {observation}, "
+                        f"{case_id}: Python CBN observation {observation}, "
                         f"expected {expected}"
                     )
-                python_outcomes[case_id] = {
+                python_cbn_outcomes[case_id] = {
                     "status": "value",
                     "result": observation,
                 }
             except EvaluationResourceLimitError as exc:
-                python_outcomes[case_id] = {
+                python_cbn_outcomes[case_id] = {
+                    "status": "resource_refusal",
+                    "detail": str(exc),
+                }
+
+            try:
+                observation, stats = evaluate_need_observed(
+                    applied,
+                    PYTHON_NEED_LIMITS,
+                )
+                if observation != expected:
+                    fail(
+                        f"{case_id}: Python call-by-need observation {observation}, "
+                        f"expected {expected}"
+                    )
+                python_need_outcomes[case_id] = {
+                    "status": "value",
+                    "result": observation,
+                    "stats": {
+                        "transitions": stats.transitions,
+                        "max_depth": stats.max_depth,
+                        "thunk_forces": stats.thunk_forces,
+                        "thunk_evaluations": stats.thunk_evaluations,
+                        "memo_hits": stats.memo_hits,
+                    },
+                }
+            except NeedResourceLimitError as exc:
+                python_need_outcomes[case_id] = {
                     "status": "resource_refusal",
                     "detail": str(exc),
                 }
@@ -194,12 +229,18 @@ def main() -> None:
             if cbn_result is not None and need_result is not None and cbn_result != need_result:
                 fail(f"{case_id}: Go CBN/call-by-need portable observations differ")
 
+            python_need = python_need_outcomes[case_id]
+            if python_need["status"] == "value" and need_result is not None:
+                if python_need["result"] != need_result:
+                    fail(f"{case_id}: Python/Go call-by-need observations differ")
+
             measurements.append(
                 {
                     "function": name,
                     "args": case["args"],
                     "expected": case["result"],
-                    "python_cbn": python_outcomes[case_id],
+                    "python_cbn": python_cbn_outcomes[case_id],
+                    "python_call_by_need": python_need,
                     "go_cbn": {
                         "status": "resource_refusal"
                         if response.get("cbn_error")
@@ -221,12 +262,14 @@ def main() -> None:
 
     report = {
         "schema": "nex-selfhost-meta-sequence-measurement",
-        "version": "0.1",
+        "version": "0.2",
         "candidate": "pow2-adic-pair-v0.1 / nat-sequence-v0.1",
         "core_version": "NEX-1 v0.1",
         "budgets": {
             "python_cbn_max_steps": PYTHON_LIMITS.max_steps,
             "python_cbn_max_depth": PYTHON_LIMITS.max_depth,
+            "python_need_max_transitions": PYTHON_NEED_LIMITS.max_transitions,
+            "python_need_max_depth": PYTHON_NEED_LIMITS.max_depth,
             "go_max_transitions": GO_MAX_TRANSITIONS,
             "go_max_depth": GO_MAX_DEPTH,
         },
@@ -241,18 +284,23 @@ def main() -> None:
             encoding="utf-8",
         )
 
-    cbn_refusals = sum(
-        1 for row in measurements if row["go_cbn"]["status"] == "resource_refusal"
-    )
-    need_refusals = sum(
-        1
-        for row in measurements
-        if row["go_call_by_need"]["status"] == "resource_refusal"
-    )
-    python_refusals = sum(
+    python_cbn_refusals = sum(
         1
         for row in measurements
         if row["python_cbn"]["status"] == "resource_refusal"
+    )
+    python_need_refusals = sum(
+        1
+        for row in measurements
+        if row["python_call_by_need"]["status"] == "resource_refusal"
+    )
+    go_cbn_refusals = sum(
+        1 for row in measurements if row["go_cbn"]["status"] == "resource_refusal"
+    )
+    go_need_refusals = sum(
+        1
+        for row in measurements
+        if row["go_call_by_need"]["status"] == "resource_refusal"
     )
     successful_pairs = [
         row
@@ -275,13 +323,14 @@ def main() -> None:
     print(f"canonical functions: {len(functions)}")
     print(f"canonical bits (separate terms): {report['separate_term_bits']}")
     print(f"measurement cases: {len(measurements)}")
-    print(f"Python CBN resource refusals: {python_refusals}")
-    print(f"Go CBN resource refusals: {cbn_refusals}")
-    print(f"Go call-by-need resource refusals: {need_refusals}")
+    print(f"Python CBN resource refusals: {python_cbn_refusals}")
+    print(f"Python call-by-need resource refusals: {python_need_refusals}")
+    print(f"Go CBN resource refusals: {go_cbn_refusals}")
+    print(f"Go call-by-need resource refusals: {go_need_refusals}")
     if largest_case is not None:
         fn, fn_args, cbn, need = largest_case
         print(
-            "largest successful CBN/need transition ratio: "
+            "largest successful Go CBN/need transition ratio: "
             f"{largest_ratio:.2f}x at {fn}{tuple(fn_args)} "
             f"({cbn} vs {need})"
         )
