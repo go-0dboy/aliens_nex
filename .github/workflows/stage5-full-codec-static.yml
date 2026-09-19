@@ -11,6 +11,7 @@ on:
       - 'stage5/selfhost/full-codec-holdout-v0.1.json'
       - 'stage5/selfhost/build_full_codec_v0_2.py'
       - 'stage5/selfhost/full-codec-v0.2.json'
+      - 'stage5/selfhost/verify_full_codec_static_v0_2.py'
       - 'stage5/selfhost/validate_full_codec_contract_v0_2.py'
       - 'stage5/selfhost/full-codec-contract-v0.2.json'
       - 'stage5/selfhost/full-codec-development-v0.2.json'
@@ -28,11 +29,16 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
       - name: Preserve historical v0.1 preregistration and identity
         run: |
           python stage5/selfhost/validate_full_codec_contract.py
           python stage5/selfhost/build_full_codec.py --check
       - name: Validate preregistered v0.2 contract before candidate execution
         run: python stage5/selfhost/validate_full_codec_contract_v0_2.py
-      - name: Emit v0.2 candidate identity without semantic execution
-        run: python stage5/selfhost/build_full_codec_v0_2.py --emit
+      - name: Preserve frozen v0.2 candidate identity
+        run: python stage5/selfhost/build_full_codec_v0_2.py --check
+      - name: Verify v0.2 canonical wire and Python/Go principal typing without semantic execution
+        run: python stage5/selfhost/verify_full_codec_static_v0_2.py
