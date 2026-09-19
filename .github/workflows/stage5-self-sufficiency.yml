@@ -46,6 +46,7 @@ jobs:
           python -m py_compile stage5/selfhost/validate_meta_representation.py
           python -m py_compile stage5/selfhost/validate_meta_representation_v0_2.py
           python -m py_compile stage5/selfhost/validate_experiment_protocol.py
+          python -m py_compile stage5/selfhost/validate_parser_contract.py
           python -m py_compile stage5/selfhost/build_foundation.py
           python -m py_compile stage5/selfhost/build_meta_sequence.py
           python -m py_compile stage5/selfhost/build_integer_codec.py
@@ -63,6 +64,9 @@ jobs:
       - name: Validate frozen Stage 5.12 experiment protocol
         run: python stage5/selfhost/validate_experiment_protocol.py
 
+      - name: Validate preregistered Stage 5.12f parser contract/workloads
+        run: python stage5/selfhost/validate_parser_contract.py
+
       - name: Preserve Stage 5.12a foundation reproducibility
         run: python stage5/selfhost/build_foundation.py --check
 
@@ -78,7 +82,7 @@ jobs:
       - name: Preserve Stage 5.12e functional-stream v0.1 reproducibility
         run: python stage5/selfhost/build_functional_stream.py --check
 
-      - name: Check active Stage 5.12e functional-stream v0.2 reproducibility
+      - name: Preserve accepted Stage 5.12e functional-stream v0.2 reproducibility
         run: python stage5/selfhost/build_functional_stream_v0_2.py --check
 
       - name: Preserve corrected receiver-assumption model
@@ -103,15 +107,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: actions/setup-go@v5
-        with:
-          go-version: '1.23.x'
 
-      - name: Validate frozen experiment protocol
+      - name: Validate frozen anti-tuning protocol
         run: python stage5/selfhost/validate_experiment_protocol.py
 
-      - name: Check active functional-stream v0.2 artifact
-        run: python stage5/selfhost/build_functional_stream_v0_2.py --check
-
-      - name: Verify active functional-stream v0.2 development workload
-        run: python stage5/selfhost/verify_functional_stream_v0_2.py
+      - name: Validate active Stage 5.12f parser contract and frozen workloads
+        run: python stage5/selfhost/validate_parser_contract.py
