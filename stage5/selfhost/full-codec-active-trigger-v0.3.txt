@@ -1,0 +1,1 @@
+2026-09-19 Stage 5.12 full-codec v0.3 first semantic development plus bounded-exhaustive run
