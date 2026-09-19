@@ -1,0 +1,238 @@
+{
+  "schema": "nex-selfhost-meta-representation",
+  "version": "0.3",
+  "status": "accepted-stage5.11-operational-representation",
+  "core_version": "NEX-1 v0.1",
+  "supersedes_for_active_work": "meta-representation-v0.2.json",
+  "historical_lineage": [
+    "meta-representation-v0.1.json",
+    "meta-representation-v0.2.json"
+  ],
+  "purpose": "Operational finite representations for the unchanged NEX-1 v0.1 self-hosting path, reconciling accepted functional streams with the complete Stage 5.11 representation inventory.",
+  "decision": {
+    "stage": "5.11",
+    "outcome": "Complete",
+    "reason": "v0.3 supplies exact operational carriers, canonical token grammars, equality/canonicality rules, failure-layer separation, bounded examples, and a machine validator without changing NEX-1 v0.1"
+  },
+  "core_dependencies": {
+    "term_constructors": ["Var", "Lam", "App", "Let", "Nat", "Prim"],
+    "type_formers": ["TypeVar", "Unit", "Nat", "Arrow", "Product", "Sum"],
+    "primitive_ids": {
+      "0": "fix",
+      "1": "succ",
+      "2": "pred",
+      "3": "ifz",
+      "4": "pair",
+      "5": "fst",
+      "6": "snd",
+      "7": "inl",
+      "8": "inr",
+      "9": "case",
+      "10": "unit"
+    },
+    "additional_core_features": []
+  },
+  "operational_foundation": {
+    "BitStream": {
+      "type": "N -> N",
+      "symbols": {"Bit0": 0, "Bit1": 1, "EOF": 2},
+      "rule": "for a finite bit string of length L, stream(i) is its 0/1 bit for i<L and EOF for every i>=L"
+    },
+    "FiniteBits": {
+      "type": "(N -> N) * N",
+      "fields": ["stream", "length"],
+      "canonical_rule": "length is exact; stream(i) is 0/1 for i<length and 2 for every i>=length",
+      "equality": "same length and same stream(i) for every i<length; EOF behavior is required after length"
+    },
+    "NatTokenStream": {
+      "type": "N -> N",
+      "rule": "for a finite token sequence of length L, token(i) is the i-th natural token for i<L and 0 for every i>=L"
+    },
+    "FiniteNatTokens": {
+      "type": "(N -> N) * N",
+      "fields": ["tokens", "length"],
+      "canonical_rule": "length is exact; token values at indices 0..length-1 are the complete canonical token sequence; out-of-range values are ignored and canonically 0",
+      "equality": "same length and same token(i) for every i<length"
+    }
+  },
+  "representations": {
+    "Bits": {
+      "carrier": "FiniteBits",
+      "form": "functional finite bit stream",
+      "canonical_rule": "every finite bit string has one extensional FiniteBits value"
+    },
+    "Term": {
+      "carrier": "FiniteNatTokens",
+      "form": "prefix token tree",
+      "grammar": {
+        "Var": "[0,index]",
+        "Lam": "[1] ++ Term(body)",
+        "App": "[2] ++ Term(function) ++ Term(argument)",
+        "Let": "[3] ++ Term(value) ++ Term(body)",
+        "Nat": "[4,value]",
+        "Prim": "[5,id]"
+      },
+      "canonical_rule": "exactly one complete token tree consumes the entire sequence",
+      "child_addressing": "children are located by token cursor and structural skip; no recursive Core type is assumed",
+      "equality": "extensional FiniteNatTokens equality",
+      "wire_relation": "decodeTerm must transform canonical NEX wire Bits into Term tokens; encodeTerm must reconstruct canonical NEX wire from Term tokens and may not return or copy an opaque original wire value"
+    },
+    "Type": {
+      "carrier": "FiniteNatTokens",
+      "form": "prefix token tree",
+      "grammar": {
+        "TypeVar": "[0,id]",
+        "Unit": "[1]",
+        "Nat": "[2]",
+        "Arrow": "[3] ++ Type(left) ++ Type(right)",
+        "Product": "[4] ++ Type(left) ++ Type(right)",
+        "Sum": "[5] ++ Type(left) ++ Type(right)"
+      },
+      "canonical_rule": "exactly one complete type token tree consumes the entire sequence"
+    },
+    "Scheme": {
+      "carrier": "FiniteNatTokens",
+      "form": "counted binders followed by Type",
+      "grammar": "[boundCount, boundId_0, ..., boundId_(k-1)] ++ Type(body)",
+      "canonical_rule": "bound IDs are unique and strictly ascending; portable normalized schemes alpha-rename bound IDs to 0..k-1"
+    },
+    "Substitution": {
+      "carrier": "FiniteNatTokens",
+      "form": "counted bindings",
+      "grammar": "[bindingCount] ++ repeated([typeVarId] ++ Type(value))",
+      "canonical_rule": "typeVarId keys are unique and strictly ascending"
+    },
+    "TypeEnvironment": {
+      "carrier": "FiniteNatTokens",
+      "form": "counted schemes",
+      "grammar": "[bindingCount] ++ Scheme(nearest) ++ ... ++ Scheme(farthest)",
+      "canonical_rule": "nearest binder first; exact binding count"
+    },
+    "PortableObservation": {
+      "carrier": "FiniteNatTokens",
+      "form": "prefix token tree",
+      "grammar": {
+        "Nat": "[0,value]",
+        "Unit": "[1]",
+        "Pair": "[2] ++ Observation(left) ++ Observation(right)",
+        "Inl": "[3] ++ Observation(payload)",
+        "Inr": "[4] ++ Observation(payload)",
+        "Function": "[5]"
+      },
+      "canonical_rule": "exactly one complete observation consumes the sequence; Function remains the coarse portable top-level observation"
+    },
+    "StaticResult": {
+      "carrier": "FiniteNatTokens",
+      "form": "tagged token record",
+      "grammar": {
+        "Ok": "[0] ++ Scheme",
+        "ScopeError": "[1,index,depth]",
+        "UnknownPrimitive": "[2,id]",
+        "TypeMismatch": "[3,detailCode]",
+        "OccursCheck": "[4,typeVarId]",
+        "MalformedMeta": "[5,detailCode]"
+      }
+    },
+    "ToolRequest": {
+      "carrier": "FiniteNatTokens",
+      "form": "tagged token record",
+      "grammar": {
+        "Decode": "[0,bitLength,bit_0,...,bit_(L-1)]",
+        "Encode": "[1] ++ Term",
+        "Validate": "[2] ++ Term",
+        "Infer": "[3] ++ Term",
+        "Evaluate": "[4] ++ Term"
+      }
+    },
+    "ToolResult": {
+      "carrier": "FiniteNatTokens",
+      "form": "tagged framed token payload",
+      "grammar": "[resultTag,payloadTokenCount,payload_0,...,payload_(k-1)]",
+      "payload_rule": "Ok payload is operation-specific canonical tokens; failure payload is a versioned portable detail token sequence",
+      "canonical_rule": "payloadTokenCount is exact"
+    }
+  },
+  "runtime_state_policy": {
+    "status": "no additional first-class runtime state required by Stage 5.11",
+    "reason": "a substitution-based Stage 5.15 evaluator may operate directly on Term tokens; Stage 5.11 therefore does not assume a hidden closure/environment object",
+    "future_rule": "if Stage 5.15 requires additional finite evaluator state, a new meta-representation version must freeze its exact FiniteNatTokens grammar before that state is used"
+  },
+  "semantic_tag_sets": {
+    "term_tags": {"Var": 0, "Lam": 1, "App": 2, "Let": 3, "Nat": 4, "Prim": 5},
+    "type_tags": {"TypeVar": 0, "Unit": 1, "Nat": 2, "Arrow": 3, "Product": 4, "Sum": 5},
+    "observation_tags": {"Nat": 0, "Unit": 1, "Pair": 2, "Inl": 3, "Inr": 4, "Function": 5},
+    "static_result_tags": {"Ok": 0, "ScopeError": 1, "UnknownPrimitive": 2, "TypeMismatch": 3, "OccursCheck": 4, "MalformedMeta": 5},
+    "request_tags": {"Decode": 0, "Encode": 1, "Validate": 2, "Infer": 3, "Evaluate": 4},
+    "tool_result_tags": {"Ok": 0, "MalformedMeta": 1, "WireError": 2, "ScopeError": 3, "UnknownPrimitive": 4, "TypeError": 5}
+  },
+  "canonicality": [
+    "Canonicality is semantic/extensional for function-valued streams; closure syntax or host identity is never compared.",
+    "FiniteBits has an exact length and EOF at every index at or beyond that length.",
+    "FiniteNatTokens has an exact length and an exact token sequence.",
+    "Term tokens are a complete canonical prefix serialization of exactly one NEX term tree.",
+    "Type tokens are a complete canonical prefix serialization of exactly one type tree.",
+    "Scheme bound IDs and substitution keys obey their normalization/order rules.",
+    "Malformed internal token representation is distinct from malformed canonical NEX wire.",
+    "Invalid de Bruijn scope and unknown primitive ID are not wire-codec errors; they remain Stage 5.13 structural validation outcomes.",
+    "Resource refusal is not serialized as semantic invalidity."
+  ],
+  "forbidden_dependencies": [
+    "recursive types",
+    "mutable references",
+    "host strings",
+    "host byte arrays",
+    "host AST objects",
+    "host callbacks implementing NEX operations",
+    "new Core primitives",
+    "incompatible NEX wire changes"
+  ],
+  "bounded_examples": {
+    "bits": [
+      {"items": [], "length": 0},
+      {"items": [0], "length": 1},
+      {"items": [1,0,1,1], "length": 4}
+    ],
+    "terms": [
+      {"name": "Var0", "tokens": [0,0], "canonical_wire": "001"},
+      {"name": "LamVar0", "tokens": [1,0,0], "canonical_wire": "01001"},
+      {"name": "Nat2", "tokens": [4,2], "canonical_wire": "1110011"},
+      {"name": "Prim10", "tokens": [5,10], "canonical_wire": "11110001011"},
+      {"name": "AppPrim1Nat3", "tokens": [2,5,1,4,3], "canonical_wire": "101111010111000100"}
+    ],
+    "types": [
+      {"name": "TypeVar0", "tokens": [0,0]},
+      {"name": "Unit", "tokens": [1]},
+      {"name": "Nat", "tokens": [2]},
+      {"name": "ArrowNatNat", "tokens": [3,2,2]},
+      {"name": "ProductUnitNat", "tokens": [4,1,2]},
+      {"name": "SumNatUnit", "tokens": [5,2,1]}
+    ],
+    "schemes": [
+      {"name": "MonoNat", "tokens": [0,2]},
+      {"name": "Forall0Var0", "tokens": [1,0,0,0]}
+    ],
+    "substitutions": [
+      {"name": "Empty", "tokens": [0]},
+      {"name": "Var0ToNat", "tokens": [1,0,2]}
+    ],
+    "environments": [
+      {"name": "Empty", "tokens": [0]},
+      {"name": "OneMonoNat", "tokens": [1,0,2]}
+    ],
+    "observations": [
+      {"name": "Nat3", "tokens": [0,3]},
+      {"name": "Unit", "tokens": [1]},
+      {"name": "Function", "tokens": [5]},
+      {"name": "PairUnitNat0", "tokens": [2,1,0,0]}
+    ]
+  },
+  "stage5_11_acceptance": {
+    "finite_carriers_without_recursive_types": true,
+    "canonical_injective_admitted_encodings": true,
+    "malformed_internal_representation_policy": "explicit",
+    "wire_vs_scope_vs_primitive_vs_resource_failures_separated": true,
+    "machine_readable_contract": "stage5/selfhost/meta-representation-v0.3.json",
+    "validator": "stage5/selfhost/validate_meta_representation_v0_3.py",
+    "bounded_round_trip_examples_required": true
+  }
+}

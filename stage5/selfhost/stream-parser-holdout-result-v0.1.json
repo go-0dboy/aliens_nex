@@ -1,0 +1,53 @@
+{
+  "schema": "nex-selfhost-stream-parser-holdout-result",
+  "version": "0.1",
+  "date": "2026-09-19",
+  "stage": "5.12f",
+  "core_version": "NEX-1 v0.1",
+  "candidate": "stage5/selfhost/stream-parser-v0.1.json",
+  "candidate_git_blob_sha": "44b9d85f8bbe522d8b637c977c3fb39520c2c10f",
+  "contract": "stage5/selfhost/parser-contract-v0.1.json",
+  "contract_git_blob_sha": "5566cecca370906ad3f837bd68bba54941c4a14b",
+  "development_workload": "stage5/selfhost/parser-development-v0.1.json",
+  "development_git_blob_sha": "ccdf1bd61980956aa7b211843d4d321a67acf5f3",
+  "holdout_workload": "stage5/selfhost/parser-holdout-v0.1.json",
+  "holdout_git_blob_sha": "352e37b682230f196b3b4414932b7625dd24bfa7",
+  "development_result": "stage5/selfhost/stream-parser-development-result-v0.1.json",
+  "pre_holdout_historical_regression": {
+    "workflow": "stage5-self-sufficiency-regression",
+    "run_id": 35434076839,
+    "conclusion": "success"
+  },
+  "github_actions": {
+    "workflow": "stage5-self-sufficiency-holdout",
+    "run_id": 35434195939,
+    "job_id": 105873992224,
+    "conclusion": "success"
+  },
+  "measurements": {
+    "holdout_cases": 12,
+    "projected_nat_observations": 48,
+    "python_call_by_need_resource_refusals": 0,
+    "go_call_by_need_resource_refusals": 0,
+    "go_normative_cbn_resource_refusals": 18,
+    "python_go_need_values_matched": 48,
+    "largest_python_need_transition_count": 15151,
+    "largest_python_need_case": "skip-let-complex:a",
+    "largest_go_need_transition_count": 6392,
+    "largest_go_need_case": "skip-let-complex:a"
+  },
+  "decision": "holdout_pass",
+  "checkpoint_status": "accepted_for_bounded_stream_wire_traversal",
+  "interpretation": "The unchanged stream-parser-v0.1 candidate passed its preregistered 12-case holdout after a green historical regression. The result supports bounded canonical-wire cursor traversal over the fixed-type functional BitStream under the frozen sharing budgets. Go normative CBN resource refusals are recorded separately and are measurement-only under the preregistered acceptance rule.",
+  "does_not_establish": [
+    "materialized recursive Term representation",
+    "complete decodeTerm or encodeTerm",
+    "scope validation",
+    "primitive-ID validity",
+    "principal HM type inference",
+    "evaluation",
+    "integrated NEX-in-NEX toolchain",
+    "self-processing",
+    "receiver-neutral bootstrap"
+  ]
+}

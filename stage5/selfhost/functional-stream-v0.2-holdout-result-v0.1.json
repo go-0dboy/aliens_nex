@@ -1,0 +1,30 @@
+{
+  "schema": "nex-selfhost-functional-stream-holdout-result",
+  "version": "0.1",
+  "date": "2026-09-19",
+  "candidate": "stage5/selfhost/functional-stream-v0.2.json",
+  "candidate_git_blob_sha": "7f35e453b7234e9078cf7cf2ca1e962b32e4ed3d",
+  "holdout": "stage5/selfhost/functional-stream-holdout-v0.1.json",
+  "holdout_git_blob_sha": "3ca4ccb6406b5ab7f30edb005a55e2a139b2b8a5",
+  "protocol": "stage5/selfhost/experiment-protocol-v0.1.json",
+  "workflow_run_id": 35432186658,
+  "job_id": 105868647658,
+  "status": "holdout_pass",
+  "metrics": {
+    "holdout_cases": 11,
+    "python_call_by_need_resource_refusals": 0,
+    "go_call_by_need_resource_refusals": 0,
+    "go_cbn_resource_refusals": 0,
+    "python_go_need_values_matched": 11,
+    "largest_python_need_transition_count": 13747,
+    "largest_python_need_case": "holdout:9(1,127,126)",
+    "largest_go_need_transition_count": 6368,
+    "largest_go_need_case": "holdout:9(1,127,126)"
+  },
+  "interpretation": [
+    "functional-stream v0.2 passed the preregistered hold-out without candidate or budget changes",
+    "the result supports fixed-type functional streams as a practical representation checkpoint for the tested surface",
+    "the result does not establish complete self-hosting or prove suitability for all later meta-objects",
+    "the next parser/Term experiment must define and freeze its own workload before acceptance evidence is collected"
+  ]
+}

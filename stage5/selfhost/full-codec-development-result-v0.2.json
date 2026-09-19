@@ -1,0 +1,46 @@
+{
+  "schema": "nex-selfhost-full-codec-development-result",
+  "version": "0.2",
+  "status": "rejected_on_frozen_development_resource_refusal",
+  "core_version": "NEX-1 v0.1",
+  "workflow_run_id": 35439908862,
+  "workflow_job_id": 105888807609,
+  "workflow_head_sha": "247f4e8fd4a2807fcf234f93648eb6552a889a51",
+  "frozen_git_blobs": {
+    "generator": "548d63e9129eb677bb686e5f8831d6ed8ebf3bf5",
+    "candidate_artifact": "87e54ae41aba9697f6d0f5ca3265bbcba5e90ef7",
+    "contract": "b404f4aafd04ceb2c7a13e7fdcc1462291e2c242",
+    "development_workload": "2904dc81c06e3d2bc0a484c01c2193dc94b19b93",
+    "holdout_workload": "e8e9e303dd6234fe074e3de4050b8fd6175d5752"
+  },
+  "candidate_wire": {
+    "decodeTerm": {
+      "bits": 6467,
+      "sha256": "c0516b8321356cecfa08ce3e253f90ec893bf0be7dd7db8419924d418de12cea"
+    },
+    "encodeTerm": {
+      "bits": 5994,
+      "sha256": "15f0fbe2c4d050b7c4841a32d39d179ebcdbc041e5f0093a66b06c0a3ed6fac3"
+    },
+    "separate_term_total_bits": 12461
+  },
+  "development_surface": {
+    "valid_terms": 17,
+    "decode_error_cases": 9,
+    "encode_error_cases": 9,
+    "includes_all_v0_1_development": true,
+    "includes_revealed_v0_1_holdout": true
+  },
+  "failure": {
+    "class": "call_by_need_resource_refusal",
+    "implementation": "independent Python sharing control",
+    "case": "law2:deepmixed:stream",
+    "resource": "transitions",
+    "observed": 5000001,
+    "limit": 5000000,
+    "message": "transition limit exceeded: 5000001 > 5000000"
+  },
+  "interpretation": "v0.2 did not remove the dominant cost of encodeTerm(decodeTerm(bits)): the decoded token function remained a random-access view that reparsed source wire across distinct token queries. This is an operational rejection under the frozen budget, not semantic invalidity and not a NEX-1 Core defect.",
+  "anti_tuning_consequence": "v0.2 is rejected before exhaustive/holdout. Any algorithmic successor is v0.3 and requires a new preregistered holdout before candidate code is written or executed.",
+  "decision": "rejected"
+}

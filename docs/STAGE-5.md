@@ -199,6 +199,8 @@ The 2026-09-19 literature re-audit is recorded in ADR-0016 and `docs/RESEARCH-AU
 
 ## Handoff to Stage 6
 
+> **Subsequent sequencing note:** this handoff records the conclusion of historical Stage 5. ADR-0018 was accepted later and inserted the separate 5.10–5.20 Core self-sufficiency extension before Stage 6 activation, without reopening Stage 5. Current continuation is in `docs/STATUS.md`; 5.11 and 5.12 are Complete and 5.13 is Planned next.
+
 The comparison with Lincos, DeVito–Oehrle, Lingua Cosmica, and especially CosmicOS reveals that Stage 5's bootstrap question was only part of the original communication problem. A receiver needs not only an executable basis but a **teaching sequence** from which the intended computational meaning can be reconstructed and checked.
 
 The handoff is therefore:

@@ -1,0 +1,31 @@
+{
+  "schema": "nex-selfhost-full-codec-candidate",
+  "version": "0.3",
+  "status": "stage5.12-development-candidate",
+  "core_version": "NEX-1 v0.1",
+  "contract": "stage5/selfhost/full-codec-contract-v0.3.json",
+  "generator": "stage5/selfhost/build_full_codec_v0_3.py",
+  "representation": {
+    "FiniteBits": "(N -> N) * N",
+    "FiniteNatTokens": "(N -> N) * N",
+    "CodecResult": "N * ((N -> N) * N)"
+  },
+  "algorithm": "recursive parsing constructs reusable functional token/bit fragments once; parent fragments compose captured child functions and lengths",
+  "functions": [
+    {
+      "name": "decodeTerm",
+      "wire_bit_length": 6198,
+      "wire_sha256": "b20d12f94bb91efc4adcb73c55cfd9db5dfc3ecd625d9421be4d67e64fedb6d8",
+      "expected_type": "(((N -> N) * N) -> (N * ((N -> N) * N)))"
+    },
+    {
+      "name": "encodeTerm",
+      "wire_bit_length": 6124,
+      "wire_sha256": "cea3472c4a819f41d7857b5cc3457cf92090f248fd101c3a40d0cfe951313ed4",
+      "expected_type": "(((N -> N) * N) -> (N * ((N -> N) * N)))"
+    }
+  ],
+  "development_manifest": "stage5/selfhost/full-codec-development-v0.3.json",
+  "holdout_workload": "stage5/selfhost/full-codec-holdout-v0.3.json",
+  "holdout_status": "preregistered_unexecuted"
+}

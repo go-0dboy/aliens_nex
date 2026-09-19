@@ -1,0 +1,25 @@
+{
+  "schema": "nex-selfhost-full-codec-workload",
+  "version": "0.3",
+  "classification": "holdout",
+  "status": "preregistered_unexecuted",
+  "valid_terms": [
+    {"id":"v3-var12","bits":"000001101","tokens":[0,12]},
+    {"id":"v3-nat9","bits":"11100001010","tokens":[4,9]},
+    {"id":"v3-prim6","bits":"111100111","tokens":[5,6]},
+    {"id":"v3-lamlet","bits":"0111011100010000010","tokens":[1,3,4,3,0,1]},
+    {"id":"v3-appnested","bits":"10010011011110010111100001000","tokens":[2,1,0,0,2,5,4,4,7]},
+    {"id":"v3-letapp","bits":"110100001111100100111110001000","tokens":[3,2,0,2,4,1,1,5,7]},
+    {"id":"v3-deep3","bits":"10110111000110010001101101111000101011011100001001001","tokens":[2,3,4,5,1,0,2,1,2,5,9,3,4,8,0,0]}
+  ],
+  "decode_errors": [
+    {"id":"v3-decode-var12-truncated","bits":"00000110","expected_status":1},
+    {"id":"v3-decode-deep3-trailing","bits":"101101110001100100011011011110001010110111000010010010","expected_status":2},
+    {"id":"v3-decode-app-nat2-missing-right","bits":"101110011","expected_status":1}
+  ],
+  "encode_errors": [
+    {"id":"v3-encode-app-prim6-missing-right","tokens":[2,5,6],"expected_status":3},
+    {"id":"v3-encode-unknown-tag8","tokens":[8],"expected_status":3},
+    {"id":"v3-encode-lamnat9-trailing-var12","tokens":[1,4,9,0,12],"expected_status":3}
+  ]
+}

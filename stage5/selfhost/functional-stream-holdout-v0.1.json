@@ -1,0 +1,30 @@
+{
+  "schema": "nex-selfhost-functional-stream-holdout",
+  "version": "0.1",
+  "date": "2026-09-19",
+  "candidate": "stage5/selfhost/functional-stream-v0.2.json",
+  "status": "preregistered_unexecuted",
+  "function": "repeat_query",
+  "resource_budgets_ref": "stage5/selfhost/experiment-protocol-v0.1.json",
+  "selection_note": "These cases were registered after v0.2 wire was frozen and before its first runtime execution. They are not used to alter v0.2. Failure rejects v0.2 and any algorithmic change requires v0.3 plus a new holdout.",
+  "cases": [
+    {"args": [1, 3, 2], "result": 1},
+    {"args": [1, 3, 3], "result": 2},
+    {"args": [0, 7, 6], "result": 0},
+    {"args": [0, 7, 7], "result": 2},
+    {"args": [1, 15, 14], "result": 1},
+    {"args": [1, 15, 15], "result": 2},
+    {"args": [0, 17, 23], "result": 2},
+    {"args": [0, 63, 62], "result": 0},
+    {"args": [0, 63, 63], "result": 2},
+    {"args": [1, 127, 126], "result": 1},
+    {"args": [1, 127, 127], "result": 2}
+  ],
+  "acceptance": {
+    "python_call_by_need_resource_refusals": 0,
+    "go_call_by_need_resource_refusals": 0,
+    "semantic_mismatches": 0,
+    "python_go_need_mismatches": 0,
+    "go_cbn_refusals": "measured_not_acceptance_failure"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "nex-selfhost-functional-stream-development-result",
+  "version": "0.1",
+  "date": "2026-09-19",
+  "candidate": "stage5/selfhost/functional-stream-v0.2.json",
+  "protocol": "stage5/selfhost/experiment-protocol-v0.1.json",
+  "workflow_run_id": 35432007845,
+  "job_id": 105868178140,
+  "status": "development_pass",
+  "candidate_unchanged_after_freeze": true,
+  "metrics": {
+    "canonical_functions": 10,
+    "canonical_bits_separate_terms": 1634,
+    "execution_cases": 26,
+    "python_call_by_need_resource_refusals": 0,
+    "go_call_by_need_resource_refusals": 0,
+    "go_cbn_resource_refusals": 0,
+    "python_go_need_values_matched": 26,
+    "largest_python_need_transition_count": 13855,
+    "largest_python_need_case": "repeat_query:7(1,128,127)",
+    "largest_go_need_transition_count": 6418,
+    "largest_go_need_case": "repeat_query:7(1,128,127)"
+  },
+  "interpretation": [
+    "functional-stream v0.2 passes the previously observed development workload under the frozen resource budgets",
+    "this is development evidence, not hold-out evidence",
+    "the preregistered hold-out remains unexecuted at this result checkpoint",
+    "passing development does not establish complete self-hosting or suitability for all recursive meta-objects"
+  ]
+}

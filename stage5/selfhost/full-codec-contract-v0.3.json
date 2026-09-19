@@ -1,0 +1,81 @@
+{
+  "schema": "nex-selfhost-full-codec-contract",
+  "version": "0.3",
+  "status": "preregistered_before_full_codec_candidate_v0.3",
+  "core_version": "NEX-1 v0.1",
+  "representation_contract": "stage5/selfhost/meta-representation-v0.3.json",
+  "predecessors": [
+    {
+      "candidate": "full-codec-v0.1",
+      "result": "stage5/selfhost/full-codec-holdout-result-v0.1.json",
+      "decision": "rejected_on_preregistered_holdout"
+    },
+    {
+      "candidate": "full-codec-v0.2",
+      "result": "stage5/selfhost/full-codec-development-result-v0.2.json",
+      "decision": "rejected_on_frozen_development_resource_refusal"
+    }
+  ],
+  "purpose": "Complete Stage 5.12 using materialized functional fragments while preserving NEX-1 v0.1, canonical wire, operational v0.3 carriers, status codes and frozen budgets.",
+  "interfaces": {
+    "FiniteBits": "(N -> N) * N",
+    "FiniteNatTokens": "(N -> N) * N",
+    "CodecResult": "N * ((N -> N) * N)",
+    "decodeTerm": "((N -> N) * N) -> (N * ((N -> N) * N))",
+    "encodeTerm": "((N -> N) * N) -> (N * ((N -> N) * N))"
+  },
+  "status_codes": {"Ok":0,"WireUnexpectedEOF":1,"WireTrailingData":2,"MalformedMeta":3},
+  "laws": [
+    "decodeTerm(encodeTerm(term)) == term extensionally on admitted canonical Term values",
+    "encodeTerm(decodeTerm(bits)) == canonical(bits) extensionally on successfully decoded canonical wire",
+    "function-valued equality forces exact length contents plus the required out-of-range sentinel"
+  ],
+  "algorithmic_successor_intent": {
+    "problem_in_v0.2": "decoded Term remained a random-access view over source wire; distinct token queries reparsed wire, so encodeTerm(decodeTerm(bits)) still exceeded the frozen Python-need transition budget on deepmixed",
+    "decode_v0.3": "recursively parse once into functional token fragments. Each fragment carries token length, token function and next wire offset; parent token functions compose already-built child fragments rather than reparsing source wire for each index",
+    "encode_v0.3": "recursively parse Term tokens once into functional bit fragments. Each fragment carries bit length, bit function and next token offset; parent bit functions compose already-built child fragments rather than re-reading the source token stream for each output bit",
+    "top_level": "validate exact consumption once, then expose the constructed fragment function and length through the unchanged CodecResult interface",
+    "representation_change": false,
+    "wire_change": false,
+    "resource_budget_change": false,
+    "core_change": false
+  },
+  "candidate_discipline": {
+    "development_manifest": "stage5/selfhost/full-codec-development-v0.3.json",
+    "holdout_workload": "stage5/selfhost/full-codec-holdout-v0.3.json",
+    "development_provenance": "exact union of v0.2 development and the known/unexecuted v0.2 holdout",
+    "observation_compaction": "four compound success evaluations per valid term preserve status+length+full extensional stream+sentinel assertions; error cases retain one status observation",
+    "after_first_candidate_execution": "any algorithmic or candidate-wire change requires full-codec candidate v0.4 and a new preregistered holdout",
+    "holdout_rule": "v0.3 holdout may execute once only after frozen development success, bounded-exhaustive success, unchanged candidate identity and a green historical checkpoint",
+    "no_budget_increase_after_result": true,
+    "no_failed_case_deletion": true,
+    "known_previous_holdouts_are_not_v0.3_holdout": true
+  },
+  "resource_budgets": {
+    "python_call_by_need": {"max_transitions":5000000,"max_depth":8000},
+    "go_call_by_need": {"max_transitions":5000000,"max_depth":20000},
+    "go_normative_cbn": {"max_transitions":5000000,"max_depth":20000,"role":"measurement_only; refusals recorded separately"}
+  },
+  "bounded_exhaustive_class": {
+    "status": "carried_forward_frozen_before_v0.3_candidate_execution",
+    "maximum_ast_nodes": 3,
+    "leaf_set": ["Var(0)","Nat(0)","Prim(0)"],
+    "expected_term_count": 27,
+    "required_checks": [
+      "Direct Go and Direct Python canonical wire agree",
+      "NEX decodeTerm returns exact v0.3 tokens",
+      "NEX encodeTerm returns exact canonical wire",
+      "both round-trip laws hold extensionally"
+    ]
+  },
+  "forbidden_shortcuts": [
+    "opaque original-wire retention as decoded Term",
+    "host callback for constructor or U encoding decisions",
+    "host AST/list/byte-array as semantic state inside NEX candidate",
+    "new Core primitive/type former/term constructor",
+    "canonical wire change",
+    "resource-budget increase",
+    "dropping or weakening deepmixed or any earlier known case"
+  ],
+  "completion_boundary": "Stage 5.13 remains blocked until v0.3 or a later properly preregistered successor passes development, bounded exhaustive, one-shot holdout, final historical regression, diff review and documentation closeout."
+}

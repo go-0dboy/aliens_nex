@@ -1,0 +1,85 @@
+{
+  "schema": "nex-selfhost-foundation",
+  "version": "0.1",
+  "status": "stage5.12-foundation-candidate",
+  "core_version": "NEX-1 v0.1",
+  "generator": "stage5/selfhost/build_foundation.py",
+  "functions": [
+    {
+      "name": "add",
+      "wire_bits": "10111110101011010101111001000010001010111101010100001100010101111011001",
+      "wire_bit_length": 71,
+      "role": "natural addition",
+      "expected_type": "(N -> (N -> N))",
+      "tests": [
+        {"args": [0, 0], "result": 0},
+        {"args": [2, 3], "result": 5},
+        {"args": [4, 1], "result": 5}
+      ]
+    },
+    {
+      "name": "mul",
+      "wire_bits": "11010111110101011010101111001000010001010111101010100001100010101111011001101111101010110101011110010000111101101000001000001010100001100010101111011001",
+      "wire_bit_length": 152,
+      "role": "natural multiplication",
+      "expected_type": "(N -> (N -> N))",
+      "tests": [
+        {"args": [0, 5], "result": 0},
+        {"args": [2, 3], "result": 6},
+        {"args": [3, 2], "result": 6}
+      ]
+    },
+    {
+      "name": "odd",
+      "wire_bits": "101111101011010101111001000011110110101011110010010111101100111100101000010101111011101111011001",
+      "wire_bit_length": 96,
+      "role": "parity flag, 0 for even and 1 for odd",
+      "expected_type": "(N -> N)",
+      "tests": [
+        {"args": [0], "result": 0},
+        {"args": [1], "result": 1},
+        {"args": [2], "result": 0},
+        {"args": [5], "result": 1}
+      ]
+    },
+    {
+      "name": "halve",
+      "wire_bits": "1011111010110101011110010000111101101010111100100101111011001111011011110101000010101111011101111011001",
+      "wire_bit_length": 103,
+      "role": "floor division by 2",
+      "expected_type": "(N -> N)",
+      "tests": [
+        {"args": [0], "result": 0},
+        {"args": [1], "result": 0},
+        {"args": [2], "result": 1},
+        {"args": [5], "result": 2},
+        {"args": [8], "result": 4}
+      ]
+    },
+    {
+      "name": "pow2",
+      "wire_bits": "1101011111010101101010111100100001000101011110101010000110001010111101100110111110101101010111100100001111001010100001110000101011110110011000010101111011001",
+      "wire_bit_length": 157,
+      "role": "power of two",
+      "expected_type": "(N -> N)",
+      "tests": [
+        {"args": [0], "result": 1},
+        {"args": [1], "result": 2},
+        {"args": [3], "result": 8}
+      ]
+    },
+    {
+      "name": "shift_right",
+      "wire_bits": "110101111101011010101111001000011110110101011110010010111101100111101101111010100001010111101110111101100110111110101011010101111001000010001010100001110000010000010101111011001",
+      "wire_bit_length": 177,
+      "role": "floor division by 2^k",
+      "expected_type": "(N -> (N -> N))",
+      "tests": [
+        {"args": [8, 0], "result": 8},
+        {"args": [8, 1], "result": 4},
+        {"args": [9, 1], "result": 4},
+        {"args": [15, 3], "result": 1}
+      ]
+    }
+  ]
+}

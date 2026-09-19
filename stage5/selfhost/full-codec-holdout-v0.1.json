@@ -1,0 +1,25 @@
+{
+  "schema": "nex-selfhost-full-codec-workload",
+  "version": "0.1",
+  "classification": "holdout",
+  "status": "preregistered_unexecuted",
+  "valid_terms": [
+    {"id":"var31","bits":"0000000100000","tokens":[0,31]},
+    {"id":"nat31","bits":"111000000100000","tokens":[4,31]},
+    {"id":"prim0","bits":"11111","tokens":[5,0]},
+    {"id":"lamlamvar1","bits":"010100010","tokens":[1,1,0,1]},
+    {"id":"appnat4prim2","bits":"101110001011111011","tokens":[2,4,4,5,2]},
+    {"id":"letprim10lamapp","bits":"11011110001011011000010001","tokens":[3,5,10,1,2,0,1,0,0]},
+    {"id":"deepmixed","bits":"100110001111000001001011011100111111010","tokens":[2,1,2,0,0,4,17,3,4,2,5,1]}
+  ],
+  "decode_errors": [
+    {"id":"decode-var31-truncated","bits":"000000010000","expected_status":1},
+    {"id":"decode-lamlamvar1-trailing","bits":"0101000100","expected_status":2},
+    {"id":"decode-let-prim10-missing-body","bits":"11011110001011","expected_status":1}
+  ],
+  "encode_errors": [
+    {"id":"encode-prim-missing-payload","tokens":[5],"expected_status":3},
+    {"id":"encode-let-missing-body","tokens":[3,4,2],"expected_status":3},
+    {"id":"encode-nat31-trailing","tokens":[4,31,0,0],"expected_status":3}
+  ]
+}

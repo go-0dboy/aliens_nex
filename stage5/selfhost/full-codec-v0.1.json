@@ -1,0 +1,30 @@
+{
+  "schema": "nex-selfhost-full-codec-candidate",
+  "version": "0.1",
+  "status": "stage5.12-development-candidate",
+  "core_version": "NEX-1 v0.1",
+  "contract": "stage5/selfhost/full-codec-contract-v0.1.json",
+  "generator": "stage5/selfhost/build_full_codec.py",
+  "representation": {
+    "FiniteBits": "(N -> N) * N",
+    "FiniteNatTokens": "(N -> N) * N",
+    "CodecResult": "N * ((N -> N) * N)"
+  },
+  "functions": [
+    {
+      "name": "decodeTerm",
+      "wire_bit_length": 5764,
+      "wire_sha256": "1d6090f971959308b4c6790bf5f2decc2f7befbddb60bd58f7602889f345a9bf",
+      "expected_type": "(((N -> N) * N) -> (N * ((N -> N) * N)))"
+    },
+    {
+      "name": "encodeTerm",
+      "wire_bit_length": 5281,
+      "wire_sha256": "1e2e5b78035bca186bea50dc21c7b7fb50086959414a574477e9c44cba72d36c",
+      "expected_type": "(((N -> N) * N) -> (N * ((N -> N) * N)))"
+    }
+  ],
+  "development_workload": "stage5/selfhost/full-codec-development-v0.1.json",
+  "holdout_workload": "stage5/selfhost/full-codec-holdout-v0.1.json",
+  "holdout_status": "preregistered_unexecuted"
+}

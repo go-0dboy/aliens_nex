@@ -1,0 +1,93 @@
+{
+  "schema": "nex-selfhost-stream-parser-contract",
+  "version": "0.1",
+  "date": "2026-09-19",
+  "status": "preregistered_before_parser_implementation",
+  "core_version": "NEX-1 v0.1",
+  "stage": "5.12f",
+  "purpose": "test canonical wire cursor traversal over the accepted functional BitStream without materializing a recursive numeric AST",
+  "dependencies": {
+    "bit_stream_checkpoint": "stage5/selfhost/functional-stream-v0.2.json",
+    "experiment_protocol": "stage5/selfhost/experiment-protocol-v0.1.json",
+    "canonical_wire": "NEX-1 v0.1"
+  },
+  "types": {
+    "BitStream": "N -> N",
+    "Cursor": "N",
+    "ParserResult": "N * (N * (N * N))"
+  },
+  "parser_result_fields": ["status", "a", "b", "next_offset"],
+  "status_codes": {
+    "Ok": 0,
+    "UnexpectedEOF": 1,
+    "TrailingData": 2
+  },
+  "constructor_kind_codes": {
+    "Var": 0,
+    "Lam": 1,
+    "App": 2,
+    "Let": 3,
+    "Nat": 4,
+    "Prim": 5
+  },
+  "operations": {
+    "decodeUAt": {
+      "type": "(N -> N) -> N -> (N * (N * (N * N)))",
+      "ok_result": "(0, decoded_n, 0, first_offset_after_U)",
+      "failure_result": "(1, 0, 0, first_missing_offset)"
+    },
+    "readHead": {
+      "type": "(N -> N) -> N -> (N * (N * (N * N)))",
+      "ok_result": "(0, constructor_kind, payload_or_0, first_offset_after_constructor_header_and_payload)",
+      "payload_rule": "Var/Nat/Prim carry U-decoded payload; Lam/App/Let use payload 0",
+      "failure_result": "(1, 0, 0, first_missing_offset)"
+    },
+    "skipTerm": {
+      "type": "(N -> N) -> N -> (N * (N * (N * N)))",
+      "ok_result": "(0, node_count, 0, first_offset_after_complete_term)",
+      "arity": {"Var": 0, "Lam": 1, "App": 2, "Let": 2, "Nat": 0, "Prim": 0},
+      "failure_result": "propagate UnexpectedEOF with a=b=0 and next_offset at the first missing bit"
+    },
+    "exactTerm": {
+      "type": "(N -> N) -> N -> (N * (N * (N * N)))",
+      "ok_result": "(0, node_count, 0, first_offset_after_complete_term) when the next stream symbol is EOF",
+      "unexpected_eof_result": "propagate skipTerm UnexpectedEOF",
+      "trailing_result": "(2, node_count, 0, first_offset_after_complete_term) when another bit follows"
+    }
+  },
+  "wire_scope": {
+    "included": [
+      "canonical constructor-prefix parsing",
+      "U(n) parsing from a functional bit stream",
+      "recursive traversal according to constructor arity",
+      "exact single-term framing via EOF"
+    ],
+    "excluded": [
+      "scope validation",
+      "primitive-ID validity",
+      "principal type inference",
+      "evaluation",
+      "materialized recursive Term value",
+      "self-processing"
+    ]
+  },
+  "resource_budgets": {
+    "python_call_by_need": {"max_transitions": 5000000, "max_depth": 8000},
+    "go_call_by_need": {"max_transitions": 5000000, "max_depth": 20000},
+    "go_normative_cbn": {"max_transitions": 5000000, "max_depth": 20000, "acceptance_role": "measurement_only"}
+  },
+  "evidence_files": {
+    "development": "stage5/selfhost/parser-development-v0.1.json",
+    "holdout": "stage5/selfhost/parser-holdout-v0.1.json"
+  },
+  "versioning_rule": "after the first NEX parser execution, any algorithmic/parser-wire change requires parser candidate v0.2 and a newly preregistered holdout",
+  "acceptance": [
+    "contract and workloads validate against an independent host oracle before parser implementation",
+    "development workload has zero semantic mismatches",
+    "Python and Go call-by-need have zero resource refusals under frozen budgets",
+    "Python and Go call-by-need observations agree on every development case",
+    "candidate wire is frozen before holdout execution",
+    "the unchanged candidate passes the preregistered holdout once under the same budgets"
+  ],
+  "interpretation_limit": "a pass establishes bounded functional-stream wire traversal only; it is not complete decodeTerm or self-hosting"
+}

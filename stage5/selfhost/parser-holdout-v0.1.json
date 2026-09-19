@@ -1,0 +1,27 @@
+{
+  "schema": "nex-selfhost-stream-parser-workload",
+  "version": "0.1",
+  "classification": "holdout",
+  "status": "preregistered_unexecuted",
+  "contract": "stage5/selfhost/parser-contract-v0.1.json",
+  "execution_rule": "do not execute against a NEX parser until parser candidate v0.1 passes the frozen development workload unchanged",
+  "failure_rule": "a semantic mismatch or sharing resource refusal rejects parser candidate v0.1; any algorithmic change requires candidate v0.2 and a new holdout",
+  "result_fields": ["status", "a", "b", "next_offset"],
+  "cases": [
+    {"id": "u7", "operation": "decodeUAt", "bits": "0001000", "offset": 0, "expected": [0,7,0,7]},
+    {"id": "u31", "operation": "decodeUAt", "bits": "00000100000", "offset": 0, "expected": [0,31,0,11]},
+    {"id": "u-holdout-trunc", "operation": "decodeUAt", "bits": "00010", "offset": 0, "expected": [1,0,0,5]},
+
+    {"id": "head-var3", "operation": "readHead", "bits": "0000100", "offset": 0, "expected": [0,0,3,7]},
+    {"id": "head-nat17", "operation": "readHead", "bits": "1110000010010", "offset": 0, "expected": [0,4,17,13]},
+
+    {"id": "skip-lam-app", "operation": "skipTerm", "bits": "01100011110000010010", "offset": 0, "expected": [0,4,0,20]},
+    {"id": "skip-let-complex", "operation": "skipTerm", "bits": "1101111010100011110011", "offset": 0, "expected": [0,5,0,22]},
+    {"id": "skip-missing-let-body", "operation": "skipTerm", "bits": "11011101", "offset": 0, "expected": [1,0,0,8]},
+
+    {"id": "exact-app-lam-nat", "operation": "exactTerm", "bits": "1001001111000100", "offset": 0, "expected": [0,4,0,16]},
+    {"id": "exact-var3-trailing", "operation": "exactTerm", "bits": "00001000", "offset": 0, "expected": [2,1,0,7]},
+    {"id": "exact-nested-trailing", "operation": "exactTerm", "bits": "011000111100000100101", "offset": 0, "expected": [2,4,0,20]},
+    {"id": "exact-prim-truncated-U", "operation": "exactTerm", "bits": "111100", "offset": 0, "expected": [1,0,0,6]}
+  ]
+}

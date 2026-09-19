@@ -1,5 +1,7 @@
 # Stage 5.8 — Bootstrap feasibility audit
 
+> **Subsequent clarification (2026-09-19):** this experiment used historical `assumptions-v0.1.json`. ADR-0016 later corrected the taxonomy: plain `A1` now contains only elementary discrete mathematics, while the stronger prior needed to interpret an exact recursive rule language is `A1(R)`. This correction does not overturn the negative Stage 5.8 result; it makes Candidate A's missing dependency more explicit. ADR-0018 later inserted the separate 5.10–5.20 Core self-sufficiency extension before Stage 6.
+
 ## Status
 
 Negative research result for the first complete-bootstrap attempt.
@@ -22,11 +24,11 @@ A candidate may be reported as a complete `B | A` or `SB | A` only if all of the
 
 A failed condition is not repaired by assigning the missing component zero cost.
 
-## Candidate A — recursive rule description under `A1`
+## Candidate A — recursive rule description under historical v0.1 `A1`
 
-`A1` assumes a discrete mathematical metalanguage: non-negative integers, finite sequences, and the ability to understand deterministic finite/recursive rule descriptions.
+The historical v0.1 `A1` profile assumed a discrete mathematical metalanguage including non-negative integers, finite sequences, and the ability to understand deterministic finite/recursive rule descriptions.
 
-This appears promising because NEX semantics can be written mathematically as recursive rules. However, Stage 5 does not yet define an exact receiver-neutral **binary syntax and operational semantics for the rule-description language itself**.
+This appeared promising because NEX semantics can be written mathematically as recursive rules. However, Stage 5 did not define an exact receiver-neutral **binary syntax and operational semantics for the rule-description language itself**.
 
 The existing forms are not admissible replacements:
 
@@ -35,7 +37,9 @@ The existing forms are not admissible replacements:
 - Go/Python assumes a terrestrial language/runtime;
 - simply saying “the receiver understands these rules” moves the missing interpreter into an undeclared prior.
 
-Therefore no exact transmitted artifact and no defensible `SB | A1` bit count is accepted in Stage 5.8.
+Therefore no exact transmitted artifact and no defensible `SB | A1` bit count was accepted in Stage 5.8.
+
+Under the corrected v0.2 taxonomy, the intended stronger prior is represented explicitly as `A1(R)`, where the exact rule calculus `R` must itself be frozen before any `B | A1(R)` claim. The historical rejection remains valid because no such exact `R` or complete transmitted artifact was present in Stage 5.8.
 
 **Classification:** `rejected_incomplete`.
 
@@ -47,7 +51,7 @@ That does **not** by itself give NEX a bootstrap cost.
 
 To accept `B | A2(U=BLC)`, the project would still need a frozen BLC program that implements at least the NEX-1 decoder, static semantics, and observable evaluator, together with exact input/output framing and conformance verification.
 
-No such complete NEX-on-BLC program exists in the current repository. Counting a BLC universal evaluator alone would measure BLC machinery, not the missing NEX interpreter.
+No such complete NEX-on-BLC program exists in the Stage 5 repository. Counting a BLC universal evaluator alone would measure BLC machinery, not the missing NEX interpreter.
 
 Therefore Stage 5.8 does not publish a BLC bootstrap bit count.
 
@@ -85,16 +89,16 @@ This is the accepted Stage 5.8 result.
 
 The result is deliberately negative: the research now knows **why** the missing bootstrap cannot yet be replaced by a defensible scalar without additional work.
 
-The two principal missing constructions are now explicit:
+The two principal missing constructions are now explicit in the corrected terminology:
 
-1. define and freeze a receiver-neutral recursive-rule transmission language under `A1`, then encode and verify the full NEX semantics in it; or
+1. define and freeze a receiver-neutral exact formal rule calculus `R` under `A1(R)`, then encode and verify the full NEX semantics in it; or
 2. freeze an exact `U` under `A2(U)` and implement the complete NEX bootstrap as a verified program for that machine.
 
-Those are appropriate subjects for a later stage. They should not be silently folded into Stage 5 by strengthening the prior after seeing the desired bit count.
+Those are subjects for later research. They must not be silently folded into a weaker prior after seeing a desired bit count.
 
 ## Reproducibility
 
-Machine-readable record:
+Machine-readable historical record:
 
 ```text
 stage5/bootstrap/attempt-v0.1.json

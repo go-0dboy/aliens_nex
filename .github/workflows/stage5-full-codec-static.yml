@@ -1,0 +1,42 @@
+name: stage5-full-codec-static
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-24.04
+    outputs:
+      run_static: ${{ steps.changed.outputs.run_static }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - id: changed
+        shell: bash
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -qx 'stage5/selfhost/full-codec-static-trigger-v0.3.txt'; then
+            echo 'run_static=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run_static=false' >> "$GITHUB_OUTPUT"
+          fi
+
+  static-v0-3:
+    needs: trigger
+    if: needs.trigger.outputs.run_static == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.x'
+      - name: Validate preregistration and v0.3 static identity/type only
+        run: python stage5/selfhost/verify_full_codec_static_v0_3.py

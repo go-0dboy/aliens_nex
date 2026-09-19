@@ -1,0 +1,48 @@
+{
+  "schema": "nex-selfhost-full-codec-workload",
+  "version": "0.2",
+  "classification": "development",
+  "status": "frozen_before_full_codec_candidate_v0.2",
+  "provenance": "union of full-codec v0.1 development and the now-revealed/rejected v0.1 holdout; no case here is eligible for v0.2 holdout",
+  "valid_terms": [
+    {"id":"var0","bits":"001","tokens":[0,0]},
+    {"id":"var3","bits":"0000100","tokens":[0,3]},
+    {"id":"lamvar0","bits":"01001","tokens":[1,0,0]},
+    {"id":"appvar0nat2","bits":"100011110011","tokens":[2,0,0,4,2]},
+    {"id":"letnat0lamvar0","bits":"1101110101001","tokens":[3,4,0,1,0,0]},
+    {"id":"nat17","bits":"1110000010010","tokens":[4,17]},
+    {"id":"prim10","bits":"11110001011","tokens":[5,10]},
+    {"id":"nestedlamapp","bits":"01100011110000010010","tokens":[1,2,0,0,4,17]},
+    {"id":"letcomplex","bits":"1101111010100011110011","tokens":[3,5,1,2,0,0,4,2]},
+    {"id":"applamnat3","bits":"1001001111000100","tokens":[2,1,0,0,4,3]},
+    {"id":"var31","bits":"0000000100000","tokens":[0,31]},
+    {"id":"nat31","bits":"111000000100000","tokens":[4,31]},
+    {"id":"prim0","bits":"11111","tokens":[5,0]},
+    {"id":"lamlamvar1","bits":"010100010","tokens":[1,1,0,1]},
+    {"id":"appnat4prim2","bits":"101110001011111011","tokens":[2,4,4,5,2]},
+    {"id":"letprim10lamapp","bits":"11011110001011011000010001","tokens":[3,5,10,1,2,0,1,0,0]},
+    {"id":"deepmixed","bits":"100110001111000001001011011100111111010","tokens":[2,1,2,0,0,4,17,3,4,2,5,1]}
+  ],
+  "decode_errors": [
+    {"id":"decode-empty","bits":"","expected_status":1},
+    {"id":"decode-var-prefix-only","bits":"00","expected_status":1},
+    {"id":"decode-lam-missing-body","bits":"01","expected_status":1},
+    {"id":"decode-app-missing-right","bits":"10001","expected_status":1},
+    {"id":"decode-var0-trailing","bits":"0011","expected_status":2},
+    {"id":"decode-nat-truncated-u","bits":"11100","expected_status":1},
+    {"id":"decode-var31-truncated","bits":"000000010000","expected_status":1},
+    {"id":"decode-lamlamvar1-trailing","bits":"0101000100","expected_status":2},
+    {"id":"decode-let-prim10-missing-body","bits":"11011110001011","expected_status":1}
+  ],
+  "encode_errors": [
+    {"id":"encode-empty","tokens":[],"expected_status":3},
+    {"id":"encode-var-missing-payload","tokens":[0],"expected_status":3},
+    {"id":"encode-lam-missing-body","tokens":[1],"expected_status":3},
+    {"id":"encode-app-missing-right","tokens":[2,0,0],"expected_status":3},
+    {"id":"encode-unknown-tag","tokens":[6],"expected_status":3},
+    {"id":"encode-var0-trailing","tokens":[0,0,4,2],"expected_status":3},
+    {"id":"encode-prim-missing-payload","tokens":[5],"expected_status":3},
+    {"id":"encode-let-missing-body","tokens":[3,4,2],"expected_status":3},
+    {"id":"encode-nat31-trailing","tokens":[4,31,0,0],"expected_status":3}
+  ]
+}

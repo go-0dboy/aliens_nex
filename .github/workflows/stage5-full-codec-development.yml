@@ -1,0 +1,43 @@
+name: stage5-full-codec-active-candidate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  trigger:
+    runs-on: ubuntu-24.04
+    outputs:
+      run_active_candidate: ${{ steps.changed.outputs.run_active_candidate }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - id: changed
+        name: Check latest commit for active-candidate trigger
+        shell: bash
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -qx 'stage5/selfhost/full-codec-active-trigger-v0.3.txt'; then
+            echo 'run_active_candidate=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run_active_candidate=false' >> "$GITHUB_OUTPUT"
+          fi
+
+  active-candidate:
+    needs: trigger
+    if: needs.trigger.outputs.run_active_candidate == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-go@v5
+        with: {go-version: '1.26.x'}
+      - name: Execute frozen compact v0.3 development workload
+        run: python stage5/selfhost/verify_full_codec_development_v0_3.py
+      - name: Execute frozen v0.3 complete 27-Term class
+        run: python stage5/selfhost/verify_full_codec_exhaustive_v0_3.py

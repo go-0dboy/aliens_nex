@@ -1,0 +1,37 @@
+{
+  "schema": "nex-selfhost-full-codec-holdout-result",
+  "version": "0.3",
+  "status": "accepted_on_preregistered_holdout",
+  "core_version": "NEX-1 v0.1",
+  "workflow_run_id": 35441600023,
+  "workflow_job_id": 105893253759,
+  "workflow_head_sha": "f312910282e444b38953d869ee780f9c2488e965",
+  "preholdout_result": "stage5/selfhost/full-codec-preholdout-result-v0.3.json",
+  "frozen_git_blobs": {
+    "generator": "69a828ac43df26f6360bc672f0fcc287594797ee",
+    "candidate_artifact": "c5fb6836564262f7fafece2a06c06949a1cbe1dd",
+    "contract": "e2205ee622c895eca1057960917fe0be22fca17c",
+    "development_manifest": "4c57a4d873d18b77f80a0efb62bb38865d86a17e",
+    "holdout_workload": "eed66f0150b1718b9cbad50548b9a14b97554da2"
+  },
+  "holdout_surface": {
+    "valid_terms": 7,
+    "decode_error_cases": 3,
+    "encode_error_cases": 3,
+    "compound_forced_nat_observations": 34,
+    "round_trip_law_valid_terms": 7
+  },
+  "results": {
+    "python_need_resource_refusals": 0,
+    "go_need_resource_refusals": 0,
+    "go_cbn_resource_refusals": 30,
+    "python_go_need_values_matched": 34,
+    "python_go_need_values_total": 34,
+    "largest_python_need_transitions": 487579,
+    "largest_python_need_case": "law2:v3-deep3",
+    "largest_go_need_transitions": 212893,
+    "largest_go_need_case": "law2:v3-deep3"
+  },
+  "interpretation": "The frozen full-codec v0.3 candidate passed the one-shot preregistered unseen holdout under unchanged resource budgets. Call-by-need controls returned all required observations and agreed across independent Python and Go implementations. Normative Go CBN resource refusals remain separately recorded as operational cost evidence and do not alter the frozen acceptance rule.",
+  "decision": "accepted"
+}

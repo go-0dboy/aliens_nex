@@ -1,0 +1,38 @@
+{
+  "schema": "nex-selfhost-full-codec-exhaustive-result",
+  "version": "0.1",
+  "status": "bounded_exhaustive_passed_candidate_frozen",
+  "core_version": "NEX-1 v0.1",
+  "workflow_run_id": 35437775893,
+  "workflow_job_id": 105883265107,
+  "workflow_head_sha": "df1ff35223754710c65044c8b5589aeb1448fa30",
+  "frozen_git_blobs": {
+    "candidate_artifact": "52ba615fff7c714b7f3f1cb87a9c045f777b11ed",
+    "contract": "87ed4f457112a6e90e1956d40c746cb2ab139847",
+    "development_result": "bf8a7cd4dfca6509f468c4be9a6334802c453fe5",
+    "exhaustive_verifier": "2d3be7668dc2053d54548c24b142617a8a396755",
+    "direct_go_control": "960ea9eaa917a257b81bec8e8183ce7f2824f4c1",
+    "holdout_workload": "0823fc9a59888c429615da6df654e8b4eb1a0eb1"
+  },
+  "bounded_exhaustive_surface": {
+    "maximum_ast_nodes": 3,
+    "leaf_set": ["Var(0)", "Nat(0)", "Prim(0)"],
+    "complete_terms": 27,
+    "direct_python_round_trips": 27,
+    "direct_go_round_trips_and_token_projections": 27,
+    "nex_forced_law_observations": 108
+  },
+  "results": {
+    "python_need_resource_refusals": 0,
+    "go_need_resource_refusals": 0,
+    "go_cbn_resource_refusals": 98,
+    "nex_python_go_need_values_matched": 108,
+    "nex_python_go_need_values_total": 108,
+    "largest_python_need_transitions": 307302,
+    "largest_python_need_case": "law2:term-26",
+    "largest_go_need_transitions": 138310,
+    "largest_go_need_case": "law2:term-26"
+  },
+  "decision": "candidate v0.1 passes the complete preregistered 1..3-node Term class and remains frozen for historical-regression and holdout evaluation",
+  "holdout_status": "preregistered_unexecuted"
+}

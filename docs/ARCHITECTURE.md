@@ -30,6 +30,11 @@ A teaching lesson may use redundancy, examples, temporary pedagogical notation, 
 
 The canonical NEX-1 Core remains unchanged unless a later evidence-backed Core-version ADR explicitly changes it.
 
+## Pre-Stage-6 Core self-sufficiency gate
+
+ADR-0018 inserts the post-Stage-5 extension 5.10–5.20 before Stage 6 may become Active. This experimental layer tests self-implementation while preserving the normative NEX-1 v0.1 Core. The current boundary is: 5.10–5.12 Complete, 5.13 structural validation Planned, and Stage 6 Planned until the 5.20 decision gate. Accepted Stage 5.11/5.12 operational representations and codec programs are research/self-implementation artifacts, not new Core constructors, primitives, types, or wire rules.
+
+
 ## Core execution layers
 
 ```text
@@ -76,7 +81,7 @@ The canonical dynamic strategy is weak call-by-name. Internal evaluator represen
 
 ## Teaching-layer responsibilities
 
-Stage 6 introduces a research layer above the Core. It owns experimental artifacts for:
+Stage 6, if activated after the 5.20 gate, introduces a research layer above the Core. It owns experimental artifacts for:
 
 ```text
 curriculum dependency graph
