@@ -195,7 +195,7 @@ def source_terms_functional_stream():
 
 CONTRACTS = {
     "stream_nil": {
-        "expected_type": "(N -> N)",
+        "expected_type": "forall T0. (T0 -> N)",
         "tests": [{"args": [0], "result": 2}, {"args": [7], "result": 2}],
     },
     "stream_cons": {
