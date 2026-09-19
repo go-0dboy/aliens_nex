@@ -2,8 +2,9 @@
 
 **Date:** 2026-09-19  
 **Baseline branch:** `main`  
-**Active work:** Stage 6 teaching/bootstrap protocol planning  
-**Current state:** `Stages 0–5 complete; Stage 6 protocol checkpoint in preparation; NEX-1 v0.1 unchanged`  
+**Active work:** Post-Stage-5 NEX Core self-sufficiency extension (5.10–5.20)  
+**Current state:** `Stages 0–5 complete; 5.10 contract accepted; 5.11 meta-representation active; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
+**Active decision:** ADR-0018  
 **Living dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md`
 
 ## Completed stages
@@ -15,28 +16,9 @@
 - Stage 4 — empirical validation and benchmarking — Complete, PR #6.
 - Stage 5 — independent reconstruction and receiver-conditioned bootstrap evidence — Complete.
 
-## Post-Stage-5 research audit
+Historical Stage 5.0–5.9 remains closed under ADR-0015. The new 5.10–5.20 numbering denotes a **post-Stage-5 extension** and does not rewrite the blind-reconstruction/bootstrap experiment.
 
-The 2026-09-19 re-audit is recorded in:
-
-- `docs/RESEARCH-AUDIT-2026-09-19.md`;
-- `docs/RESEARCH-AUDIT-2026-09-19.ru.md`;
-- `docs/RELATED-WORK.md` / `docs/RELATED-WORK.ru.md`;
-- ADR-0016.
-
-No reviewed issue invalidates the NEX-1 v0.1 wire/static/dynamic semantics or frozen Stage 4–5 measurements.
-
-Important corrections now accepted:
-
-- typed combinatory logic is a legitimate competitor;
-- exact total cost is conditional on explicit receiver assumptions and concrete serialization;
-- current receiver assumptions use `A1(R)` rather than hiding an executable rule calculus in `A1`;
-- `942/942` is strong differential-conformance evidence, not a proof;
-- the 98.90% Stage 4 result is an evaluator transition-counter reduction, not wall-clock speedup;
-- Lincos, DeVito–Oehrle, Lingua Cosmica, CosmicOS, and exosemiotic work are design inputs for teachability;
-- historical novelty is not a project success criterion.
-
-## Stable evidence entering Stage 6
+## Stable evidence
 
 ### NEX-1 Core
 
@@ -51,23 +33,14 @@ weak call-by-name semantics
 canonical binary wire
 ```
 
+No new Core constructor, primitive, type former, wire rule, host callback, mutable memory model, or native backend is authorized by the self-sufficiency workstream.
+
 ### Stage 4 corpus
 
 ```text
 programs   17
 AST nodes  345
 wire bits  1371
-```
-
-Constructor attribution:
-
-```text
-Prim  460
-Var   286
-App   264
-Nat   244
-Lam    84
-Let    33
 ```
 
 ### Stage 5 independent reconstruction
@@ -79,18 +52,11 @@ semantic mismatches     0
 resource asymmetries    0
 ```
 
-Case composition:
+Accepted meaning remains strong differential-conformance evidence of reconstructability on the tested surface, not a proof.
 
-```text
-17   frozen corpus programs
-325  valid cases = 25 parameter sets x 13 templates
-100  static-error cases = 25 parameter sets x 4 families
-500  randomized term shapes tested at wire level
-```
+### Receiver assumptions / bootstrap status
 
-### Receiver assumptions
-
-Historical Stage 5 evidence remains frozen in `assumptions-v0.1.json`. Current research uses `assumptions-v0.2.json`:
+Current receiver taxonomy remains:
 
 ```text
 A0        exact binary-frame prior
@@ -100,9 +66,7 @@ A2(U)     A1 + exact universal binary machine U and framing
 A_host(H) non-neutral terrestrial host control
 ```
 
-These are experimental conditions, not claims about actual extraterrestrial cognition.
-
-### Bootstrap status
+Historical negative bootstrap result remains:
 
 ```text
 accepted complete bootstrap candidates  0
@@ -111,11 +75,53 @@ full SB | A known                       false
 total C | A computable                  false
 ```
 
-The Python/Go host implementations remain engineering controls, not receiver-neutral bootstrap.
+The post-Stage-5 self-sufficiency experiment does not retroactively change those results.
 
-## Stage 6 — teaching NEX
+## Post-Stage-5 Core self-sufficiency extension
 
-ADR-0017 establishes the new architectural boundary:
+ADR-0018 adds a pre-Stage-6 evidence gate:
+
+```text
+5.10 contract and gate                 accepted
+5.11 NEX-in-NEX meta-representation   active
+5.12 self wire codec                   planned
+5.13 self structural validation        planned
+5.14 self HM type inference            planned
+5.15 self evaluator                    planned
+5.16 integrated NEX-in-NEX toolchain  planned
+5.17 self-processing                   planned
+5.18 bounded/differential validation   planned
+5.19 supporting metatheory             planned
+5.20 decision gate                     planned
+```
+
+The target is an exact canonical NEX implementation `I` capable of implementing its own portable wire/static/dynamic semantics and processing `code(I)` without hidden host-language operations.
+
+A native `NEX -> x86/ARM/WASM` compiler is not part of this gate. Such a backend requires a separately declared target/profile.
+
+### Decision outcomes reserved for 5.20
+
+```text
+supported
+supported_but_impractical
+core_limitation_discovered
+inconclusive
+```
+
+Difficulty during implementation is recorded as evidence; it does not by itself authorize a NEX-1 v0.1 redesign.
+
+## Stage 6 status
+
+Stage 6 remains **Planned**. ADR-0017 and the existing planning artifacts remain valid:
+
+```text
+docs/STAGE-6.md
+stage6/curriculum-plan-v0.1.json
+stage6/validate_plan.py
+docs/adr/0017-separate-teaching-protocol-from-core.md
+```
+
+The teaching/bootstrap architecture remains:
 
 ```text
 receiver prior A
@@ -125,66 +131,12 @@ receiver prior A
     -> canonical NEX programs P
 ```
 
-Canonical NEX remains the final target. The teaching representation may be redundant, staged, or pedagogical, but every transmitted convention must be defined and counted unless it is part of the declared prior.
+Stage 6 is not activated while the 5.10–5.20 gate is unresolved.
 
-### Stage 6 planning artifacts
+## Research synthesis status
 
-```text
-docs/STAGE-6.md
-stage6/curriculum-plan-v0.1.json
-stage6/validate_plan.py
-docs/adr/0017-separate-teaching-protocol-from-core.md
-```
+ADR-0018 is a research-significant project decision. The living dissertation pair must incorporate this pre-Stage-6 self-sufficiency question within the same workstream and must be current before 5.20 closeout. Historical Stage 5 evidence and the post-Stage-5 literature audit remain unchanged.
 
-`curriculum-plan-v0.1.json` is explicitly a planning artifact, **not** an accepted teaching message and not a source of `T_bits`.
+## Next recommended step
 
-### Operational competence target
-
-A receiver experiment is not successful merely because it can execute supplied examples. It must demonstrate:
-
-1. canonical decode;
-2. canonical encode;
-3. static checking / principal types;
-4. evaluation to portable observations;
-5. self-test capability;
-6. construction of valid NEX programs for held-out tasks.
-
-The final item distinguishes “can run NEX” from “can program in NEX”.
-
-### Initial lesson-order hypothesis
-
-```text
-binary/framing
- -> naturals/sequences
- -> self-delimiting integers
- -> structure/trees
- -> primitive equations
- -> application/functions
- -> binding/de Bruijn
- -> products/sums
- -> recursion
- -> types/judgments
- -> principal-type examples
- -> canonical NEX wire
- -> self-tests
- -> held-out construction
-```
-
-This sequence is a hypothesis to test, not part of NEX-1 semantics.
-
-## Supporting evidence work during Stage 6
-
-In parallel with the teaching experiment, strengthen:
-
-- NEX-specific canonical forms / preservation / progress-or-safety metatheory;
-- NEX-specific call-by-need observational-preservation reasoning;
-- bounded exhaustive small-term comparison across independent implementations, including function application contexts;
-- hold-out and independently specified workloads.
-
-These workstreams support confidence in the target Core but do not replace the Stage 6 teaching objective.
-
-## Scope guard
-
-Stage 6 does not authorize an incompatible NEX-1 redesign. No new Core constructors, primitive IDs, wire format, mutable memory model, native backend, product frontend, or self-hosting claim enters the stage without a separate evidence-backed ADR/new Core version.
-
-A Core redesign may be discussed only if Stage 6 evidence shows that the stable target itself prevents a defensible teaching/bootstrap construction, rather than merely showing that a particular curriculum is poor.
+Complete and validate the versioned 5.11 meta-representation contract using only existing NEX-1 v0.1 values, then use that frozen representation as the input contract for the 5.12 self wire codec.

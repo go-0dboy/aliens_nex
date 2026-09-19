@@ -4,7 +4,7 @@ NEX uses Architecture Decision Records (ADRs) to preserve not only final decisio
 
 ## Why ADRs exist here
 
-NEX is a research-oriented language project. Choices such as SKI, Binary Lambda Calculus, Hindley-Milner, System F, PCF, recursive types, explicit memory, DAG transport, bootstrap machines, receiver priors, and teaching protocols can look attractive in isolation. ADRs prevent repeated debates and silent architectural drift.
+NEX is a research-oriented language project. Choices such as SKI, Binary Lambda Calculus, Hindley-Milner, System F, PCF, recursive types, explicit memory, DAG transport, bootstrap machines, receiver priors, teaching protocols, and self-hosting gates can look attractive in isolation. ADRs prevent repeated debates and silent architectural drift.
 
 An ADR is required for decisions that materially change or reinterpret one or more of:
 
@@ -38,6 +38,7 @@ An ADR is required for decisions that materially change or reinterpret one or mo
 - [ADR-0015: Close Stage 5 with a negative complete-bootstrap result](0015-stage5-decision-gate.md)
 - [ADR-0016: Correct research claims after the post-Stage-5 literature re-audit](0016-post-stage5-literature-reaudit-corrections.md)
 - [ADR-0017: Separate the NEX teaching/bootstrap protocol from the stable NEX-1 Core](0017-separate-teaching-protocol-from-core.md)
+- [ADR-0018: Require a pre-Stage-6 NEX Core self-sufficiency gate](0018-pre-stage6-core-self-sufficiency-gate.md)
 
 ## Status values
 
