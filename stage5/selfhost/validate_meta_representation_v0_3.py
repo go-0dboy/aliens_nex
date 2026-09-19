@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the Stage 5.11 operational meta-representation v0.3.
+"""Validate the accepted Stage 5.11 operational meta-representation v0.3.
 
 This validator is deliberately host-side evidence for the representation
 contract. It does not implement Stage 5.12 encodeTerm/decodeTerm in NEX.
@@ -218,8 +218,11 @@ def main() -> None:
         fail("Core dependency inventory changed")
     if new.get("semantic_tag_sets") != old.get("tag_sets"):
         fail("semantic tag sets changed from v0.2")
-    if new.get("status") != "stage5.11-operational-candidate":
-        fail("unexpected v0.3 status")
+    if new.get("status") != "accepted-stage5.11-operational-representation":
+        fail("v0.3 is not the accepted Stage 5.11 operational representation")
+    decision = new.get("decision", {})
+    if decision.get("stage") != "5.11" or decision.get("outcome") != "Complete":
+        fail("Stage 5.11 completion decision drifted")
 
     forbidden = set(new.get("forbidden_dependencies", []))
     required_forbidden = {
@@ -318,8 +321,6 @@ def main() -> None:
             f"Observation example {example['name']}", example["tokens"], parse_observation
         )
 
-    # Bounded structural evidence: enumerate every generated term with 1..4 nodes,
-    # prove injectivity in that complete generated class, and check token/wire round trips.
     seen_tokens = {}
     seen_wire = {}
     generated = 0
@@ -359,7 +360,8 @@ def main() -> None:
     if "new meta-representation version" not in runtime_policy.get("future_rule", ""):
         fail("future runtime-state extension is not version-gated")
 
-    print("stage5.11 meta-representation v0.3: valid operational contract")
+    print("stage5.11 meta-representation v0.3: accepted operational contract")
+    print("Stage 5.11: Complete")
     print("Core dependencies: unchanged from v0.2")
     print("Bits carrier: FiniteBits = (N -> N) * N")
     print("recursive meta-data carrier: FiniteNatTokens = (N -> N) * N")
