@@ -1,14 +1,12 @@
 # Stage 5.12 closeout plan — complete self wire codec before Stage 5.13
 
-**Status:** Active planning / implementation blocked until prerequisites are checked  
+**Status:** Active  
 **Date:** 2026-09-19  
 **Core:** NEX-1 v0.1 unchanged  
 **Parent decision:** ADR-0018  
 **Stage 6:** Planned  
 
-## Sequencing correction
-
-This document corrects the project ordering after the accepted Stage 5.12f bounded stream-parser checkpoint.
+## Sequencing rule
 
 The ordering is strict:
 
@@ -18,9 +16,9 @@ The ordering is strict:
      -> 5.13 may begin
 ```
 
-Stage 5.12f is a checkpoint **inside Stage 5.12**. It is not the completion of Stage 5.12 and it does not authorize work on Stage 5.13.
+Stage 5.11 is now Complete under `meta-representation-v0.3`.
 
-Any earlier wording in status, manuscript, or PR discussion that described Stage 5.13 structural validation as the immediate next implementation step is superseded by this closeout plan.
+Stage 5.12f remains a checkpoint **inside Stage 5.12**. It is not the completion of Stage 5.12 and it does not authorize Stage 5.13 work.
 
 No Stage 5.13 implementation branch or code is to be created until the Stage 5.12 completion gate below is satisfied.
 
@@ -40,7 +38,7 @@ decodeTerm(encodeTerm(term)) == term
 encodeTerm(decodeTerm(bits)) == canonical(bits)
 ```
 
-and differential comparison against the existing Go/Python wire behavior.
+and differential comparison against existing Go/Python wire behavior.
 
 Current evidence establishes:
 
@@ -48,58 +46,61 @@ Current evidence establishes:
 - a practical functional finite-bit-stream representation on tested surfaces;
 - NEX-written `decodeUAt`, `readHead`, `skipTerm`, and `exactTerm`;
 - bounded recursive traversal of canonical NEX term wire;
-- preregistered development/hold-out evidence for the stream parser.
+- preregistered development/hold-out evidence for the stream parser;
+- a completed Stage 5.11 operational representation contract v0.3.
 
 It does **not** yet establish complete `encodeTerm/decodeTerm` or their required round trips. Therefore Stage 5.12 remains Active.
 
-## Gate 0 — predecessor audit: Stage 5.11 must be Complete
+## Gate 0 — predecessor audit: Stage 5.11 Complete
 
-Before adding another Stage 5.12 implementation candidate, re-audit the original Stage 5.11 definition of done.
+**Status: Complete.**
 
-The original representation scope includes at least:
+Durable evidence:
 
 ```text
-Bits
-Term
-Type
-Scheme
-Substitution
-Type environment
-Runtime/evaluation state as needed
-Error/result classes
-Portable observations
-Toolchain requests/results
+stage5/selfhost/meta-representation-v0.3.json
+stage5/selfhost/validate_meta_representation_v0_3.py
+docs/experiments/stage5-selfhost-5.11-completion-audit.md
+docs/experiments/stage5-selfhost-meta-representation-v0.3.md
 ```
 
-The existing v0.1/v0.2 numeric representation checkpoints and the later functional-stream evidence must be compared with this original scope.
+The accepted operational carriers are:
 
-Gate 0 outcomes:
+```text
+FiniteBits      = (N -> N) * N
+FiniteNatTokens = (N -> N) * N
+```
 
-1. **5.11 already satisfies its exact contract** — record the evidence and mark 5.11 Complete; or
-2. **5.11 has missing representation contracts** — finish and validate them before proceeding with new 5.12 code.
+The accepted `Term` representation is a canonical finite natural-token prefix tree:
 
-No redefinition of 5.11 is allowed merely to make the status green. If the representation strategy evolved from all-`N` carriers to stream/cursor carriers, that evolution must be explicitly versioned and reconciled with the original 5.11 acceptance criteria.
+```text
+Var(k)   -> [0,k]
+Lam(t)   -> [1] ++ t
+App(a,b) -> [2] ++ a ++ b
+Let(v,b) -> [3] ++ v ++ b
+Nat(n)   -> [4,n]
+Prim(p)  -> [5,p]
+```
 
-## Gate 1 — freeze the exact Stage 5.12 Term representation
+The full codec must use this exact v0.3 representation unless a later versioned representation decision explicitly supersedes it before candidate execution.
 
-The next unresolved question is not yet an algorithm. It is the exact internal representation on which `decodeTerm` and `encodeTerm` operate.
+## Gate 1 — freeze the exact Stage 5.12 full-codec interface
 
-Before implementation, freeze a machine-readable representation contract that states:
+The representation question is now resolved by Stage 5.11 v0.3. Gate 1 must freeze the exact NEX interfaces and result/error contracts for the full codec before implementation.
 
-- the physical NEX carrier for a decoded `Term`;
-- whether it is materialized or stream-backed;
-- exact equality for decoded terms;
+At minimum, freeze:
+
+- physical types of `Bits`, `Term`, decode result, and encode result;
+- exact `decodeTerm` success/error result shape;
+- exact `encodeTerm` success/error result shape if encoding malformed internal tokens is representable;
+- malformed/truncated/trailing wire classes;
+- malformed Term-token classes;
+- treatment of unknown primitive IDs: the wire codec preserves `Prim(id)` and Stage 5.13 performs primitive validity checks;
+- extensional equality for function-valued Bits;
 - exact canonicalization rule;
-- exact success/error result type;
-- treatment of malformed/truncated/trailing wire;
-- whether unknown primitive IDs remain a structural Term value for Stage 5.13 to reject, rather than being rejected by the wire codec;
-- how child terms are addressed without recursive Core types;
-- how `encodeTerm` obtains every constructor and payload needed to reproduce canonical wire;
 - no hidden host AST/list/string/byte-array callback.
 
-A stream-backed/offset representation may be considered, but it must not be accepted merely because it makes `decodeTerm` an identity operation. The contract must demonstrate that the representation is sufficient for an independent NEX-written encoder and for later static/dynamic consumers.
-
-If this representation changes the accepted 5.11 meta-representation contract, create a new explicit representation version and satisfy Gate 0 before proceeding.
+The contract must preserve the v0.3 anti-identity rule: `decodeTerm` transforms wire Bits into Term tokens and `encodeTerm` reconstructs canonical wire from the token representation itself.
 
 ## Gate 2 — preregister Stage 5.12 completion workloads
 
@@ -119,7 +120,7 @@ and include:
 - nested unary terms;
 - both-child constructors with asymmetric subtree sizes;
 - deep mixed nesting;
-- offsets/cursors where applicable;
+- malformed Term token streams;
 - truncated constructor prefixes;
 - truncated U payloads;
 - truncated child terms;
@@ -139,7 +140,7 @@ Retain the frozen Stage 5.12 anti-tuning budgets unless an explicit pre-executio
 
 ## Gate 3 — implement NEX-written `decodeTerm`
 
-Implement a closed, well-typed canonical NEX term that consumes the Stage 5.12 `Bits` representation and returns the frozen Stage 5.12 `Term` representation or an explicit wire/decode error.
+Implement a closed, well-typed canonical NEX term that consumes accepted v0.3 `Bits` and returns accepted v0.3 `Term` tokens or an explicit wire/decode error.
 
 Acceptance requires:
 
@@ -154,9 +155,9 @@ Acceptance requires:
 
 ## Gate 4 — implement NEX-written `encodeTerm`
 
-Implement a closed, well-typed canonical NEX term that consumes the frozen decoded-Term representation and emits canonical functional bit stream output.
+Implement a closed, well-typed canonical NEX term that consumes accepted v0.3 `Term` tokens and emits canonical v0.3 `Bits`.
 
-The encoder must reconstruct constructor prefixes and U payloads from the NEX representation itself. Host code may build test applications and observe results, but may not supply missing encoding decisions through callbacks.
+The encoder must reconstruct constructor prefixes and `U(n)` payloads from the token representation itself. Host code may build test applications and observe results, but may not supply missing encoding decisions through callbacks.
 
 Acceptance uses the same artifact/type/differential/resource discipline as Gate 3.
 
@@ -184,17 +185,17 @@ For function-valued stream results, equality must be tested extensionally over t
 
 ## Gate 6 — bounded exhaustive/differential strengthening for the codec
 
-Before Stage 5.12 can be called Complete, add at least one precisely defined small complete class, for example by a frozen combination of:
+Before Stage 5.12 can be called Complete, add at least one precisely defined small complete class, frozen before aggregate execution, using explicit bounds such as:
 
 - maximum AST node count;
-- bounded Var/Nat/Prim payload range;
-- all six constructors where the bound permits them.
+- bounded Var/Nat/Prim payload ranges;
+- all six constructors where the node bound permits them.
 
 For every admitted term in that class:
 
 - direct Go and Python canonical encodings agree;
-- NEX `encodeTerm` agrees extensionally with the canonical wire;
-- NEX `decodeTerm` accepts the canonical wire;
+- NEX `encodeTerm` agrees extensionally with canonical wire;
+- NEX `decodeTerm` accepts canonical wire and returns exact v0.3 Term tokens;
 - round-trip observations agree;
 - malformed cases remain separately classified.
 
@@ -204,7 +205,8 @@ This is bounded evidence, not a global proof.
 
 Only after:
 
-- representation contract frozen;
+- full-codec interface frozen;
+- workloads frozen;
 - candidate artifacts frozen;
 - development pass frozen;
 - full historical checkpoint green;
@@ -217,11 +219,13 @@ A hold-out failure rejects that candidate version. The same version may not be t
 
 Stage 5.12 may be marked **Complete** only when all of the following are true:
 
-- [ ] Gate 0: Stage 5.11 is formally Complete under its original/evidence-backed versioned contract;
+- [x] Gate 0: Stage 5.11 formally Complete under accepted operational v0.3;
 - [x] NEX integer wire codec prerequisites exist;
 - [x] functional bit-stream representation checkpoint exists;
 - [x] bounded NEX stream parser checkpoint exists;
-- [ ] exact Term representation for full codec is frozen and validated;
+- [x] exact operational Term representation frozen and validated by Stage 5.11 v0.3;
+- [ ] exact full-codec interface/result contract frozen;
+- [ ] full-codec development + hold-out workloads preregistered;
 - [ ] NEX `decodeTerm` exists and passes frozen development evidence;
 - [ ] NEX `encodeTerm` exists and passes frozen development evidence;
 - [ ] both required round-trip/canonicalization laws pass;
@@ -239,6 +243,6 @@ Only after this checklist is complete may the project discuss or begin Stage 5.1
 
 ## Immediate next action
 
-The immediate next action is **Gate 0: audit Stage 5.11 completion against its original definition of done**.
+The immediate next action is **Gate 1**: freeze the exact full-codec interface/result contract against accepted `meta-representation-v0.3`.
 
-No new codec implementation should be written until that audit is recorded, because the full `Term` codec depends on a representation contract and the project has explicitly adopted strict sequential completion.
+No `decodeTerm` or `encodeTerm` implementation should be executed before Gate 1 and Gate 2 are committed and reviewed.
