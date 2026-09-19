@@ -1,1 +1,1 @@
-2026-09-19 protocol checkpoint before functional-stream-v0.2 runtime
+2026-09-19 historical checkpoint before stream-parser-v0.1 holdout
