@@ -3,7 +3,7 @@
 **Date:** 2026-09-19  
 **Baseline branch:** `main`  
 **Active work:** Post-Stage-5 NEX Core self-sufficiency extension (5.10–5.20)  
-**Current state:** `Stages 0–5 complete; 5.10 accepted; 5.11 representation work versioned; 5.12a/b/c verified; 5.12d interleaved pair rejected under frozen budgets; 5.12e functional-stream v0.1 rejected and v0.2 accepted provisionally on frozen development+hold-out surfaces; 5.12f NEX-written stream parser passed frozen development and preregistered hold-out and is accepted for bounded canonical-wire traversal; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
+**Current state:** `Stages 0–5 complete; 5.10 accepted; 5.11 Complete under operational meta-representation v0.3; 5.12a/b/c verified; 5.12d interleaved pair rejected under frozen budgets; 5.12e functional-stream v0.1 rejected and v0.2 accepted provisionally on frozen development+hold-out surfaces; 5.12f NEX-written stream parser passed frozen development and preregistered hold-out and is accepted for bounded canonical-wire traversal; 5.12 remains Active until full encodeTerm/decodeTerm closeout; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
 **Active decision:** ADR-0018  
 **Living dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md`
 
@@ -99,16 +99,16 @@ ADR-0018 inserts an executable evidence gate before Stage 6 activation:
 
 ```text
 5.10 contract and gate                 accepted
-5.11 NEX-in-NEX meta-representation   versioned/validated checkpoints
-5.12 self wire codec                   active; bounded stream traversal accepted
-5.13 self structural validation        planned
-5.14 self HM type inference            planned
-5.15 self evaluator                    planned
-5.16 integrated NEX-in-NEX toolchain  planned
-5.17 self-processing                   planned
-5.18 bounded/differential validation   planned
-5.19 supporting metatheory             planned
-5.20 decision gate                     planned
+5.11 NEX-in-NEX meta-representation   Complete; operational v0.3 accepted
+5.12 self wire codec                   Active; bounded stream traversal accepted, full codec open
+5.13 self structural validation        Planned; blocked by 5.12
+5.14 self HM type inference            Planned
+5.15 self evaluator                    Planned
+5.16 integrated NEX-in-NEX toolchain  Planned
+5.17 self-processing                   Planned
+5.18 bounded/differential validation   Planned
+5.19 supporting metatheory             Planned
+5.20 decision gate                     Planned
 ```
 
 Reserved 5.20 outcomes remain:
@@ -122,20 +122,75 @@ inconclusive
 
 Difficulty is evidence to record; it does not authorize a NEX-1 v0.1 redesign.
 
-## 5.11 — meta-representation checkpoints
+## 5.11 — meta-representation — Complete
 
-The historical N-only candidate is frozen in:
+Historical N-only contracts remain frozen in:
 
 ```text
 stage5/selfhost/meta-representation-v0.1.json
+stage5/selfhost/meta-representation-v0.2.json
 stage5/selfhost/validate_meta_representation.py
+stage5/selfhost/validate_meta_representation_v0_2.py
 ```
 
-Every frozen meta-object there uses mathematical `N` as the physical Core carrier. No recursive type, list primitive, host AST, host byte array, new Core primitive, or wire change is assumed.
+v0.1 established the first all-`N` construction. v0.2 made the outer tagged encoding exact. Later 5.12 experiments demonstrated that recursively materialized numeric trees are mathematically valid but not the accepted practical route: pow2-adic packing has recursive code-size pathology and the tested interleaving replacement exceeded frozen sharing-depth budgets.
 
-During 5.12 it became clear that v0.1 did not explicitly freeze the outer tagged-value formula. Historical v0.1 remains unchanged. `meta-representation-v0.2.json` explicitly records the candidate rule `tagged(tag,payload)=pair(tag,payload)` and is independently validated.
+The Stage 5.11 completion audit therefore introduced and accepted:
 
-The later 5.12 experiments show that this numeric representation is useful as an expressiveness construction but is not automatically a practical recursive AST representation.
+```text
+stage5/selfhost/meta-representation-v0.3.json
+stage5/selfhost/validate_meta_representation_v0_3.py
+```
+
+Operational v0.3 uses:
+
+```text
+FiniteBits      = (N -> N) * N
+FiniteNatTokens = (N -> N) * N
+```
+
+`Bits` retains functional `0/1/EOF` stream semantics with an exact finite length.
+
+`Term` is a canonical natural-token prefix tree:
+
+```text
+Var(k)   -> [0,k]
+Lam(t)   -> [1] ++ t
+App(a,b) -> [2] ++ a ++ b
+Let(v,b) -> [3] ++ v ++ b
+Nat(n)   -> [4,n]
+Prim(p)  -> [5,p]
+```
+
+Exact token grammars are also frozen for:
+
+```text
+Type
+Scheme
+Substitution
+TypeEnvironment
+PortableObservation
+StaticResult
+ToolRequest
+ToolResult
+```
+
+The representation has explicit extensional equality/canonicality rules and preserves the distinction among malformed internal representation, malformed wire, scope error, unknown primitive, type error, portable result, and resource refusal.
+
+The `Term` contract is deliberately not an opaque wire reference: Stage 5.12 `decodeTerm` must transform canonical bits into tokens and `encodeTerm` must reconstruct canonical wire from tokens.
+
+The v0.3 validator checks bounded examples and exhaustively enumerates its frozen generated Term class with 1–4 nodes, confirming token round trips, canonical-wire reconstruction, and no token/wire collisions in that bounded class.
+
+A separate first-class runtime state is not required at 5.11. If Stage 5.15 needs additional closure/environment state, a new representation version must be frozen before such state is used.
+
+Durable completion record:
+
+```text
+docs/experiments/stage5-selfhost-5.11-completion-audit.md
+docs/experiments/stage5-selfhost-meta-representation-v0.3.md
+```
+
+**Stage 5.11 result: Complete.**
 
 ## 5.12a — executable arithmetic foundation
 
@@ -326,12 +381,12 @@ Go need resource refusals                    0
 Go CBN resource refusals                     0
 Python/Go need values matched              11/11
 largest Python need transitions            13,747
-largest Go need transitions                 6,368
+largest Go need transitions                  6,368
 ```
 
 Decision: `functional-stream-v0.2` is **accepted provisionally as the finite-bit-stream representation checkpoint for the tested surface**.
 
-This supports the claim that dynamically sized finite bit data can be represented and queried with unchanged rank-1 HM functions/closures under the frozen budgets. It does **not** establish complete `Term` representation, type environments, substitutions, evaluator state, self-hosting, or receiver-neutral bootstrap.
+This supports the claim that dynamically sized finite bit data can be represented and queried with unchanged rank-1 HM functions/closures under the frozen budgets. It does **not** establish complete `Term` codec, HM machinery, evaluator state, self-hosting, or receiver-neutral bootstrap.
 
 Durable evidence:
 
@@ -436,7 +491,7 @@ Decision: `stream-parser-v0.1` is **accepted as the bounded canonical-wire trave
 
 This establishes that unchanged NEX-1 v0.1 can decode canonical `U(n)` fields, distinguish all six term constructors, recursively traverse complete canonical term structure, and detect premature EOF/trailing data using a functional `BitStream` and natural cursor.
 
-It does **not** establish a materialized recursive `Term`, complete `decodeTerm`/`encodeTerm`, scope validation, primitive-ID validity, HM inference, evaluation, integrated self-hosting, self-processing, or receiver-neutral bootstrap.
+It does **not** establish complete v0.3 `Term` construction, full `decodeTerm`/`encodeTerm`, scope validation, primitive-ID validity, HM inference, evaluation, integrated self-hosting, self-processing, or receiver-neutral bootstrap.
 
 Normative Go CBN refused 16 development projections and 18 hold-out projections under the frozen budget. Both sharing controls completed every acceptance observation. This is recorded as further evidence that sharing is an engineering feasibility condition, not as semantic invalidity or a Core defect.
 
@@ -456,6 +511,7 @@ Fast accepted-checkpoint validation and expensive historical checks are separate
 
 ```text
 stage5-self-sufficiency.yml
+  -> v0.1/v0.2/v0.3 representation validators
   -> protocol/contracts/reproducibility
   -> validate frozen 5.12f result without rerunning hold-out
 
@@ -469,9 +525,7 @@ stage5-self-sufficiency-holdout.yml
   -> one-shot hold-out jobs only when the matching explicit trigger changes
 ```
 
-The latest-commit trigger behavior has been verified. The parser hold-out is now represented by its frozen result and blob identities; ordinary regression does not re-execute the one-shot hold-out.
-
-This changes scheduling only; the final merge gate still requires current historical evidence and research synthesis.
+The latest-commit trigger behavior has been verified. Accepted hold-outs are represented by frozen results and blob identities; ordinary regression does not re-execute one-shot hold-outs.
 
 ## Required final implementation target
 
@@ -507,8 +561,8 @@ Existing Stage 6 planning artifacts remain planning artifacts, not accepted teac
 
 ## Research synthesis / next step
 
-Stage 5.12f has closed the immediate question of whether a fixed-type functional stream can support bounded recursive traversal of actual canonical NEX term wire. The next step must not silently equate traversal with a complete decoder.
+Stage 5.11 is now Complete under operational v0.3. The representation drift discovered between the historical all-`N` contract and the successful functional-stream experiments is resolved without changing NEX-1 v0.1.
 
-Before further implementation, the project must explicitly define how structural information produced by wire traversal will be represented and consumed by Stage 5.13 structural validation while preserving the existing anti-tuning discipline. In particular, the next contract must state whether validation will operate directly over `(BitStream, Cursor)`/parser results or whether a new versioned materialized representation is required.
+Stage 5.12 remains Active. Its next step is **Gate 1** of `docs/STAGE-5.12-CLOSEOUT.md`: freeze the exact full-codec interface/result contract using accepted v0.3 `Bits` and `Term`, then preregister the development/hold-out workloads before executing any full `decodeTerm`/`encodeTerm` candidate.
 
-Stage 6 remains Planned. Both living dissertation versions must include the accepted 5.12f checkpoint and its CBN/sharing qualification before PR #16 can leave draft.
+Stage 5.13 remains Planned and blocked until Stage 5.12 is formally Complete. Stage 6 remains Planned until the 5.20 gate.
