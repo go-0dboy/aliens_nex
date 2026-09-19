@@ -126,7 +126,7 @@ def source_case6():
         ),
     )
     result = body
-    for name in reversed(("bad", "b5", "b4", "b3", "b2", "b1", "b0", "k")):
+    for name in reversed(("k", "b0", "b1", "b2", "b3", "b4", "b5", "bad")):
         result = lam(name, result)
     return result
 
