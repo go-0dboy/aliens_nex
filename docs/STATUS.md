@@ -3,7 +3,7 @@
 **Date:** 2026-09-19  
 **Baseline branch:** `main`  
 **Active work:** Post-Stage-5 NEX Core self-sufficiency extension (5.10–5.20)  
-**Current state:** `Stages 0–5 complete; 5.10 contract accepted; 5.11 N-only meta-representation validated; 5.12 self-wire work active with first arithmetic foundation verified; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
+**Current state:** `Stages 0–5 complete; 5.10 contract accepted; 5.11 N-only meta-representation validated; 5.12a arithmetic foundation verified; 5.12b pair/sequence resource checkpoint measured; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
 **Active decision:** ADR-0018  
 **Living dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md`
 
@@ -127,7 +127,7 @@ ADR-0018 inserts an executable evidence gate before Stage 6 activation:
 ```text
 5.10 contract and gate                 accepted in ADR-0018
 5.11 NEX-in-NEX meta-representation   validated checkpoint
-5.12 self wire codec                   active; arithmetic foundation verified
+5.12 self wire codec                   active; arithmetic + pair/sequence prerequisites measured
 5.13 self structural validation        planned
 5.14 self HM type inference            planned
 5.15 self evaluator                    planned
@@ -150,13 +150,13 @@ docs/experiments/stage5-selfhost-meta-representation.md
 
 Every frozen meta-object uses only NEX mathematical naturals `N` as its physical Core carrier. Finite products and sequences are encoded numerically; no recursive type, list primitive, host AST, host byte array, new Core primitive, or wire change is assumed.
 
-The repository validator checks Core-dependency closure, tag contracts, bounded pair/sequence injectivity/round trips, and all bit sequences of length 0..5. The dedicated `stage5-self-sufficiency` workflow and the historical Stage 5 regression/re-audit workflows are green on the checkpoint head.
+The repository validator checks Core-dependency closure, tag contracts, bounded pair/sequence injectivity/round trips, and all bit sequences of length 0..5. The dedicated `stage5-self-sufficiency` workflow and the historical Stage 5 regression/re-audit workflows are green on the validated checkpoint.
 
 This result is intentionally narrow: it establishes a concrete representation candidate, not a self-hosting claim and not an efficiency claim.
 
 ### 5.12a executable arithmetic foundation
 
-The first actual canonical NEX programs for the self-hosting workstream are now frozen in:
+The first actual canonical NEX programs for the self-hosting workstream are frozen in:
 
 ```text
 stage5/selfhost/build_foundation.py
@@ -189,11 +189,63 @@ The `756` figure is a local engineering size of six separately serialized helper
 
 The helper generator uses readable names only as engineering notation; the exact research objects are canonical NEX wire strings. No arithmetic helper was added as a Core primitive.
 
-### 5.12 representation-risk checkpoint
+### 5.12b N-only pair/sequence execution checkpoint
 
-The next subproblem is the N-only meta-pair/sequence implementation required by `meta-representation-v0.1.json`. Preliminary construction work shows a plausible resource-risk mechanism: derived multiplication/exponentiation and repeated call-by-name forcing may make numeric pair/unpair expensive even though the representation is computable in principle.
+The exact candidate required by `meta-representation-v0.1.json` was implemented as seven further closed canonical NEX terms:
 
-This is currently a **hypothesis / implementation risk**, not a verified Core defect and not a reason to change v0.1. The next experiment must measure the actual NEX pair/sequence operations under recorded CBN and call-by-need controls before the representation is either retained or versioned.
+```text
+meta_pair
+v2
+unpair_left
+unpair_right
+seq_cons
+seq_head
+seq_tail
+```
+
+Artifacts:
+
+```text
+stage5/selfhost/build_meta_sequence.py
+stage5/selfhost/meta-sequence-v0.1.json
+stage5/selfhost/verify_meta_sequence.py
+stage5/selfhost/meta-sequence-measurement-summary-v0.1.json
+docs/experiments/stage5-selfhost-meta-sequence.md
+reference/go/cmd/nexselfhostprobe/main.go
+```
+
+The seven terms occupy 3,290 canonical bits when counted separately. This remains an engineering measurement, not a bootstrap or total-information cost.
+
+Frozen bounded workload:
+
+```text
+measurement cases                     37
+Python CBN resource refusals           8
+Go CBN resource refusals               5
+Go call-by-need resource refusals      0
+portable mismatches on returned values 0
+```
+
+The largest successful Go contrast was:
+
+```text
+unpair_right(27)
+CBN transitions       4,857,667
+call-by-need              1,793
+ratio                  ~2709.24x
+```
+
+Go CBN exhausted the 5,000,000-transition budget on five small cases, including `meta_pair(2,3)`, `meta_pair(3,2)`, `unpair_left(39)`, `unpair_right(39)`, and `seq_cons(1,6)`. The Go sharing evaluator completed all 37 cases with the expected portable result.
+
+Accepted interpretation at this checkpoint:
+
+- the N-only representation remains an executable expressiveness construction;
+- pure CBN execution is already operationally poor on several small encoded values;
+- resource refusal is not semantic invalidity and is not evidence by itself of a Core defect;
+- sharing changes practical feasibility by orders of magnitude on the tested workload;
+- the current evidence is still only one sharing implementation and does not prove NEX-specific CBN/call-by-need equivalence.
+
+Therefore the representation is **retained provisionally**, but the full self wire codec is not yet built on it. Before promoting it as the main 5.12 implementation basis, the sharing result must be corroborated by a second sharing-capable control outside the frozen historical Stage 5 implementation, or by equivalent independently checkable evidence.
 
 ### Required final implementation target
 
@@ -294,8 +346,8 @@ These support confidence in the target Core but do not replace either the self-s
 
 ## Research synthesis status
 
-ADR-0018 is a research-significant decision. Both living dissertation versions must incorporate the pre-Stage-6 self-sufficiency question in this pull request before merge. Historical Stage 5 evidence and the post-Stage-5 literature audit remain unchanged.
+ADR-0018 and the 5.12b resource result are research-significant. Both living dissertation versions must incorporate the pre-Stage-6 self-sufficiency question and this sharing/resource qualification in this pull request before merge. Historical Stage 5 evidence and the post-Stage-5 literature audit remain unchanged.
 
 ## Next recommended step
 
-Implement and measure the exact NEX meta-pair/sequence operations required by `meta-representation-v0.1.json`, compare normative CBN with the existing experimental call-by-need evaluator, and use that evidence to decide whether the N-only representation remains the 5.12 basis before implementing `encodeU/decodeU`.
+Add a second sharing-capable execution control outside the frozen historical Stage 5 implementation and rerun the exact 37-case 5.12b workload. If the sharing result is corroborated, retain the N-only representation as a sharing-conditioned engineering basis and proceed to NEX-written `encodeU/decodeU`; otherwise version the meta-representation before the self wire codec is built.
