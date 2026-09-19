@@ -2,6 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-09-18
+- **Later clarification:** ADR-0016 corrects the receiver-assumption taxonomy; ADR-0017 separates teaching from the stable Core; ADR-0018 inserts the 5.10–5.20 self-sufficiency gate before Stage 6 activation. The Stage 5 negative result itself remains Accepted and unchanged.
 
 ## Context
 
@@ -16,7 +17,7 @@ The Stage 5 definition of done explicitly permits this outcome if inability to c
 Stage 5 is considered complete after the final closeout checks with the following conclusions:
 
 1. NEX-1 v0.1 is independently reconstructable on the tested evidence surface.
-2. Receiver assumptions are explicit and versioned through `A0`, `A1`, `A2(U)`, and non-neutral `A_host(H)`.
+2. Receiver assumptions are explicit and versioned. Historical Stage 5 used `A0`, `A1`, `A2(U)`, and non-neutral `A_host(H)`; ADR-0016 later corrected the current taxonomy by separating the stronger `A1(R)` rule-calculus prior from plain elementary-mathematics `A1`.
 3. Exact bootstrap/specification accounting is conditional on a declared profile and must obey the no-double-counting rule.
 4. Stage 5.8 produced **zero accepted complete receiver-neutral bootstrap candidates**.
 5. No scalar `B | A`, `SB | A`, or total `C | A` is accepted yet.
@@ -56,7 +57,7 @@ These host byte counts are explicitly not bootstrap values.
 
 - Stage 5 has a falsifiable, bounded conclusion instead of remaining indefinitely open.
 - Unknown bootstrap cost remains visible rather than being silently treated as zero.
-- The next stage has a precise construction target: close the dependency ledger of one actual bootstrap artifact.
+- The later construction program has a precise target: close the dependency ledger of one actual bootstrap artifact.
 
 ### Limitations
 
@@ -64,11 +65,15 @@ These host byte counts are explicitly not bootstrap values.
 - Independent reconstruction evidence is empirical, not a formal equivalence proof.
 - Receiver profiles are experimental models, not claims about a real extraterrestrial receiver.
 
+### Subsequent sequencing
+
+This ADR closed historical Stage 5; it did not itself define the eventual order of all later research. ADR-0017 later separated the teaching/bootstrap protocol from the stable Core, and ADR-0018 then required the post-Stage-5 5.10–5.20 Core self-sufficiency extension before Stage 6 may become Active. Current continuation is recorded in `docs/STATUS.md`; Stage 5.11 and 5.12 are Complete and Stage 5.13 is Planned next.
+
 ## Rejected alternatives
 
 ### Keep Stage 5 open until a complete bootstrap is built
 
-Rejected. Stage 5 has already answered its feasibility question: under the current artifacts no admissible full bootstrap number exists. Continuing indefinitely would mix a new construction research program into the evidence stage.
+Rejected. Stage 5 has already answered its feasibility question: under the Stage 5 artifacts no admissible full bootstrap number exists. Continuing indefinitely would mix a new construction research program into the evidence stage.
 
 ### Use the Python implementation as `B`
 
