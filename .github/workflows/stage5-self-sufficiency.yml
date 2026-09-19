@@ -50,6 +50,7 @@ jobs:
           python -m py_compile stage5/selfhost/validate_meta_representation_v0_3.py
           python -m py_compile stage5/selfhost/validate_experiment_protocol.py
           python -m py_compile stage5/selfhost/validate_parser_contract.py
+          python -m py_compile stage5/selfhost/validate_full_codec_contract.py
           python -m py_compile stage5/selfhost/build_foundation.py
           python -m py_compile stage5/selfhost/build_meta_sequence.py
           python -m py_compile stage5/selfhost/build_integer_codec.py
@@ -76,6 +77,9 @@ jobs:
 
       - name: Validate preregistered Stage 5.12f parser contract/workloads
         run: python stage5/selfhost/validate_parser_contract.py
+
+      - name: Validate preregistered Stage 5.12 full codec contract/workloads
+        run: python stage5/selfhost/validate_full_codec_contract.py
 
       - name: Preserve Stage 5.12a foundation reproducibility
         run: python stage5/selfhost/build_foundation.py --check
@@ -132,6 +136,9 @@ jobs:
 
       - name: Validate Stage 5.12f parser contract and frozen workloads
         run: python stage5/selfhost/validate_parser_contract.py
+
+      - name: Validate preregistered Stage 5.12 full codec contract/workloads
+        run: python stage5/selfhost/validate_full_codec_contract.py
 
       - name: Check accepted Stage 5.12f parser artifact
         run: python stage5/selfhost/build_stream_parser.py --check
