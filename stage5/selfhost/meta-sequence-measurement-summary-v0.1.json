@@ -1,0 +1,58 @@
+{
+  "schema": "nex-selfhost-meta-sequence-measurement-summary",
+  "version": "0.1",
+  "date": "2026-09-19",
+  "candidate": "pow2-adic-pair-v0.1 / nat-sequence-v0.1",
+  "core_version": "NEX-1 v0.1",
+  "source_head": "24f6949d0cc5c61e0d1028b2d55c426d3d33a65d",
+  "workflow_run_id": 35428386585,
+  "workflow_artifact_id": 10580075998,
+  "full_report_sha256": "3ed5a2d7cab8fe85133934cb442999941dec41f5112baa78863acacb74a9bd9d",
+  "budgets": {
+    "python_cbn_max_steps": 5000000,
+    "python_cbn_max_depth": 700,
+    "go_cbn_max_transitions": 5000000,
+    "go_cbn_max_depth": 20000,
+    "go_call_by_need_max_transitions": 5000000,
+    "go_call_by_need_max_depth": 20000
+  },
+  "artifact": {
+    "canonical_functions": 7,
+    "canonical_bits_as_separate_terms": 3290,
+    "measurement_cases": 37
+  },
+  "outcomes": {
+    "python_cbn_resource_refusals": 8,
+    "go_cbn_resource_refusals": 5,
+    "go_call_by_need_resource_refusals": 0,
+    "portable_observation_mismatches_when_values_returned": 0
+  },
+  "largest_successful_cbn_to_need_ratio": {
+    "function": "unpair_right",
+    "args": [27],
+    "go_cbn_transitions": 4857667,
+    "go_call_by_need_transitions": 1793,
+    "ratio": 2709.239821528165
+  },
+  "go_cbn_resource_refusal_cases": [
+    {"function": "meta_pair", "args": [2, 3]},
+    {"function": "meta_pair", "args": [3, 2]},
+    {"function": "unpair_left", "args": [39]},
+    {"function": "unpair_right", "args": [39]},
+    {"function": "seq_cons", "args": [1, 6]}
+  ],
+  "selected_successful_costs": [
+    {"function": "unpair_left", "args": [27], "cbn": 219662, "need": 1128, "ratio": 194.73581560283688},
+    {"function": "unpair_right", "args": [27], "cbn": 4857667, "need": 1793, "ratio": 2709.239821528165},
+    {"function": "seq_tail", "args": [26], "cbn": 593517, "need": 1377, "ratio": 431.0217864923747},
+    {"function": "seq_head", "args": [26], "cbn": 21708, "need": 834, "ratio": 26.028776978417266}
+  ],
+  "interpretation": [
+    "The N-only representation remains an executable expressiveness candidate; no observed returned value disagreed with the mathematical contract.",
+    "Resource refusal is an implementation-budget outcome and is not semantic invalidity.",
+    "Normative call-by-name execution is already impractical on several small pair/sequence cases under the declared budget.",
+    "The existing Go call-by-need control completed all 37 cases and preserved every portable observation returned by call-by-name.",
+    "This evidence does not by itself prove NEX-specific CBN/call-by-need equivalence and does not establish a Core defect.",
+    "Before building the full self wire codec on this representation, a second sharing-capable control or equivalent corroborating evidence is required."
+  ]
+}
