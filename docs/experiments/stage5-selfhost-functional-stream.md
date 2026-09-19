@@ -1,6 +1,6 @@
 # Stage 5.12e — fixed-type functional stream candidates
 
-**Status:** v0.1 rejected on frozen development budget; v0.2 frozen and not yet runtime-executed  
+**Status:** v0.1 rejected on frozen development budget; v0.2 development workload passed under frozen protocol; preregistered hold-out not yet executed  
 **Date:** 2026-09-19  
 **Core:** NEX-1 v0.1 unchanged
 
@@ -100,6 +100,7 @@ Artifacts:
 stage5/selfhost/build_functional_stream_v0_2.py
 stage5/selfhost/functional-stream-v0.2.json
 stage5/selfhost/verify_functional_stream_v0_2.py
+stage5/selfhost/functional-stream-v0.2-development-result-v0.1.json
 ```
 
 The 10 effective terms occupy 1,634 bits when counted separately. The two changed terms are:
@@ -110,6 +111,33 @@ repeat_query   236 bits   (v0.1: 323)
 ```
 
 At the time the experiment protocol was frozen, v0.2 had **not yet been runtime-executed by CI**.
+
+### First runtime execution after protocol freeze
+
+Workflow run `35432007845`, job `105868178140`, executed v0.2 only after the protocol and the separate hold-out file had already been committed.
+
+The candidate artifact was unchanged after freeze. Result:
+
+```text
+canonical functions                         10
+canonical bits, counted as separate terms  1,634
+execution cases                              26
+Python call-by-need resource refusals         0
+Go call-by-need resource refusals             0
+Go CBN resource refusals                      0
+Python/Go need values matched               26/26
+```
+
+Largest measured sharing costs:
+
+```text
+repeat(1,128)(127)
+Python need transitions  13,855
+Go need transitions       6,418
+frozen transition limit 5,000,000
+```
+
+Thus v0.2 **passes the previously observed development workload** under the frozen budgets. This is development evidence only, not hold-out evidence.
 
 ## Anti-tuning protocol
 
@@ -139,20 +167,21 @@ Before v0.2's first runtime execution, 11 additional `repeat_query` cases were f
 stage5/selfhost/functional-stream-holdout-v0.1.json
 ```
 
-They are intentionally **not** part of the development run.
+They were intentionally excluded from the development run and remain unexecuted at the development-result checkpoint.
 
 The procedure is:
 
 ```text
 v0.2 frozen development workload
         |
-        +-- fail -> reject v0.2
-        |
-        +-- pass -> keep artifact unchanged
-                    -> execute preregistered hold-out once
-                         |
-                         +-- fail -> reject v0.2; successor must be v0.3 with new hold-out
-                         +-- pass -> accept this representation checkpoint provisionally
+        +-- PASS (recorded)
+              |
+              +-- keep artifact unchanged
+                  -> first require the historical checkpoint regression to be green
+                  -> execute preregistered hold-out once
+                       |
+                       +-- fail -> reject v0.2; successor must be v0.3 with new hold-out
+                       +-- pass -> accept this representation checkpoint provisionally
 ```
 
 This prevents the same hidden workload from being used repeatedly to tune the same candidate.
