@@ -1,0 +1,31 @@
+name: stage5-full-codec-development
+
+on:
+  pull_request:
+    paths:
+      - 'stage5/selfhost/build_full_codec.py'
+      - 'stage5/selfhost/full-codec-v0.1.json'
+      - 'stage5/selfhost/full-codec-contract-v0.1.json'
+      - 'stage5/selfhost/full-codec-development-v0.1.json'
+      - 'stage5/selfhost/verify_full_codec_static.py'
+      - 'stage5/selfhost/verify_full_codec_development.py'
+      - '.github/workflows/stage5-full-codec-development.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  development:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.x'
+      - name: Verify frozen full codec candidate statically
+        run: python stage5/selfhost/verify_full_codec_static.py
+      - name: Execute development workload only
+        run: python stage5/selfhost/verify_full_codec_development.py
