@@ -1,1 +1,1 @@
-2026-09-19 final historical checkpoint after diff-review diagnostics
+2026-09-19 Stage 5.12 full-codec pre-holdout historical checkpoint
