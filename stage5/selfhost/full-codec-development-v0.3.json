@@ -1,0 +1,23 @@
+{
+  "schema": "nex-selfhost-full-codec-development-manifest",
+  "version": "0.3",
+  "classification": "development",
+  "status": "frozen_before_full_codec_candidate_v0.3",
+  "sources": [
+    "stage5/selfhost/full-codec-development-v0.2.json",
+    "stage5/selfhost/full-codec-holdout-v0.2.json"
+  ],
+  "merge_rule": "exact concatenation by category; no source case may be dropped or changed; the unexecuted v0.2 holdout is development for v0.3 because it was known before v0.3 authorship",
+  "expected_counts": {
+    "valid_terms": 24,
+    "decode_errors": 12,
+    "encode_errors": 12
+  },
+  "observation_compaction": {
+    "valid_term_evaluations": ["decode", "encode", "law1", "law2"],
+    "each_success_evaluation_forces": ["status", "length", "every declared stream element", "one exact out-of-range sentinel"],
+    "error_evaluations": "one forced status observation per error case",
+    "semantic_coverage_change": false,
+    "purpose": "avoid three separate status/length/stream evaluator invocations while preserving the same extensional assertions"
+  }
+}
