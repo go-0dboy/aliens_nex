@@ -29,10 +29,11 @@ Throughout 5.10–5.20:
 5. Every discovered bug or ambiguity gets a regression case or versioned research record.
 6. Difficulty does not authorize a Core change; a change requires a later evidence-backed successor-Core ADR.
 7. Stage 6 artifacts remain planning artifacts and are not treated as active experiment evidence during this workstream.
+8. Substages are sequential: a later numbered substage is not implementation-active while its required predecessor remains incomplete.
 
 ## 5.10 — freeze the self-sufficiency contract
 
-**Status:** Complete when ADR-0018 and this document are merged.
+**Status:** Complete.
 
 Freeze:
 
@@ -47,35 +48,73 @@ The contract deliberately does not require `NEX -> x86/ARM/WASM`. Architecture-s
 
 ## 5.11 — NEX-in-NEX meta-representation
 
-**Status:** Active.
+**Status:** Complete.
 
-Define finite encodings, expressible entirely with NEX-1 v0.1 values, for at least:
+Stage 5.11 now has an accepted operational representation contract:
 
 ```text
-Bits
-Term
+stage5/selfhost/meta-representation-v0.3.json
+stage5/selfhost/validate_meta_representation_v0_3.py
+```
+
+Historical v0.1/v0.2 remain preserved as N-only expressiveness/engineering evidence. v0.3 supersedes them only for active operational self-hosting work.
+
+The accepted finite carriers are:
+
+```text
+FiniteBits      = (N -> N) * N
+FiniteNatTokens = (N -> N) * N
+```
+
+`Bits` uses the accepted functional bit-stream convention (`0/1` data, `2` EOF, exact length).
+
+Recursive internal objects use canonical finite natural-token streams. In particular:
+
+```text
+Var(k)   -> [0,k]
+Lam(t)   -> [1] ++ t
+App(a,b) -> [2] ++ a ++ b
+Let(v,b) -> [3] ++ v ++ b
+Nat(n)   -> [4,n]
+Prim(p)  -> [5,p]
+```
+
+Exact token grammars are also frozen for:
+
+```text
 Type
 Scheme
 Substitution
-Type environment
-Runtime/evaluation state as needed
-Error/result classes
-Portable observations
-Toolchain requests/results
+TypeEnvironment
+PortableObservation
+StaticResult
+ToolRequest
+ToolResult
 ```
 
-The first candidate should prefer a deliberately austere representation rather than changing Core. In particular, arbitrary finite recursive host structures may be represented by natural-number encodings.
+A separate first-class runtime state is not required by 5.11: a later substitution-based evaluator may operate on `Term`. If Stage 5.15 needs additional closure/environment state, a new versioned representation contract must be frozen before that state is used.
 
-Acceptance:
+Acceptance evidence:
 
-- representation is finite and injective/canonical for the admitted object class;
-- decode operations are computable using existing NEX primitives plus derived functions;
-- no recursive type or host container is assumed;
-- malformed/non-canonical encodings have an explicit rejection policy;
-- machine-readable contract and validator exist;
-- bounded round-trip examples pass.
+- representation carriers use only existing NEX-1 v0.1 values;
+- no recursive Core type or host container is assumed;
+- canonicality/equality rules are explicit;
+- malformed internal representation remains distinct from malformed wire, scope errors, unknown primitives, type errors, and resource refusal;
+- v0.3 has a machine-readable contract and executable validator;
+- bounded examples pass;
+- the validator exhaustively checks its frozen generated Term class for 1–4 nodes, including token round trips, canonical-wire reconstruction, and bounded injectivity/no collisions;
+- the contract forbids satisfying the later codec by merely retaining/copying an opaque original wire object.
+
+Durable reasoning:
+
+```text
+docs/experiments/stage5-selfhost-5.11-completion-audit.md
+docs/experiments/stage5-selfhost-meta-representation-v0.3.md
+```
 
 ## 5.12 — self wire codec
+
+**Status:** Active.
 
 Implement in NEX:
 
@@ -84,18 +123,22 @@ encodeU / decodeU
 encodeTerm / decodeTerm
 ```
 
-where transmitted/canonical bit strings are represented through the 5.11 internal `Bits` encoding.
+where transmitted/canonical bit strings use accepted v0.3 `Bits` and internal terms use accepted v0.3 `Term` tokens.
 
 Required checks:
 
 ```text
-decode(encode(term)) == term
-encode(decode(bits)) == canonical(bits)
+decodeTerm(encodeTerm(term)) == term
+encodeTerm(decodeTerm(bits)) == canonical(bits)
 ```
 
 Compare against existing Go/Python wire behavior and conformance vectors.
 
+The detailed closeout order is frozen in `docs/STAGE-5.12-CLOSEOUT.md`. Stage 5.13 remains blocked until 5.12 is formally Complete.
+
 ## 5.13 — self structural validation
+
+**Status:** Planned; blocked by Stage 5.12.
 
 Implement in NEX:
 
@@ -294,7 +337,7 @@ Historical Stage 5 measurements must never be edited to make this later work app
 This extension is complete only when:
 
 - [x] 5.10 contract and ADR exist;
-- [ ] 5.11 machine-readable meta-representation exists and is validated;
+- [x] 5.11 machine-readable operational meta-representation exists and is validated;
 - [ ] NEX self codec exists;
 - [ ] NEX self structural validator exists;
 - [ ] NEX self HM inference exists;
