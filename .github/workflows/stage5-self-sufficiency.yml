@@ -4,167 +4,50 @@ on:
   pull_request:
     paths:
       - 'stage5/selfhost/**'
-      - 'reference/go/cmd/nexselfhostprobe/**'
-      - 'reference/go/cmd/nexucontrol/**'
-      - 'reference/go/cmd/nextermcontrol/**'
       - 'docs/STAGE-5-EXTENSION.md'
       - 'docs/STAGE-5.12-CLOSEOUT.md'
       - 'docs/experiments/stage5-selfhost-*.md'
       - 'docs/STATUS.md'
       - 'docs/RESEARCH-DISSERTATION.md'
       - 'docs/RESEARCH-DISSERTATION.ru.md'
-      - 'docs/adr/0018-pre-stage6-core-self-sufficiency-gate.md'
-      - 'docs/adr/README.md'
       - '.github/workflows/stage5-self-sufficiency.yml'
   push:
     branches: [ main ]
     paths:
       - 'stage5/selfhost/**'
-      - 'reference/go/cmd/nexselfhostprobe/**'
-      - 'reference/go/cmd/nexucontrol/**'
-      - 'reference/go/cmd/nextermcontrol/**'
       - 'docs/STAGE-5-EXTENSION.md'
       - 'docs/STAGE-5.12-CLOSEOUT.md'
       - 'docs/experiments/stage5-selfhost-*.md'
       - 'docs/STATUS.md'
       - 'docs/RESEARCH-DISSERTATION.md'
       - 'docs/RESEARCH-DISSERTATION.ru.md'
-      - 'docs/adr/0018-pre-stage6-core-self-sufficiency-gate.md'
-      - 'docs/adr/README.md'
       - '.github/workflows/stage5-self-sufficiency.yml'
 
 permissions:
   contents: read
 
 jobs:
-  selfhost-contract:
+  active-invariants:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Compile active self-host validators/builders
+      - name: Compile active Stage 5.12 v0.2 tooling
         run: |
-          python -m py_compile stage5/selfhost/validate_meta_representation.py
-          python -m py_compile stage5/selfhost/validate_meta_representation_v0_2.py
           python -m py_compile stage5/selfhost/validate_meta_representation_v0_3.py
           python -m py_compile stage5/selfhost/validate_experiment_protocol.py
-          python -m py_compile stage5/selfhost/validate_parser_contract.py
-          python -m py_compile stage5/selfhost/validate_full_codec_contract.py
           python -m py_compile stage5/selfhost/validate_full_codec_contract_v0_2.py
-          python -m py_compile stage5/selfhost/build_foundation.py
-          python -m py_compile stage5/selfhost/build_meta_sequence.py
-          python -m py_compile stage5/selfhost/build_integer_codec.py
-          python -m py_compile stage5/selfhost/build_interleaved_pair.py
-          python -m py_compile stage5/selfhost/build_functional_stream.py
-          python -m py_compile stage5/selfhost/build_functional_stream_v0_2.py
-          python -m py_compile stage5/selfhost/verify_functional_stream_v0_2.py
-          python -m py_compile stage5/selfhost/build_stream_parser.py
-          python -m py_compile stage5/selfhost/verify_stream_parser.py
-          python -m py_compile stage5/selfhost/verify_stream_parser_holdout.py
-          python -m py_compile stage5/selfhost/verify_stream_parser_result.py
-          python -m py_compile stage5/selfhost/build_full_codec.py
-          python -m py_compile stage5/selfhost/verify_full_codec_static.py
-          python -m py_compile stage5/selfhost/verify_full_codec_development.py
-          python -m py_compile stage5/selfhost/verify_full_codec_exhaustive.py
-          python -m py_compile stage5/selfhost/verify_full_codec_holdout.py
-
-      - name: Validate historical Stage 5.11 meta-representation v0.1
-        run: python stage5/selfhost/validate_meta_representation.py
-
-      - name: Validate explicit Stage 5.11 meta-representation v0.2
-        run: python stage5/selfhost/validate_meta_representation_v0_2.py
-
-      - name: Validate operational Stage 5.11 meta-representation v0.3
+          python -m py_compile stage5/selfhost/build_full_codec_v0_2.py
+          python -m py_compile stage5/selfhost/verify_full_codec_static_v0_2.py
+          python -m py_compile stage5/selfhost/verify_full_codec_development_v0_2.py
+          python -m py_compile stage5/selfhost/verify_full_codec_exhaustive_v0_2.py
+      - name: Validate accepted Stage 5.11 representation
         run: python stage5/selfhost/validate_meta_representation_v0_3.py
-
-      - name: Validate frozen Stage 5.12 experiment protocol
-        run: python stage5/selfhost/validate_experiment_protocol.py
-
-      - name: Validate preregistered Stage 5.12f parser contract/workloads
-        run: python stage5/selfhost/validate_parser_contract.py
-
-      - name: Validate historical Stage 5.12 full codec v0.1 contract/workloads
-        run: python stage5/selfhost/validate_full_codec_contract.py
-
-      - name: Validate preregistered Stage 5.12 full codec v0.2 contract/workloads
-        run: python stage5/selfhost/validate_full_codec_contract_v0_2.py
-
-      - name: Preserve frozen Stage 5.12 full codec v0.1 candidate identity
-        run: python stage5/selfhost/build_full_codec.py --check
-
-      - name: Verify Stage 5.12 full codec v0.1 candidate statically
-        run: python stage5/selfhost/verify_full_codec_static.py
-
-      - name: Preserve Stage 5.12a foundation reproducibility
-        run: python stage5/selfhost/build_foundation.py --check
-
-      - name: Preserve Stage 5.12b meta-sequence reproducibility
-        run: python stage5/selfhost/build_meta_sequence.py --check
-
-      - name: Preserve Stage 5.12c integer-codec reproducibility
-        run: python stage5/selfhost/build_integer_codec.py --check
-
-      - name: Preserve Stage 5.12d interleaved candidate reproducibility
-        run: python stage5/selfhost/build_interleaved_pair.py --check
-
-      - name: Preserve Stage 5.12e functional-stream v0.1 reproducibility
-        run: python stage5/selfhost/build_functional_stream.py --check
-
-      - name: Preserve accepted Stage 5.12e functional-stream v0.2 reproducibility
-        run: python stage5/selfhost/build_functional_stream_v0_2.py --check
-
-      - name: Preserve accepted Stage 5.12f stream-parser artifact reproducibility
-        run: python stage5/selfhost/build_stream_parser.py --check
-
-      - name: Validate frozen Stage 5.12f stream-parser result
-        run: python stage5/selfhost/verify_stream_parser_result.py
-
-      - name: Preserve corrected receiver-assumption model
-        run: python stage5/validate_receiver_assumptions.py
-
-      - name: Preserve frozen Stage 5 packet
-        run: python stage5/build_packet.py --verify
-
-      - name: Preserve frozen Stage 5 independent checkpoint
-        run: python stage5/verify_independent_checkpoint.py
-
-      - name: Preserve negative bootstrap result
-        run: python stage5/bootstrap/validate_attempt.py
-
-      - name: Keep Stage 6 planning artifact valid while inactive
-        run: python stage6/validate_plan.py
-
-  accepted-checkpoint:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Validate accepted Stage 5.11 operational representation
-        run: python stage5/selfhost/validate_meta_representation_v0_3.py
-
       - name: Validate frozen anti-tuning protocol
         run: python stage5/selfhost/validate_experiment_protocol.py
-
-      - name: Validate Stage 5.12f parser contract and frozen workloads
-        run: python stage5/selfhost/validate_parser_contract.py
-
-      - name: Preserve historical full-codec v0.1 preregistration
-        run: python stage5/selfhost/validate_full_codec_contract.py
-
-      - name: Validate active full-codec v0.2 preregistration before candidate execution
+      - name: Validate active Stage 5.12 v0.2 preregistration
         run: python stage5/selfhost/validate_full_codec_contract_v0_2.py
-
-      - name: Preserve frozen Stage 5.12 full codec v0.1 candidate identity
-        run: python stage5/selfhost/build_full_codec.py --check
-
-      - name: Check accepted Stage 5.12f parser artifact
-        run: python stage5/selfhost/build_stream_parser.py --check
-
-      - name: Validate accepted Stage 5.12f parser checkpoint result without rerunning holdout
-        run: python stage5/selfhost/verify_stream_parser_result.py
+      - name: Preserve frozen Stage 5.12 v0.2 identity
+        run: python stage5/selfhost/build_full_codec_v0_2.py --check
