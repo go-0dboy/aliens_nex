@@ -1,0 +1,86 @@
+name: stage5-self-sufficiency-regression
+
+on:
+  pull_request:
+    paths:
+      - 'stage5/selfhost/checkpoint-trigger.txt'
+      - 'stage5/selfhost/build_foundation.py'
+      - 'stage5/selfhost/foundation-v0.1.json'
+      - 'stage5/selfhost/verify_foundation.py'
+      - 'stage5/selfhost/build_meta_sequence.py'
+      - 'stage5/selfhost/meta-sequence-v0.1.json'
+      - 'stage5/selfhost/meta-sequence-measurement-summary-v0.1.json'
+      - 'stage5/selfhost/meta-sequence-measurement-summary-v0.2.json'
+      - 'stage5/selfhost/verify_meta_sequence.py'
+      - 'stage5/selfhost/python_need.py'
+      - 'stage5/selfhost/build_integer_codec.py'
+      - 'stage5/selfhost/integer-codec-v0.1.json'
+      - 'stage5/selfhost/verify_integer_codec.py'
+      - 'stage5/selfhost/build_interleaved_pair.py'
+      - 'stage5/selfhost/interleaved-pair-v0.1.json'
+      - 'stage5/selfhost/interleaved-pair-result-v0.1.json'
+      - 'stage5/selfhost/verify_interleaved_pair.py'
+      - 'stage5/selfhost/verify_interleaved_pair_result.py'
+      - 'stage5/selfhost/build_functional_stream.py'
+      - 'stage5/selfhost/functional-stream-v0.1.json'
+      - 'stage5/selfhost/verify_functional_stream.py'
+      - 'stage5/selfhost/verify_functional_stream_v0_1_result.py'
+      - 'reference/go/**'
+      - 'independent/python/**'
+      - '.github/workflows/stage5-self-sufficiency-regression.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'stage5/selfhost/checkpoint-trigger.txt'
+      - 'stage5/selfhost/**'
+      - 'reference/go/**'
+      - 'independent/python/**'
+      - '.github/workflows/stage5-self-sufficiency-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  historical-regression:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Materialize frozen packet for independent verifier
+        run: python stage5/build_packet.py --output independent/python/packet
+
+      - name: Verify Stage 5.12a foundation across Python and Go
+        run: python stage5/selfhost/verify_foundation.py
+
+      - name: Measure Stage 5.12b meta-sequence across CBN and call-by-need
+        run: python stage5/selfhost/verify_meta_sequence.py --report /tmp/meta-sequence-measurements.json
+
+      - name: Upload Stage 5.12b measurement artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage5-selfhost-meta-sequence-measurements
+          path: /tmp/meta-sequence-measurements.json
+          if-no-files-found: error
+
+      - name: Verify Stage 5.12c NEX integer codec
+        run: python stage5/selfhost/verify_integer_codec.py
+
+      - name: Reproduce Stage 5.12d interleaved-pair rejection
+        run: python stage5/selfhost/verify_interleaved_pair_result.py
+
+      - name: Reproduce Stage 5.12e functional-stream v0.1 rejection
+        run: python stage5/selfhost/verify_functional_stream_v0_1_result.py
+
+      - name: Verify independent Python implementation
+        working-directory: independent/python
+        run: python verify.py
+
+      - name: Verify Go reference and frozen Stage 4 evidence
+        working-directory: reference/go
+        run: sh verify.sh
