@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""Build/check the Stage 5.12e functional finite-stream candidate.
-
-The representation uses the fixed HM type N -> N. Stream positions contain
-0/1 data and 2 denotes EOF. Dynamic streams are ordinary NEX closures; no
-recursive type, numeric tree packing, host list, or new Core primitive is used.
-"""
+"""Build/check the Stage 5.12e functional finite-stream candidate."""
 
 from __future__ import annotations
 
@@ -20,14 +15,14 @@ EOF = 2
 
 
 def as_nat(expr):
-    """Identity that constrains expr to N in the HM checker."""
+    """Identity at runtime; constrains an expression to N statically."""
     return app(IFZ, expr, expr, expr)
 
 
 def source_terms_functional_stream():
-    stream_nil = lam("i", nat(EOF))
+    nil = lam("i", nat(EOF))
 
-    stream_cons = lam(
+    cons = lam(
         "x",
         lam(
             "tail",
@@ -43,11 +38,8 @@ def source_terms_functional_stream():
         ),
     )
 
-    stream_head = lam("s", as_nat(app(v("s"), nat(0))))
-    stream_tail = lam(
-        "s",
-        lam("i", as_nat(app(v("s"), app(SUCC, v("i"))))),
-    )
+    head = lam("s", as_nat(app(v("s"), nat(0))))
+    tail = lam("s", lam("i", as_nat(app(v("s"), app(SUCC, v("i"))))))
 
     drop_body = app(
         IFZ,
@@ -55,18 +47,18 @@ def source_terms_functional_stream():
         v("s"),
         app(v("self"), app(PRED, v("k")), app(v("tail"), v("s"))),
     )
-    stream_drop = let(
+    drop = let(
         "tail",
-        stream_tail,
+        tail,
         app(FIX, lam("self", lam("k", lam("s", drop_body)))),
     )
 
-    dynamic2 = let(
+    dynamic2_query = let(
         "nil",
-        stream_nil,
+        nil,
         let(
             "cons",
-            stream_cons,
+            cons,
             lam(
                 "a",
                 lam(
@@ -74,11 +66,7 @@ def source_terms_functional_stream():
                     lam(
                         "i",
                         app(
-                            app(
-                                v("cons"),
-                                v("a"),
-                                app(v("cons"), v("b"), v("nil")),
-                            ),
+                            app(v("cons"), v("a"), app(v("cons"), v("b"), v("nil"))),
                             v("i"),
                         ),
                     ),
@@ -87,15 +75,15 @@ def source_terms_functional_stream():
         ),
     )
 
-    dynamic_tail = let(
+    dynamic_tail_query = let(
         "nil",
-        stream_nil,
+        nil,
         let(
             "cons",
-            stream_cons,
+            cons,
             let(
                 "tail",
-                stream_tail,
+                tail,
                 lam(
                     "a",
                     lam(
@@ -120,49 +108,42 @@ def source_terms_functional_stream():
         IFZ,
         v("count"),
         v("nil"),
-        app(
-            v("cons"),
-            v("bit"),
-            app(v("self"), v("bit"), app(PRED, v("count"))),
-        ),
+        app(v("cons"), v("bit"), app(v("self"), v("bit"), app(PRED, v("count")))),
     )
-    stream_repeat = let(
+    repeat = let(
         "nil",
-        stream_nil,
+        nil,
         let(
             "cons",
-            stream_cons,
-            app(
-                FIX,
-                lam(
-                    "self",
-                    lam("bit", lam("count", repeat_body)),
-                ),
-            ),
+            cons,
+            app(FIX, lam("self", lam("bit", lam("count", repeat_body)))),
         ),
     )
 
     repeat_query = let(
         "repeat",
-        stream_repeat,
+        repeat,
         lam(
             "bit",
             lam(
                 "count",
-                lam("i", as_nat(app(app(v("repeat"), v("bit"), v("count")), v("i")))),
+                lam(
+                    "i",
+                    as_nat(app(app(v("repeat"), v("bit"), v("count")), v("i"))),
+                ),
             ),
         ),
     )
 
     drop_query = let(
         "nil",
-        stream_nil,
+        nil,
         let(
             "cons",
-            stream_cons,
+            cons,
             let(
                 "drop",
-                stream_drop,
+                drop,
                 lam(
                     "k",
                     lam(
@@ -199,14 +180,14 @@ def source_terms_functional_stream():
     )
 
     return {
-        "stream_nil": stream_nil,
-        "stream_cons": stream_cons,
-        "stream_head": stream_head,
-        "stream_tail": stream_tail,
-        "stream_drop": stream_drop,
-        "dynamic2_query": dynamic2,
-        "dynamic_tail_query": dynamic_tail,
-        "stream_repeat": stream_repeat,
+        "stream_nil": nil,
+        "stream_cons": cons,
+        "stream_head": head,
+        "stream_tail": tail,
+        "stream_drop": drop,
+        "dynamic2_query": dynamic2_query,
+        "dynamic_tail_query": dynamic_tail_query,
+        "stream_repeat": repeat,
         "repeat_query": repeat_query,
         "drop_query": drop_query,
     }
@@ -215,15 +196,12 @@ def source_terms_functional_stream():
 CONTRACTS = {
     "stream_nil": {
         "expected_type": "(N -> N)",
-        "tests": [
-            {"args": [0], "result": 2},
-            {"args": [7], "result": 2},
-        ],
+        "tests": [{"args": [0], "result": 2}, {"args": [7], "result": 2}],
     },
     "stream_cons": {
         "expected_type": "(N -> ((N -> N) -> (N -> N)))",
         "tests": [],
-        "static_only": true if False else True,
+        "static_only": True,
     },
     "stream_head": {
         "expected_type": "((N -> N) -> N)",
@@ -248,7 +226,7 @@ CONTRACTS = {
             {"args": [0, 1, 2], "result": 2},
             {"args": [1, 0, 0], "result": 1},
             {"args": [1, 0, 1], "result": 0},
-            {"args": [1, 0, 2], "result": 2},
+            {"args": [1, 0, 2], "result": 2}
         ],
     },
     "dynamic_tail_query": {
@@ -257,7 +235,7 @@ CONTRACTS = {
             {"args": [0, 1, 0], "result": 1},
             {"args": [0, 1, 1], "result": 2},
             {"args": [1, 0, 0], "result": 0},
-            {"args": [1, 0, 1], "result": 2},
+            {"args": [1, 0, 1], "result": 2}
         ],
     },
     "stream_repeat": {
@@ -276,7 +254,7 @@ CONTRACTS = {
             {"args": [0, 32, 31], "result": 0},
             {"args": [0, 32, 32], "result": 2},
             {"args": [1, 128, 127], "result": 1},
-            {"args": [1, 128, 128], "result": 2},
+            {"args": [1, 128, 128], "result": 2}
         ],
     },
     "drop_query": {
@@ -286,7 +264,7 @@ CONTRACTS = {
             {"args": [1, 0, 1, 0, 0], "result": 1},
             {"args": [2, 0, 1, 0, 0], "result": 0},
             {"args": [3, 0, 1, 0, 0], "result": 2},
-            {"args": [1, 0, 1, 0, 1], "result": 0},
+            {"args": [1, 0, 1, 0, 1], "result": 0}
         ],
     },
 }
@@ -296,14 +274,12 @@ def generated_artifact() -> dict:
     functions = []
     for name, source in source_terms_functional_stream().items():
         bits = encode_core(lower(source))
-        functions.append(
-            {
-                "name": name,
-                "wire_bits": bits,
-                "wire_bit_length": len(bits),
-                **CONTRACTS[name],
-            }
-        )
+        functions.append({
+            "name": name,
+            "wire_bits": bits,
+            "wire_bit_length": len(bits),
+            **CONTRACTS[name],
+        })
     return {
         "schema": "nex-selfhost-functional-stream-candidate",
         "version": "0.1",
@@ -333,13 +309,11 @@ def main() -> None:
     args = parser.parse_args()
     if args.check == args.write:
         parser.error("choose exactly one of --check or --write")
-
     expected = generated_artifact()
     if args.write:
         ARTIFACT.write_text(json.dumps(expected, indent=2) + "\n", encoding="utf-8")
         print(f"wrote {ARTIFACT.relative_to(ROOT)}")
         return
-
     actual = json.loads(ARTIFACT.read_text(encoding="utf-8"))
     if actual != expected:
         raise SystemExit(
