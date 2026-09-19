@@ -59,10 +59,12 @@ jobs:
           python stage5/selfhost/validate_parser_contract.py
           python stage5/selfhost/verify_stream_parser_result.py
 
-      - name: Preserve rejected full-codec v0.1 without re-executing it
+      - name: Preserve rejected full-codec v0.1 and v0.2 without re-executing them
         run: |
           python stage5/selfhost/validate_full_codec_contract.py
           python stage5/selfhost/build_full_codec.py --check
+          python stage5/selfhost/validate_full_codec_contract_v0_2.py
+          python stage5/selfhost/build_full_codec_v0_2.py --check
           python - <<'PY'
           import json
           from pathlib import Path
@@ -71,23 +73,25 @@ jobs:
               'full-codec-development-result-v0.1.json': ('development_passed_candidate_frozen', None),
               'full-codec-exhaustive-result-v0.1.json': ('bounded_exhaustive_passed_candidate_frozen', None),
               'full-codec-holdout-result-v0.1.json': ('rejected_on_preregistered_holdout', 'rejected'),
+              'full-codec-development-result-v0.2.json': ('rejected_on_frozen_development_resource_refusal', 'rejected'),
           }
           for name, (status, decision) in expected.items():
               data = json.loads((root / name).read_text())
               assert data['status'] == status, (name, data.get('status'))
               if decision is not None:
                   assert data['decision'] == decision, (name, data.get('decision'))
-          print('full-codec v0.1 immutable results: valid')
+          print('full-codec v0.1/v0.2 immutable results: valid')
           PY
 
-      - name: Validate active full-codec v0.2 identity
+      - name: Validate frozen full-codec v0.3 identity
         run: |
-          python stage5/selfhost/validate_full_codec_contract_v0_2.py
-          python stage5/selfhost/build_full_codec_v0_2.py --check
-      - name: Reproduce active full-codec v0.2 development
-        run: python stage5/selfhost/verify_full_codec_development_v0_2.py
-      - name: Reproduce active full-codec v0.2 bounded exhaustive class
-        run: python stage5/selfhost/verify_full_codec_exhaustive_v0_2.py
+          python stage5/selfhost/validate_full_codec_contract_v0_3.py
+          python stage5/selfhost/build_full_codec_v0_3.py --check
+          python stage5/selfhost/verify_full_codec_static_v0_3.py
+      - name: Reproduce frozen full-codec v0.3 development
+        run: python stage5/selfhost/verify_full_codec_development_v0_3.py
+      - name: Reproduce frozen full-codec v0.3 bounded exhaustive class
+        run: python stage5/selfhost/verify_full_codec_exhaustive_v0_3.py
 
       - name: Verify independent Python implementation
         working-directory: independent/python
