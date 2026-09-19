@@ -1,0 +1,28 @@
+name: stage5-full-codec-static
+
+on:
+  pull_request:
+    paths:
+      - 'stage5/selfhost/build_full_codec.py'
+      - 'stage5/selfhost/full-codec-v0.1.json'
+      - 'stage5/selfhost/verify_full_codec_static.py'
+      - 'stage5/selfhost/full-codec-contract-v0.1.json'
+      - 'stage5/selfhost/full-codec-development-v0.1.json'
+      - 'stage5/selfhost/full-codec-holdout-v0.1.json'
+      - '.github/workflows/stage5-full-codec-static.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  emit-identity:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate preregistered contract
+        run: python stage5/selfhost/validate_full_codec_contract.py
+      - name: Emit candidate identity without execution
+        run: python stage5/selfhost/build_full_codec.py --emit
