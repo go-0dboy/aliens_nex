@@ -107,16 +107,7 @@ jobs:
           if-no-files-found: error
 
       - name: Verify Stage 5.12c NEX integer codec
-        run: |
-          python - <<'PY'
-          import runpy
-          import sys
-          # The Python need control declares max_depth=2000. Keep the host
-          # interpreter stack from becoming an accidental stricter limit.
-          sys.setrecursionlimit(20000)
-          sys.path.insert(0, 'stage5/selfhost')
-          runpy.run_path('stage5/selfhost/verify_integer_codec.py', run_name='__main__')
-          PY
+        run: python stage5/selfhost/verify_integer_codec.py
 
       - name: Verify independent Python implementation
         working-directory: independent/python
