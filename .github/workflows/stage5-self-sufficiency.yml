@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'stage5/selfhost/**'
+      - 'reference/go/cmd/nexselfhostprobe/**'
       - 'docs/STAGE-5-EXTENSION.md'
       - 'docs/experiments/stage5-selfhost-*.md'
       - 'docs/STATUS.md'
@@ -16,6 +17,7 @@ on:
     branches: [ main ]
     paths:
       - 'stage5/selfhost/**'
+      - 'reference/go/cmd/nexselfhostprobe/**'
       - 'docs/STAGE-5-EXTENSION.md'
       - 'docs/experiments/stage5-selfhost-*.md'
       - 'docs/STATUS.md'
@@ -42,12 +44,17 @@ jobs:
           python -m py_compile stage5/selfhost/validate_meta_representation.py
           python -m py_compile stage5/selfhost/build_foundation.py
           python -m py_compile stage5/selfhost/verify_foundation.py
+          python -m py_compile stage5/selfhost/build_meta_sequence.py
+          python -m py_compile stage5/selfhost/verify_meta_sequence.py
 
       - name: Validate Stage 5.11 meta-representation
         run: python stage5/selfhost/validate_meta_representation.py
 
       - name: Check Stage 5.12 foundation reproducibility
         run: python stage5/selfhost/build_foundation.py --check
+
+      - name: Check Stage 5.12b meta-sequence reproducibility
+        run: python stage5/selfhost/build_meta_sequence.py --check
 
       - name: Preserve corrected receiver-assumption model
         run: python stage5/validate_receiver_assumptions.py
@@ -80,6 +87,16 @@ jobs:
 
       - name: Verify Stage 5.12 foundation across Python and Go
         run: python stage5/selfhost/verify_foundation.py
+
+      - name: Measure Stage 5.12b meta-sequence across CBN and call-by-need
+        run: python stage5/selfhost/verify_meta_sequence.py --report /tmp/meta-sequence-measurements.json
+
+      - name: Upload Stage 5.12b measurement artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stage5-selfhost-meta-sequence-measurements
+          path: /tmp/meta-sequence-measurements.json
+          if-no-files-found: error
 
       - name: Verify independent Python implementation
         working-directory: independent/python
