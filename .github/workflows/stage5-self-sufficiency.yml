@@ -32,8 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+        with: {python-version: '3.12'}
       - name: Compile active Stage 5.12 tooling
         run: |
           python -m py_compile stage5/selfhost/validate_meta_representation_v0_3.py
@@ -41,17 +40,25 @@ jobs:
           python -m py_compile stage5/selfhost/validate_full_codec_contract_v0_2.py
           python -m py_compile stage5/selfhost/validate_full_codec_contract_v0_3.py
           python -m py_compile stage5/selfhost/build_full_codec_v0_2.py
-          python -m py_compile stage5/selfhost/verify_full_codec_static_v0_2.py
-          python -m py_compile stage5/selfhost/verify_full_codec_development_v0_2.py
-          python -m py_compile stage5/selfhost/verify_full_codec_exhaustive_v0_2.py
-          python -m py_compile stage5/selfhost/verify_full_codec_holdout_v0_2.py
+          python -m py_compile stage5/selfhost/build_full_codec_v0_3.py
+          python -m py_compile stage5/selfhost/verify_full_codec_static_v0_3.py
+          python -m py_compile stage5/selfhost/verify_full_codec_development_v0_3.py
+          python -m py_compile stage5/selfhost/verify_full_codec_exhaustive_v0_3.py
       - name: Validate accepted Stage 5.11 representation
         run: python stage5/selfhost/validate_meta_representation_v0_3.py
       - name: Validate frozen anti-tuning protocol
         run: python stage5/selfhost/validate_experiment_protocol.py
-      - name: Preserve rejected Stage 5.12 v0.2 preregistration and identity
+      - name: Preserve rejected Stage 5.12 v0.2 evidence
         run: |
           python stage5/selfhost/validate_full_codec_contract_v0_2.py
           python stage5/selfhost/build_full_codec_v0_2.py --check
-      - name: Validate Stage 5.12 v0.3 preregistration before candidate implementation
-        run: python stage5/selfhost/validate_full_codec_contract_v0_3.py
+          python - <<'PY'
+          import json
+          d=json.load(open('stage5/selfhost/full-codec-development-result-v0.2.json'))
+          assert d['status']=='rejected_on_frozen_development_resource_refusal' and d['decision']=='rejected'
+          print('full-codec v0.2 rejection: preserved')
+          PY
+      - name: Validate active Stage 5.12 v0.3 preregistration and identity
+        run: |
+          python stage5/selfhost/validate_full_codec_contract_v0_3.py
+          python stage5/selfhost/build_full_codec_v0_3.py --check
