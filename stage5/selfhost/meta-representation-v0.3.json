@@ -1,7 +1,7 @@
 {
   "schema": "nex-selfhost-meta-representation",
   "version": "0.3",
-  "status": "stage5.11-operational-candidate",
+  "status": "accepted-stage5.11-operational-representation",
   "core_version": "NEX-1 v0.1",
   "supersedes_for_active_work": "meta-representation-v0.2.json",
   "historical_lineage": [
@@ -9,6 +9,11 @@
     "meta-representation-v0.2.json"
   ],
   "purpose": "Operational finite representations for the unchanged NEX-1 v0.1 self-hosting path, reconciling accepted functional streams with the complete Stage 5.11 representation inventory.",
+  "decision": {
+    "stage": "5.11",
+    "outcome": "Complete",
+    "reason": "v0.3 supplies exact operational carriers, canonical token grammars, equality/canonicality rules, failure-layer separation, bounded examples, and a machine validator without changing NEX-1 v0.1"
+  },
   "core_dependencies": {
     "term_constructors": ["Var", "Lam", "App", "Let", "Nat", "Prim"],
     "type_formers": ["TypeVar", "Unit", "Nat", "Arrow", "Product", "Sum"],
