@@ -54,6 +54,7 @@ jobs:
           python -m py_compile stage5/selfhost/verify_integer_codec.py
           python -m py_compile stage5/selfhost/build_interleaved_pair.py
           python -m py_compile stage5/selfhost/verify_interleaved_pair.py
+          python -m py_compile stage5/selfhost/verify_interleaved_pair_result.py
 
       - name: Validate historical Stage 5.11 meta-representation v0.1
         run: python stage5/selfhost/validate_meta_representation.py
@@ -118,8 +119,8 @@ jobs:
       - name: Verify Stage 5.12c NEX integer codec
         run: python stage5/selfhost/verify_integer_codec.py
 
-      - name: Verify Stage 5.12d interleaved pair candidate
-        run: python stage5/selfhost/verify_interleaved_pair.py
+      - name: Reproduce Stage 5.12d interleaved pair rejection
+        run: python stage5/selfhost/verify_interleaved_pair_result.py
 
       - name: Verify independent Python implementation
         working-directory: independent/python
