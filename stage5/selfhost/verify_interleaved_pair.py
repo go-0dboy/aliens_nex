@@ -94,7 +94,7 @@ def main() -> None:
 
     go_requests: list[dict] = []
     python_results: dict[str, dict] = {}
-    python_refusals = 0
+    python_refusal_details: list[str] = []
 
     for item in data["functions"]:
         name = item["name"]
@@ -137,7 +137,7 @@ def main() -> None:
                     "max_depth": stats.max_depth,
                 }
             except NeedResourceLimitError as exc:
-                python_refusals += 1
+                python_refusal_details.append(f"{case_id}{tuple(args)}: {exc}")
                 python_results[case_id] = {"status": "resource_refusal", "detail": str(exc)}
 
             go_requests.append(
@@ -166,8 +166,8 @@ def main() -> None:
     if len(by_id) != len(go_requests):
         fail("Go probe response count/IDs differ")
 
-    go_need_refusals = 0
-    go_cbn_refusals = 0
+    go_need_refusal_details: list[str] = []
+    go_cbn_refusal_details: list[str] = []
     compared_need_values = 0
     cases = 0
 
@@ -181,16 +181,21 @@ def main() -> None:
 
         for index, case in enumerate(item["tests"]):
             case_id = f"{name}:{index}"
+            args = case["args"]
             row = by_id.get(f"eval:{case_id}")
             if row is None or row.get("static_error"):
                 fail(f"{case_id}: Go static rejection/missing response: {row}")
             expected = {"kind": "Nat", "value": str(case["result"])}
             if row.get("need_error"):
-                go_need_refusals += 1
+                go_need_refusal_details.append(
+                    f"{case_id}{tuple(args)}: {row['need_error']}"
+                )
             elif row.get("need_result") != expected:
                 fail(f"{case_id}: Go need {row.get('need_result')} != {expected}")
             if row.get("cbn_error"):
-                go_cbn_refusals += 1
+                go_cbn_refusal_details.append(
+                    f"{case_id}{tuple(args)}: {row['cbn_error']}"
+                )
             elif row.get("cbn_result") != expected:
                 fail(f"{case_id}: Go CBN {row.get('cbn_result')} != {expected}")
 
@@ -201,28 +206,32 @@ def main() -> None:
                 compared_need_values += 1
             cases += 1
 
-    if go_need_refusals:
-        fail(f"Go call-by-need refused {go_need_refusals} candidate cases")
-
     for a in range(32):
         for b in range(32):
             if interleave_unpair(interleave_pair(a, b)) != (a, b):
                 fail(f"bounded host round-trip failed for ({a},{b})")
 
     total_bits = sum(item["wire_bit_length"] for item in data["functions"])
-    print("stage5.12d interleaved pair candidate: structurally and differentially verified")
+    print("stage5.12d interleaved pair candidate: measured")
     print(f"canonical functions: {len(data['functions'])}")
     print(f"canonical bits (separate terms): {total_bits}")
     print(f"execution cases: {cases}")
-    print(f"Python call-by-need resource refusals: {python_refusals}")
-    print(f"Go call-by-need resource refusals: {go_need_refusals}")
-    print(f"Go CBN resource refusals: {go_cbn_refusals}")
+    print(f"Python call-by-need resource refusals: {len(python_refusal_details)}")
+    print(f"Go call-by-need resource refusals: {len(go_need_refusal_details)}")
+    print(f"Go CBN resource refusals: {len(go_cbn_refusal_details)}")
     print(f"Python/Go need values compared: {compared_need_values}")
     for row in data["growth_examples"]:
         print(
             "growth sample "
             f"({row['a']},{row['b']}): pow2-adic={row['pow2_adic_code_bit_length']} bits, "
             f"interleaved={row['interleaved_code_bit_length']} bits"
+        )
+
+    if go_need_refusal_details:
+        fail(
+            "Go call-by-need candidate refusals: "
+            + " | ".join(go_need_refusal_details)
+            + ("; Python refusals: " + " | ".join(python_refusal_details) if python_refusal_details else "")
         )
 
 
