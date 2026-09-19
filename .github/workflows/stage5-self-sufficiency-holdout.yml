@@ -2,18 +2,34 @@ name: stage5-self-sufficiency-holdout
 
 on:
   pull_request:
-    paths:
-      - 'stage5/selfhost/holdout-trigger-v0.1.txt'
-  push:
-    branches: [ main ]
-    paths:
-      - 'stage5/selfhost/holdout-trigger-v0.1.txt'
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
 
 jobs:
+  trigger:
+    runs-on: ubuntu-24.04
+    outputs:
+      run_holdout: ${{ steps.changed.outputs.run_holdout }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+      - id: changed
+        name: Check latest commit for holdout trigger
+        shell: bash
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -qx 'stage5/selfhost/holdout-trigger-v0.1.txt'; then
+            echo 'run_holdout=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run_holdout=false' >> "$GITHUB_OUTPUT"
+          fi
+
   functional-stream-v0-2-holdout:
+    needs: trigger
+    if: needs.trigger.outputs.run_holdout == 'true'
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
