@@ -3,7 +3,7 @@
 **Date:** 2026-09-19  
 **Baseline branch:** `main`  
 **Active work:** Post-Stage-5 NEX Core self-sufficiency extension (5.10–5.20)  
-**Current state:** `Stages 0–5 complete; 5.10 accepted; 5.11 Complete under operational meta-representation v0.3; 5.12a/b/c verified; 5.12d interleaved pair rejected under frozen budgets; 5.12e functional-stream v0.1 rejected and v0.2 accepted provisionally on frozen development+hold-out surfaces; 5.12f NEX-written stream parser passed frozen development and preregistered hold-out and is accepted for bounded canonical-wire traversal; 5.12 remains Active until full encodeTerm/decodeTerm closeout; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
+**Current state:** `Stages 0–5 complete; 5.10 accepted; 5.11 Complete under operational meta-representation v0.3; 5.12 Complete with accepted NEX-written full Term codec v0.3 after frozen development, complete bounded 27-Term class, green pre-holdout historical checkpoint, and one-shot preregistered holdout; 5.13 Planned as next sequential substage; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
 **Active decision:** ADR-0018  
 **Living dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md`
 
@@ -100,8 +100,8 @@ ADR-0018 inserts an executable evidence gate before Stage 6 activation:
 ```text
 5.10 contract and gate                 accepted
 5.11 NEX-in-NEX meta-representation   Complete; operational v0.3 accepted
-5.12 self wire codec                   Active; bounded stream traversal accepted, full codec open
-5.13 self structural validation        Planned; blocked by 5.12
+5.12 self wire codec                   Complete; full codec v0.3 accepted
+5.13 self structural validation        Planned; predecessor complete
 5.14 self HM type inference            Planned
 5.15 self evaluator                    Planned
 5.16 integrated NEX-in-NEX toolchain  Planned
@@ -272,7 +272,7 @@ Python/Go need observations                 matched wherever Python returned
 Python/Go direct U(n) host controls          matched
 ```
 
-The single Python sharing refusal is an implementation-resource outcome; Go sharing and both direct host codec controls corroborate the returned semantics. This checkpoint is not yet complete `Term` encode/decode.
+The single Python sharing refusal is an implementation-resource outcome; Go sharing and both direct host codec controls corroborate the returned semantics. This checkpoint did not by itself establish complete `Term` encode/decode; that requirement is closed by full-codec v0.3 below.
 
 ## 5.12d — recursive numeric pairing alternatives
 
@@ -301,7 +301,7 @@ returned semantic mismatches               0
 
 The interleaved candidate is therefore **rejected as the primary recursive representation under the frozen budgets**. Its negative result is reproducibly checked. No resource limit was raised to make it pass.
 
-This is evidence about the representation and available derived operations, not yet a fundamental Core limitation.
+This is evidence about the representation and available derived operations, not a fundamental Core limitation.
 
 ## 5.12e — fixed-type functional bit streams
 
@@ -491,7 +491,7 @@ Decision: `stream-parser-v0.1` is **accepted as the bounded canonical-wire trave
 
 This establishes that unchanged NEX-1 v0.1 can decode canonical `U(n)` fields, distinguish all six term constructors, recursively traverse complete canonical term structure, and detect premature EOF/trailing data using a functional `BitStream` and natural cursor.
 
-It does **not** establish complete v0.3 `Term` construction, full `decodeTerm`/`encodeTerm`, scope validation, primitive-ID validity, HM inference, evaluation, integrated self-hosting, self-processing, or receiver-neutral bootstrap.
+It did **not** by itself establish complete v0.3 `Term` construction, full `decodeTerm`/`encodeTerm`, scope validation, primitive-ID validity, HM inference, evaluation, integrated self-hosting, self-processing, or receiver-neutral bootstrap.
 
 Normative Go CBN refused 16 development projections and 18 hold-out projections under the frozen budget. Both sharing controls completed every acceptance observation. This is recorded as further evidence that sharing is an engineering feasibility condition, not as semantic invalidity or a Core defect.
 
@@ -505,27 +505,102 @@ stage5/selfhost/verify_stream_parser_result.py
 docs/experiments/stage5-selfhost-stream-parser.md
 ```
 
-## CI structure after the protocol checkpoint
+## 5.12g — full NEX-written Term codec — Complete
 
-Fast accepted-checkpoint validation and expensive historical checks are separated.
+The full codec closeout preserved the accepted Stage 5.11 v0.3 carriers:
+
+```text
+FiniteBits      = (N -> N) * N
+FiniteNatTokens = (N -> N) * N
+CodecResult     = N * ((N -> N) * N)
+```
+
+Two predecessor candidates are preserved as negative evidence. v0.1 failed its one-shot hold-out and v0.2 failed frozen development at `law2:deepmixed:stream`, both with Python sharing reaching `5,000,001 > 5,000,000` transitions. The resource budget was not changed.
+
+v0.3 was preregistered before implementation with a fresh unseen hold-out. Its algorithm constructs compositional functional fragments during recursive traversal rather than returning a random-access decoded view that reparses source wire across distinct index queries.
+
+Frozen candidate:
+
+```text
+decodeTerm   6,198 bits
+encodeTerm   6,124 bits
+total       12,322 bits
+principal type for each:
+(((N -> N) * N) -> (N * ((N -> N) * N)))
+```
+
+Official development and complete bounded class:
+
+```text
+development valid/error surface       24 + 12 + 12
+compound development observations             120
+Python/Go need matches                     120/120
+sharing refusals                                0/0
+largest Python need                       265,933  law2:deepmixed
+largest Go need                           117,098  law2:deepmixed
+
+complete 1..3-node Term class                27/27
+Direct Python round trips                     27/27
+Direct Go round trips/token checks            27/27
+NEX forced law observations                 108/108
+sharing refusals                                0/0
+```
+
+Pre-holdout historical checkpoint `35441259575` / job `105892338355` completed green across historical 5.12a–f, immutable v0.1/v0.2 full-codec results, frozen v0.3 development/exhaustive, independent Python, and Go reference/frozen Stage 4 evidence.
+
+The unchanged candidate then passed its one-shot preregistered unseen hold-out in workflow `35441600023`, job `105893253759`:
+
+```text
+hold-out valid/error surface          7 + 3 + 3
+compound forced Nat observations             34
+Python need refusals                          0
+Go need refusals                              0
+Python/Go need matches                    34/34
+Go normative CBN resource refusals           30
+largest Python need                     487,579  law2:v3-deep3
+largest Go need                         212,893  law2:v3-deep3
+round-trip laws                            7/7 valid terms
+```
+
+The normative Go CBN refusals remain explicit cost evidence and are not silently converted to values. The frozen acceptance rule relied on the two independent sharing controls for executable bounded feasibility while recording CBN separately.
+
+Durable evidence:
+
+```text
+stage5/selfhost/full-codec-preholdout-result-v0.3.json
+stage5/selfhost/full-codec-holdout-result-v0.3.json
+stage5/selfhost/verify_full_codec_result_v0_3.py
+docs/experiments/stage5-selfhost-full-codec-v0.3.md
+```
+
+**Stage 5.12 result: Complete.** The result is bounded empirical evidence for the self wire codec, not a proof of global codec correctness and not evidence yet for Stage 5.13–5.20.
+
+## CI structure after Stage 5.12 closeout
+
+Fast invariant validation and expensive historical checks are separated.
 
 ```text
 stage5-self-sufficiency.yml
-  -> v0.1/v0.2/v0.3 representation validators
-  -> protocol/contracts/reproducibility
-  -> validate frozen 5.12f result without rerunning hold-out
+  -> accepted representation/protocol/full-codec contract invariants
+  -> compile/check active/frozen Stage 5.12 tooling
+  -> no ordinary heavy replay
+
+stage5-full-codec-active-candidate / static
+  -> explicit latest-commit trigger only
+  -> no cumulative PR-path heavy reruns
 
 stage5-self-sufficiency-regression.yml
   -> cheap trigger job on ordinary commits
   -> heavy historical regression only when latest commit changes checkpoint-trigger.txt
-  -> reproduce development evidence and validate frozen hold-out result
+  -> reproduce accepted development/exhaustive evidence
+  -> validate frozen one-shot hold-out result without rerunning hold-out
 
 stage5-self-sufficiency-holdout.yml
   -> cheap trigger job on ordinary commits
   -> one-shot hold-out jobs only when the matching explicit trigger changes
 ```
 
-The latest-commit trigger behavior has been verified. Accepted hold-outs are represented by frozen results and blob identities; ordinary regression does not re-execute one-shot hold-outs.
+Accepted hold-outs are represented by frozen result artifacts and blob identities; ordinary regression does not re-execute them.
 
 ## Required final implementation target
 
@@ -561,8 +636,8 @@ Existing Stage 6 planning artifacts remain planning artifacts, not accepted teac
 
 ## Research synthesis / next step
 
-Stage 5.11 is now Complete under operational v0.3. The representation drift discovered between the historical all-`N` contract and the successful functional-stream experiments is resolved without changing NEX-1 v0.1.
+Stage 5.11 is Complete under operational v0.3, and Stage 5.12 is now Complete with an accepted NEX-written full Term codec v0.3. The codec passed frozen development, a complete bounded 27-Term class, a green historical pre-holdout checkpoint, and a one-shot preregistered unseen holdout without changing NEX-1 v0.1 or raising resource budgets.
 
-Stage 5.12 remains Active. Its next step is **Gate 1** of `docs/STAGE-5.12-CLOSEOUT.md`: freeze the exact full-codec interface/result contract using accepted v0.3 `Bits` and `Term`, then preregister the development/hold-out workloads before executing any full `decodeTerm`/`encodeTerm` candidate.
+The main engineering lesson from v0.1/v0.2 is that representing recursive information with functions is not enough by itself: a random-access function that reparses its source on each index can still be operationally pathological. The accepted v0.3 route constructs compositional functional fragments once and then exposes the same fixed carrier.
 
-Stage 5.13 remains Planned and blocked until Stage 5.12 is formally Complete. Stage 6 remains Planned until the 5.20 gate.
+Stage 5.13 is the next **Planned** sequential substage; no Stage 5.13 implementation is part of this 5.12 closeout. Stage 6 remains Planned until the 5.20 gate.
