@@ -55,6 +55,8 @@ jobs:
           python -m py_compile stage5/selfhost/build_interleaved_pair.py
           python -m py_compile stage5/selfhost/verify_interleaved_pair.py
           python -m py_compile stage5/selfhost/verify_interleaved_pair_result.py
+          python -m py_compile stage5/selfhost/build_functional_stream.py
+          python -m py_compile stage5/selfhost/verify_functional_stream.py
 
       - name: Validate historical Stage 5.11 meta-representation v0.1
         run: python stage5/selfhost/validate_meta_representation.py
@@ -73,6 +75,9 @@ jobs:
 
       - name: Check Stage 5.12d interleaved pair candidate reproducibility
         run: python stage5/selfhost/build_interleaved_pair.py --check
+
+      - name: Check Stage 5.12e functional stream candidate reproducibility
+        run: python stage5/selfhost/build_functional_stream.py --check
 
       - name: Preserve corrected receiver-assumption model
         run: python stage5/validate_receiver_assumptions.py
@@ -121,6 +126,9 @@ jobs:
 
       - name: Reproduce Stage 5.12d interleaved pair rejection
         run: python stage5/selfhost/verify_interleaved_pair_result.py
+
+      - name: Verify Stage 5.12e functional stream candidate
+        run: python stage5/selfhost/verify_functional_stream.py
 
       - name: Verify independent Python implementation
         working-directory: independent/python
