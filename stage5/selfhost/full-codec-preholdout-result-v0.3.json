@@ -1,0 +1,72 @@
+{
+  "schema": "nex-selfhost-full-codec-preholdout-result",
+  "version": "0.3",
+  "status": "development_and_exhaustive_passed_candidate_frozen",
+  "core_version": "NEX-1 v0.1",
+  "semantic_workflow": {
+    "run_id": 35440628434,
+    "job_id": 105890683686,
+    "head_sha": "6947523cceb5e41c62d297f1f6934a3bf4c9de26"
+  },
+  "frozen_git_blobs": {
+    "generator": "69a828ac43df26f6360bc672f0fcc287594797ee",
+    "candidate_artifact": "c5fb6836564262f7fafece2a06c06949a1cbe1dd",
+    "contract": "e2205ee622c895eca1057960917fe0be22fca17c",
+    "development_manifest": "4c57a4d873d18b77f80a0efb62bb38865d86a17e",
+    "holdout_workload": "eed66f0150b1718b9cbad50548b9a14b97554da2",
+    "development_verifier": "36a5452219405d2cdb26fc23f30f45ebde209cc3",
+    "exhaustive_verifier": "f160fde6592d05f2e06d3982e2cb4497595b0b95"
+  },
+  "candidate_wire": {
+    "decodeTerm": {
+      "bits": 6198,
+      "sha256": "b20d12f94bb91efc4adcb73c55cfd9db5dfc3ecd625d9421be4d67e64fedb6d8"
+    },
+    "encodeTerm": {
+      "bits": 6124,
+      "sha256": "cea3472c4a819f41d7857b5cc3457cf92090f248fd101c3a40d0cfe951313ed4"
+    },
+    "separate_term_total_bits": 12322
+  },
+  "development": {
+    "valid_terms": 24,
+    "decode_error_cases": 12,
+    "encode_error_cases": 12,
+    "compound_forced_nat_observations": 120,
+    "python_need_resource_refusals": 0,
+    "go_need_resource_refusals": 0,
+    "go_cbn_resource_refusals": 94,
+    "python_go_need_values_matched": 120,
+    "python_go_need_values_total": 120,
+    "largest_python_need_transitions": 265933,
+    "largest_python_need_case": "law2:deepmixed",
+    "largest_go_need_transitions": 117098,
+    "largest_go_need_case": "law2:deepmixed",
+    "round_trip_laws_valid_terms": 24
+  },
+  "bounded_exhaustive": {
+    "maximum_ast_nodes": 3,
+    "leaf_set": ["Var(0)", "Nat(0)", "Prim(0)"],
+    "complete_terms": 27,
+    "direct_python_round_trips": 27,
+    "direct_go_round_trips_and_token_projections": 27,
+    "nex_forced_law_observations": 108,
+    "python_need_resource_refusals": 0,
+    "go_need_resource_refusals": 0,
+    "go_cbn_resource_refusals": 99,
+    "nex_python_go_need_values_matched": 108,
+    "nex_python_go_need_values_total": 108,
+    "largest_python_need_transitions": 32764,
+    "largest_python_need_case": "law2:term-18",
+    "largest_go_need_transitions": 14894,
+    "largest_go_need_case": "law2:term-18"
+  },
+  "pre_holdout_historical_regression": {
+    "passed": true,
+    "workflow_run_id": 35441259575,
+    "workflow_job_id": 105892338355,
+    "workflow_head_sha": "728841809f8b3c9a1e3c2230149deedde9cb9fcc"
+  },
+  "holdout_status": "preregistered_unexecuted",
+  "decision": "candidate v0.3 is frozen and eligible for one-shot preregistered holdout"
+}
