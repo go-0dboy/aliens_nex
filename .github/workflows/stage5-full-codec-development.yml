@@ -1,21 +1,23 @@
-name: stage5-full-codec-development
+name: stage5-full-codec-active-candidate
 
 on:
   pull_request:
     paths:
-      - 'stage5/selfhost/build_full_codec.py'
-      - 'stage5/selfhost/full-codec-v0.1.json'
-      - 'stage5/selfhost/full-codec-contract-v0.1.json'
-      - 'stage5/selfhost/full-codec-development-v0.1.json'
-      - 'stage5/selfhost/verify_full_codec_static.py'
-      - 'stage5/selfhost/verify_full_codec_development.py'
+      - 'stage5/selfhost/build_full_codec_v0_2.py'
+      - 'stage5/selfhost/full-codec-v0.2.json'
+      - 'stage5/selfhost/full-codec-contract-v0.2.json'
+      - 'stage5/selfhost/full-codec-development-v0.2.json'
+      - 'stage5/selfhost/verify_full_codec_development_v0_2.py'
+      - 'stage5/selfhost/verify_full_codec_exhaustive_v0_2.py'
+      - 'reference/go/cmd/nexselfhostprobe/**'
+      - 'reference/go/cmd/nextermcontrol/**'
       - '.github/workflows/stage5-full-codec-development.yml'
 
 permissions:
   contents: read
 
 jobs:
-  development:
+  active-candidate:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -25,7 +27,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: '1.26.x'
-      - name: Verify frozen full codec candidate statically
-        run: python stage5/selfhost/verify_full_codec_static.py
-      - name: Execute development workload only
-        run: python stage5/selfhost/verify_full_codec_development.py
+      - name: Execute frozen v0.2 development workload
+        run: python stage5/selfhost/verify_full_codec_development_v0_2.py
+      - name: Execute frozen v0.2 complete 27-Term class
+        run: python stage5/selfhost/verify_full_codec_exhaustive_v0_2.py
