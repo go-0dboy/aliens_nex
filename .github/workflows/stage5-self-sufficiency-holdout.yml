@@ -13,6 +13,7 @@ jobs:
     outputs:
       run_functional_stream_holdout: ${{ steps.changed.outputs.run_functional_stream_holdout }}
       run_parser_holdout: ${{ steps.changed.outputs.run_parser_holdout }}
+      run_full_codec_holdout: ${{ steps.changed.outputs.run_full_codec_holdout }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,6 +33,11 @@ jobs:
             echo 'run_parser_holdout=true' >> "$GITHUB_OUTPUT"
           else
             echo 'run_parser_holdout=false' >> "$GITHUB_OUTPUT"
+          fi
+          if printf '%s\n' "$changed" | grep -qx 'stage5/selfhost/full-codec-holdout-trigger-v0.1.txt'; then
+            echo 'run_full_codec_holdout=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'run_full_codec_holdout=false' >> "$GITHUB_OUTPUT"
           fi
 
   functional-stream-v0-2-holdout:
@@ -74,3 +80,25 @@ jobs:
 
       - name: Execute preregistered stream-parser v0.1 holdout
         run: python stage5/selfhost/verify_stream_parser_holdout.py
+
+  full-codec-v0-1-holdout:
+    needs: trigger
+    if: needs.trigger.outputs.run_full_codec_holdout == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+
+      - name: Validate frozen experiment protocol
+        run: python stage5/selfhost/validate_experiment_protocol.py
+
+      - name: Validate preregistered full-codec contract/workloads
+        run: python stage5/selfhost/validate_full_codec_contract.py
+
+      - name: Execute preregistered full-codec v0.1 holdout
+        run: python stage5/selfhost/verify_full_codec_holdout.py
