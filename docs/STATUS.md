@@ -3,7 +3,7 @@
 **Date:** 2026-09-19  
 **Baseline branch:** `main`  
 **Active work:** Post-Stage-5 NEX Core self-sufficiency extension (5.10–5.20)  
-**Current state:** `Stages 0–5 complete; 5.10 contract accepted; 5.11 N-only meta-representation validated; 5.12a arithmetic foundation verified; 5.12b pair/sequence resource checkpoint measured; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
+**Current state:** `Stages 0–5 complete; 5.10 contract accepted; 5.11 N-only meta-representation validated; 5.12a arithmetic foundation verified; 5.12b pair/sequence sharing requirement corroborated by Python and Go; self wire codec next; Stage 6 remains Planned; NEX-1 v0.1 unchanged`  
 **Active decision:** ADR-0018  
 **Living dissertation:** `docs/RESEARCH-DISSERTATION.md` / `docs/RESEARCH-DISSERTATION.ru.md`
 
@@ -127,7 +127,7 @@ ADR-0018 inserts an executable evidence gate before Stage 6 activation:
 ```text
 5.10 contract and gate                 accepted in ADR-0018
 5.11 NEX-in-NEX meta-representation   validated checkpoint
-5.12 self wire codec                   active; arithmetic + pair/sequence prerequisites measured
+5.12 self wire codec                   active; prerequisites verified/corroborated
 5.13 self structural validation        planned
 5.14 self HM type inference            planned
 5.15 self evaluator                    planned
@@ -189,7 +189,7 @@ The `756` figure is a local engineering size of six separately serialized helper
 
 The helper generator uses readable names only as engineering notation; the exact research objects are canonical NEX wire strings. No arithmetic helper was added as a Core primitive.
 
-### 5.12b N-only pair/sequence execution checkpoint
+### 5.12b N-only pair/sequence execution and sharing checkpoint
 
 The exact candidate required by `meta-representation-v0.1.json` was implemented as seven further closed canonical NEX terms:
 
@@ -208,15 +208,18 @@ Artifacts:
 ```text
 stage5/selfhost/build_meta_sequence.py
 stage5/selfhost/meta-sequence-v0.1.json
+stage5/selfhost/python_need.py
 stage5/selfhost/verify_meta_sequence.py
 stage5/selfhost/meta-sequence-measurement-summary-v0.1.json
+stage5/selfhost/meta-sequence-measurement-summary-v0.2.json
 docs/experiments/stage5-selfhost-meta-sequence.md
+docs/experiments/stage5-selfhost-sharing-corroboration.md
 reference/go/cmd/nexselfhostprobe/main.go
 ```
 
 The seven terms occupy 3,290 canonical bits when counted separately. This remains an engineering measurement, not a bootstrap or total-information cost.
 
-Frozen bounded workload:
+The original bounded workload showed:
 
 ```text
 measurement cases                     37
@@ -235,17 +238,31 @@ call-by-need              1,793
 ratio                  ~2709.24x
 ```
 
-Go CBN exhausted the 5,000,000-transition budget on five small cases, including `meta_pair(2,3)`, `meta_pair(3,2)`, `unpair_left(39)`, `unpair_right(39)`, and `seq_cons(1,6)`. The Go sharing evaluator completed all 37 cases with the expected portable result.
+A second memoizing evaluator was then implemented in Python outside the frozen `independent/python` tree and the exact same 37-case workload was rerun. Corroboration result:
+
+```text
+Python call-by-need resource refusals   0
+Go call-by-need resource refusals       0
+Python/Go need observation mismatches   0
+cases agreed                            37/37
+```
+
+The updated full measurement report from workflow run `35428624295` has SHA-256:
+
+```text
+4f6baafe007f785f2a274abd6905f4961dfa49b3eabebe85835c32d51f58683b
+```
 
 Accepted interpretation at this checkpoint:
 
 - the N-only representation remains an executable expressiveness construction;
 - pure CBN execution is already operationally poor on several small encoded values;
 - resource refusal is not semantic invalidity and is not evidence by itself of a Core defect;
-- sharing changes practical feasibility by orders of magnitude on the tested workload;
-- the current evidence is still only one sharing implementation and does not prove NEX-specific CBN/call-by-need equivalence.
+- two separately implemented sharing controls complete the frozen workload and agree on every portable observation;
+- sharing is therefore an explicit engineering feasibility condition for this representation;
+- the result still does not prove NEX-specific CBN/call-by-need equivalence.
 
-Therefore the representation is **retained provisionally**, but the full self wire codec is not yet built on it. Before promoting it as the main 5.12 implementation basis, the sharing result must be corroborated by a second sharing-capable control outside the frozen historical Stage 5 implementation, or by equivalent independently checkable evidence.
+Decision: retain `meta-representation-v0.1` as the working 5.12 basis with the sharing condition explicit. The self wire codec may now proceed to NEX-written `encodeU/decodeU` while preserving CBN resource results and both sharing controls as evidence.
 
 ### Required final implementation target
 
@@ -346,8 +363,8 @@ These support confidence in the target Core but do not replace either the self-s
 
 ## Research synthesis status
 
-ADR-0018 and the 5.12b resource result are research-significant. Both living dissertation versions must incorporate the pre-Stage-6 self-sufficiency question and this sharing/resource qualification in this pull request before merge. Historical Stage 5 evidence and the post-Stage-5 literature audit remain unchanged.
+ADR-0018 and the 5.12b resource/sharing result are research-significant. Both living dissertation versions must incorporate the pre-Stage-6 self-sufficiency question and this sharing qualification in this pull request before merge. Historical Stage 5 evidence and the post-Stage-5 literature audit remain unchanged.
 
 ## Next recommended step
 
-Add a second sharing-capable execution control outside the frozen historical Stage 5 implementation and rerun the exact 37-case 5.12b workload. If the sharing result is corroborated, retain the N-only representation as a sharing-conditioned engineering basis and proceed to NEX-written `encodeU/decodeU`; otherwise version the meta-representation before the self wire codec is built.
+Implement and freeze NEX-written `encodeU/decodeU` on the validated N-only representation, verify canonical gamma-code round trips against both existing wire implementations, and run the resulting NEX terms under both sharing controls while continuing to record pure-CBN resource behavior separately.
