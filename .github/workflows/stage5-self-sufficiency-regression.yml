@@ -65,6 +65,12 @@ jobs:
       - name: Reproduce Stage 5.12e functional-stream v0.1 rejection
         run: python stage5/selfhost/verify_functional_stream_v0_1_result.py
 
+      - name: Reproduce accepted Stage 5.12e functional-stream v0.2 development result
+        run: python stage5/selfhost/verify_functional_stream_v0_2.py
+
+      - name: Validate preregistered Stage 5.12f parser contract/workloads
+        run: python stage5/selfhost/validate_parser_contract.py
+
       - name: Verify independent Python implementation
         working-directory: independent/python
         run: python verify.py
