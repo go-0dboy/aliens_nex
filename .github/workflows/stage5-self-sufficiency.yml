@@ -45,6 +45,7 @@ jobs:
           python -m py_compile stage5/selfhost/build_foundation.py
           python -m py_compile stage5/selfhost/verify_foundation.py
           python -m py_compile stage5/selfhost/build_meta_sequence.py
+          python -m py_compile stage5/selfhost/python_need.py
           python -m py_compile stage5/selfhost/verify_meta_sequence.py
 
       - name: Validate Stage 5.11 meta-representation
