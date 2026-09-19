@@ -1,6 +1,6 @@
 # Stage 5.12e — fixed-type functional stream candidates
 
-**Status:** v0.1 rejected on frozen development budget; v0.2 development workload passed under frozen protocol; preregistered hold-out not yet executed  
+**Status:** v0.1 rejected on frozen development budget; v0.2 passed frozen development and preregistered hold-out workloads  
 **Date:** 2026-09-19  
 **Core:** NEX-1 v0.1 unchanged
 
@@ -101,6 +101,7 @@ stage5/selfhost/build_functional_stream_v0_2.py
 stage5/selfhost/functional-stream-v0.2.json
 stage5/selfhost/verify_functional_stream_v0_2.py
 stage5/selfhost/functional-stream-v0.2-development-result-v0.1.json
+stage5/selfhost/functional-stream-v0.2-holdout-result-v0.1.json
 ```
 
 The 10 effective terms occupy 1,634 bits when counted separately. The two changed terms are:
@@ -137,7 +138,7 @@ Go need transitions       6,418
 frozen transition limit 5,000,000
 ```
 
-Thus v0.2 **passes the previously observed development workload** under the frozen budgets. This is development evidence only, not hold-out evidence.
+Thus v0.2 passes the previously observed development workload under the frozen budgets. This remains development evidence, not hold-out evidence.
 
 ## Anti-tuning protocol
 
@@ -167,31 +168,70 @@ Before v0.2's first runtime execution, 11 additional `repeat_query` cases were f
 stage5/selfhost/functional-stream-holdout-v0.1.json
 ```
 
-They were intentionally excluded from the development run and remain unexecuted at the development-result checkpoint.
-
-The procedure is:
+The candidate Git blob SHA was frozen as:
 
 ```text
-v0.2 frozen development workload
-        |
-        +-- PASS (recorded)
-              |
-              +-- keep artifact unchanged
-                  -> first require the historical checkpoint regression to be green
-                  -> execute preregistered hold-out once
-                       |
-                       +-- fail -> reject v0.2; successor must be v0.3 with new hold-out
-                       +-- pass -> accept this representation checkpoint provisionally
+7f35e453b7234e9078cf7cf2ca1e962b32e4ed3d
 ```
 
-This prevents the same hidden workload from being used repeatedly to tune the same candidate.
+and the hold-out blob SHA as:
 
-## Acceptance meaning
+```text
+3ca4ccb6406b5ab7f30edb005a55e2a139b2b8a5
+```
 
-Passing v0.2 development plus hold-out would establish only that dynamically sized finite bit data can be represented and queried with existing rank-1 HM functions/closures under the frozen sharing budgets.
+After the development pass, the historical checkpoint regression completed successfully, including reproduction of the earlier negative interleaving and functional-stream-v0.1 results. The unchanged v0.2 candidate was then evaluated exactly once against the preregistered hold-out by workflow run `35432186658`, job `105868647658`.
 
-It would **not** establish complete self-hosting, and it would not yet prove that the representation is appropriate for `Term`, HM environments, substitutions, or evaluator state.
+Result:
 
-If v0.2 is accepted, the next representation experiment may build a cursor/parser layer over functional streams rather than first converting canonical wire into a recursively packed natural-number AST.
+```text
+hold-out cases                              11
+Python call-by-need resource refusals        0
+Go call-by-need resource refusals            0
+Go CBN resource refusals                     0
+Python/Go need values matched              11/11
+```
 
-If v0.2 is rejected, the exact barrier remains evidence for the eventual Stage 5.20 outcome; it does not authorize a NEX-1 v0.1 Core change.
+Largest hold-out costs:
+
+```text
+repeat(1,127)(126)
+Python need transitions  13,747
+Go need transitions       6,368
+frozen transition limit 5,000,000
+```
+
+No candidate wire, hold-out input, expected semantic observation, or resource budget was changed between preregistration and execution.
+
+## Decision at this checkpoint
+
+`functional-stream-v0.2` is **accepted provisionally as the finite-bit-stream representation checkpoint for the tested surface**.
+
+What this supports:
+
+- dynamically sized finite bit data can be represented with the fixed rank-1 HM type `N -> N`;
+- stream-producing and stream-transforming programs can be written in unchanged NEX-1 v0.1;
+- on the frozen development and preregistered hold-out workloads, both sharing controls and the Go CBN control return the expected observations without resource refusal;
+- the previous failures were properties of the tested numeric/cons-chain representations, not evidence that dynamically sized finite data is impossible in the Core.
+
+What this does **not** establish:
+
+- complete `Term` decoding or encoding;
+- a practical representation for type environments, substitutions, or evaluator state;
+- complete self-hosting;
+- a NEX-specific proof that call-by-need preserves all CBN observations;
+- receiver-neutral bootstrap or any new value for `B | A` or `C | A`.
+
+## Next experiment
+
+The next Stage 5.12 experiment should build a cursor/parser layer directly over the accepted stream interface rather than first packing the whole recursive syntax tree into one natural number.
+
+Before implementation, that parser experiment must freeze:
+
+1. the exact parser/cursor interface and result representation;
+2. development inputs and expected observations;
+3. resource budgets;
+4. a separate hold-out set that is not executed during development;
+5. the rule for versioning any algorithmic change after the first execution.
+
+Only after those items are committed should parser code be executed for acceptance evidence.
