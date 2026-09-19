@@ -24,7 +24,7 @@
       "name": "stream_nil",
       "wire_bits": "011110011",
       "wire_bit_length": 9,
-      "expected_type": "(N -> N)",
+      "expected_type": "forall T0. (T0 -> N)",
       "tests": [
         {"args": [0], "result": 2},
         {"args": [7], "result": 2}
