@@ -21,11 +21,15 @@ Stages 0–5 are complete. NEX-1 v0.1 currently has:
 - a negative complete-bootstrap result: no accepted receiver-neutral `B | A` exists yet;
 - a living bilingual dissertation and a post-Stage-5 literature re-audit.
 
+A post-Stage-5 **Core self-sufficiency workstream (5.10–5.20)** is now active under ADR-0018. It tests whether the unchanged NEX-1 v0.1 Core can express a complete implementation of its own portable wire, static, and dynamic semantics before the teaching experiment begins. Stage 6 remains **Planned**.
+
 Authoritative current state: [docs/STATUS.md](docs/STATUS.md).
 
 ## Primary documents
 
 - [NEX-1 Core v0.1 specification](docs/NEX-1-v0.1.md) / [Russian translation](docs/NEX-1-v0.1.ru.md)
+- [Post-Stage-5 self-sufficiency plan](docs/STAGE-5-EXTENSION.md)
+- [Stage 6 teaching plan](docs/STAGE-6.md)
 - [Architecture](docs/ARCHITECTURE.md) / [Russian translation](docs/ARCHITECTURE.ru.md)
 - [Living research dissertation](docs/RESEARCH-DISSERTATION.md) / [Russian translation](docs/RESEARCH-DISSERTATION.ru.md)
 - [Post-Stage-5 research audit](docs/RESEARCH-AUDIT-2026-09-19.md) / [Russian mirror](docs/RESEARCH-AUDIT-2026-09-19.ru.md)
@@ -54,7 +58,7 @@ The stable Core defines:
 - weak call-by-name normative evaluation;
 - strict separation between Core and optional machine/environment profiles.
 
-Stages 4–5 and the post-stage audit did **not** change this normative v0.1 object.
+Stages 4–5, the post-stage audit, and the current self-sufficiency experiment do **not** change this normative v0.1 object.
 
 ## Research objective and accounting
 
@@ -129,11 +133,33 @@ A_host(H) terrestrial engineering control only
 
 These profiles are experimental conditions, not claims about what an extraterrestrial intelligence necessarily knows. No accepted complete receiver-neutral bootstrap currently exists, so full `B | A` and total `C | A` remain unknown.
 
+## Pre-Stage-6 self-sufficiency gate
+
+ADR-0018 requires executable evidence before Stage 6 activation. The workstream is:
+
+```text
+5.10 contract/gate
+5.11 NEX-in-NEX meta-representation
+5.12 self wire codec
+5.13 self structural validation
+5.14 self HM inference
+5.15 self evaluator
+5.16 integrated NEX-in-NEX toolchain
+5.17 self-processing
+5.18 bounded/differential validation
+5.19 supporting metatheory
+5.20 decision gate
+```
+
+The first 5.11 candidate represents every frozen meta-object through NEX `N`, using numeric encodings for finite products, sequences, terms, types, schemes, and results. This deliberately tests the existing Core before considering recursive types or new primitives.
+
+The target is a canonical NEX implementation `I` that can decode/encode, validate, infer, evaluate, and process its own canonical representation. A native x86/ARM/WASM compiler is not required by this architecture-neutral gate.
+
 ## Related work and design lessons
 
 The project explicitly compares itself with Lincos, the DeVito–Oehrle science-based language, Lingua Cosmica, and especially CosmicOS. The purpose is to learn from prior approaches, not to establish priority.
 
-The comparison suggests a two-layer architecture:
+The comparison suggests a two-layer teaching architecture that remains planned after the self-sufficiency gate:
 
 ```text
 NEX Teaching / Bootstrap Message
@@ -159,6 +185,7 @@ The project does not yet establish:
 - formal NEX-specific type safety;
 - a formal NEX-specific CBN/call-by-need equivalence theorem;
 - representativeness of the 17-program design corpus;
+- a complete NEX-in-NEX self-implementation;
 - a complete receiver-neutral teaching/bootstrap message;
 - numerical total `C | A`.
 
@@ -166,19 +193,14 @@ The Stage 4 transition reduction `226151 -> 2484` is an evaluator transition-cou
 
 ## Next research direction
 
-The next stage should focus on **teachability and bootstrap construction**, not on an immediate Core redesign.
+The immediate research task is **Core self-sufficiency**, not receiver teaching and not an immediate Core redesign.
 
-The central question is:
+The current question is:
+
+> Can the unchanged NEX-1 v0.1 Core implement its own canonical codec, validation, rank-1 HM inference, and weak call-by-name evaluator, and then process that implementation's own canonical representation?
+
+If the 5.20 gate supports the Core, Stage 6 then resumes the already planned question:
 
 > What finite transmitted sequence can take a receiver from an explicit prior profile to demonstrable ability to decode, type-check, execute, and construct NEX programs?
-
-Candidate Stage-6 work includes:
-
-1. define the teaching/bootstrap message as a separate layer above the stable NEX-1 Core;
-2. design a progressive lesson sequence inspired by Lincos and CosmicOS;
-3. use type judgments and existing conformance vectors as receiver self-tests;
-4. define an operational success criterion for “NEX competence”;
-5. construct a finite machine-readable teaching artifact and measure its exact bits;
-6. continue NEX-specific metatheory and bounded-exhaustive cross-implementation testing as supporting evidence.
 
 The repository remains the source of truth. New measurements, falsifications, formal results, and literature corrections must update durable project documents rather than relying on chat history.
