@@ -131,4 +131,4 @@ Stage 5.11 is **Complete** under the v0.3 operational contract.
 
 This conclusion means only that the self-hosting workstream now has finite, exact, versioned representation contracts expressible with existing NEX-1 v0.1 values. It does not claim that the Stage 5.12 full `encodeTerm/decodeTerm` implementation already exists.
 
-The next permitted work is therefore the remaining Stage 5.12 closeout gates. Stage 5.13 remains Planned and blocked until Stage 5.12 is Complete.
+At the Stage 5.11 closeout, the next permitted work was the remaining Stage 5.12 codec gates and Stage 5.13 was still blocked by that predecessor. That sequencing condition has since been satisfied: Stage 5.12 is now Complete with accepted full-codec v0.3, and Stage 5.13 is Planned as the next sequential substage. This navigation update does not alter the Stage 5.11 evidence or decision.
