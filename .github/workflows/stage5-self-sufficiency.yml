@@ -53,6 +53,7 @@ jobs:
           python -m py_compile stage5/selfhost/validate_experiment_protocol.py
           python -m py_compile stage5/selfhost/validate_parser_contract.py
           python -m py_compile stage5/selfhost/validate_full_codec_contract.py
+          python -m py_compile stage5/selfhost/validate_full_codec_contract_v0_2.py
           python -m py_compile stage5/selfhost/build_foundation.py
           python -m py_compile stage5/selfhost/build_meta_sequence.py
           python -m py_compile stage5/selfhost/build_integer_codec.py
@@ -85,13 +86,16 @@ jobs:
       - name: Validate preregistered Stage 5.12f parser contract/workloads
         run: python stage5/selfhost/validate_parser_contract.py
 
-      - name: Validate preregistered Stage 5.12 full codec contract/workloads
+      - name: Validate historical Stage 5.12 full codec v0.1 contract/workloads
         run: python stage5/selfhost/validate_full_codec_contract.py
 
-      - name: Preserve frozen Stage 5.12 full codec candidate identity
+      - name: Validate preregistered Stage 5.12 full codec v0.2 contract/workloads
+        run: python stage5/selfhost/validate_full_codec_contract_v0_2.py
+
+      - name: Preserve frozen Stage 5.12 full codec v0.1 candidate identity
         run: python stage5/selfhost/build_full_codec.py --check
 
-      - name: Verify Stage 5.12 full codec candidate statically without executing it
+      - name: Verify Stage 5.12 full codec v0.1 candidate statically
         run: python stage5/selfhost/verify_full_codec_static.py
 
       - name: Preserve Stage 5.12a foundation reproducibility
@@ -150,10 +154,13 @@ jobs:
       - name: Validate Stage 5.12f parser contract and frozen workloads
         run: python stage5/selfhost/validate_parser_contract.py
 
-      - name: Validate preregistered Stage 5.12 full codec contract/workloads
+      - name: Preserve historical full-codec v0.1 preregistration
         run: python stage5/selfhost/validate_full_codec_contract.py
 
-      - name: Preserve frozen Stage 5.12 full codec candidate identity
+      - name: Validate active full-codec v0.2 preregistration before candidate execution
+        run: python stage5/selfhost/validate_full_codec_contract_v0_2.py
+
+      - name: Preserve frozen Stage 5.12 full codec v0.1 candidate identity
         run: python stage5/selfhost/build_full_codec.py --check
 
       - name: Check accepted Stage 5.12f parser artifact
