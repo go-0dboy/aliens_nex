@@ -92,6 +92,8 @@ jobs:
         run: python stage5/selfhost/verify_full_codec_development_v0_3.py
       - name: Reproduce frozen full-codec v0.3 bounded exhaustive class
         run: python stage5/selfhost/verify_full_codec_exhaustive_v0_3.py
+      - name: Verify accepted v0.3 one-shot holdout result without rerunning holdout
+        run: python stage5/selfhost/verify_full_codec_result_v0_3.py
 
       - name: Verify independent Python implementation
         working-directory: independent/python
