@@ -1,0 +1,168 @@
+{
+  "schema": "nex-selfhost-meta-representation",
+  "version": "0.1",
+  "status": "candidate_frozen_for_5.11",
+  "core_version": "NEX-1 v0.1",
+  "purpose": "Finite N-only representations for implementing NEX-1 portable semantics in NEX-1 itself.",
+  "core_dependencies": {
+    "term_constructors": ["Var", "Lam", "App", "Let", "Nat", "Prim"],
+    "type_formers": ["TypeVar", "Unit", "Nat", "Arrow", "Product", "Sum"],
+    "primitive_ids": {
+      "0": "fix",
+      "1": "succ",
+      "2": "pred",
+      "3": "ifz",
+      "4": "pair",
+      "5": "fst",
+      "6": "snd",
+      "7": "inl",
+      "8": "inr",
+      "9": "case",
+      "10": "unit"
+    },
+    "additional_core_features": []
+  },
+  "numeric_foundation": {
+    "pair": {
+      "id": "pow2-adic-pair-v0.1",
+      "carrier": "N x N -> N",
+      "definition": "pair(a,b) = 2^a * (2*b + 1) - 1",
+      "inverse": [
+        "n = z + 1",
+        "a = v2(n), the number of factors 2 dividing n",
+        "b = ((n / 2^a) - 1) / 2"
+      ],
+      "derived_requirements": ["add", "mul", "pow2", "halve", "is_even"],
+      "note": "All derived requirements are total recursive functions over N expressible using fix, succ, pred and ifz."
+    },
+    "sequence": {
+      "id": "nat-sequence-v0.1",
+      "carrier": "finite sequence N* -> N",
+      "nil": 0,
+      "cons_definition": "cons(head,tail) = 1 + pair(head,tail)",
+      "inverse": [
+        "0 decodes as []",
+        "n>0 decodes by unpair(n-1) = (head,tail)"
+      ]
+    }
+  },
+  "representations": {
+    "Bits": {
+      "carrier": "N",
+      "form": "sequence",
+      "canonical_rule": "decode as nat-sequence; every element must be 0 or 1"
+    },
+    "Term": {
+      "carrier": "N",
+      "form": "tagged",
+      "tag_set": "term_tags",
+      "payload_rule": "unary payload directly; binary payload via pair(left,right)"
+    },
+    "Type": {
+      "carrier": "N",
+      "form": "tagged",
+      "tag_set": "type_tags",
+      "payload_rule": "TypeVar carries id; Unit/Nat carry 0; binary type formers carry pair(left,right)"
+    },
+    "Scheme": {
+      "carrier": "N",
+      "form": "product",
+      "payload_rule": "pair(bound_type_var_sequence, type_code)",
+      "canonical_rule": "bound variable ids are unique, strictly ascending, and scheme normalization may alpha-rename to 0..k-1"
+    },
+    "Substitution": {
+      "carrier": "N",
+      "form": "sequence",
+      "payload_rule": "sequence of pair(type_var_id,type_code)",
+      "canonical_rule": "type_var_id keys are unique and strictly ascending"
+    },
+    "TypeEnvironment": {
+      "carrier": "N",
+      "form": "sequence",
+      "payload_rule": "nearest binder first; each element is Scheme code"
+    },
+    "PortableObservation": {
+      "carrier": "N",
+      "form": "tagged",
+      "tag_set": "observation_tags",
+      "payload_rule": "Nat carries n; Unit/Function carry 0; Pair carries pair(left,right); Inl/Inr carry nested observation"
+    },
+    "StaticResult": {
+      "carrier": "N",
+      "form": "tagged",
+      "tag_set": "static_result_tags",
+      "payload_rule": "Ok carries normalized Scheme; errors carry stable portable detail code or 0"
+    },
+    "ToolRequest": {
+      "carrier": "N",
+      "form": "tagged",
+      "tag_set": "request_tags",
+      "payload_rule": "payload is Bits or Term code according to request"
+    },
+    "ToolResult": {
+      "carrier": "N",
+      "form": "tagged",
+      "tag_set": "tool_result_tags",
+      "payload_rule": "success carries operation result; failures carry portable error/detail code"
+    }
+  },
+  "tag_sets": {
+    "term_tags": {"Var": 0, "Lam": 1, "App": 2, "Let": 3, "Nat": 4, "Prim": 5},
+    "type_tags": {"TypeVar": 0, "Unit": 1, "Nat": 2, "Arrow": 3, "Product": 4, "Sum": 5},
+    "observation_tags": {"Nat": 0, "Unit": 1, "Pair": 2, "Inl": 3, "Inr": 4, "Function": 5},
+    "static_result_tags": {
+      "Ok": 0,
+      "ScopeError": 1,
+      "UnknownPrimitive": 2,
+      "TypeMismatch": 3,
+      "OccursCheck": 4,
+      "MalformedMeta": 5
+    },
+    "request_tags": {"Decode": 0, "Encode": 1, "Validate": 2, "Infer": 3, "Evaluate": 4},
+    "tool_result_tags": {
+      "Ok": 0,
+      "MalformedMeta": 1,
+      "WireError": 2,
+      "ScopeError": 3,
+      "UnknownPrimitive": 4,
+      "TypeError": 5
+    }
+  },
+  "canonicality": [
+    "Every admitted meta-object has exactly one N code under its representation rules.",
+    "Tagged values reject tags outside the declared tag set.",
+    "Bits rejects sequence elements other than 0 or 1.",
+    "Unit/Nat type tags use payload 0 only.",
+    "Substitution keys are unique and strictly ascending.",
+    "Scheme bound ids are canonicalized before portable comparison.",
+    "Malformed meta-encoding is distinct from malformed canonical NEX wire.",
+    "Resource refusal is not encoded as semantic invalidity; it remains an execution-control outcome."
+  ],
+  "forbidden_dependencies": [
+    "recursive types",
+    "mutable references",
+    "host strings",
+    "host byte arrays",
+    "host AST objects",
+    "host callbacks implementing NEX operations",
+    "new Core primitives",
+    "incompatible wire changes"
+  ],
+  "bounded_examples": {
+    "pairs": [
+      {"a": 0, "b": 0, "code": 0},
+      {"a": 1, "b": 0, "code": 1},
+      {"a": 0, "b": 1, "code": 2},
+      {"a": 2, "b": 3, "code": 27},
+      {"a": 3, "b": 2, "code": 39}
+    ],
+    "sequences": [
+      {"items": [], "code": 0},
+      {"items": [0], "code": 1},
+      {"items": [1], "code": 2},
+      {"items": [0, 1], "code": 5},
+      {"items": [1, 0], "code": 6},
+      {"items": [1, 1, 0], "code": 26}
+    ]
+  }
+}
