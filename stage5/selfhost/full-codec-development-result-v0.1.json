@@ -1,0 +1,47 @@
+{
+  "schema": "nex-selfhost-full-codec-development-result",
+  "version": "0.1",
+  "status": "development_passed_candidate_frozen",
+  "core_version": "NEX-1 v0.1",
+  "workflow_run_id": 35437523138,
+  "workflow_job_id": 105882608510,
+  "workflow_head_sha": "09236f3451f4f3b957fd2e3a9afb2de059c72884",
+  "frozen_git_blobs": {
+    "generator": "5b22788957e386b75f354c4d67595f144675b6af",
+    "candidate_artifact": "52ba615fff7c714b7f3f1cb87a9c045f777b11ed",
+    "contract": "87ed4f457112a6e90e1956d40c746cb2ab139847",
+    "development_workload": "3f4ede2c638c184c318b9ade9580eb4ce187f1e6",
+    "holdout_workload": "0823fc9a59888c429615da6df654e8b4eb1a0eb1"
+  },
+  "candidate_wire": {
+    "decodeTerm": {
+      "bits": 5764,
+      "sha256": "1d6090f971959308b4c6790bf5f2decc2f7befbddb60bd58f7602889f345a9bf"
+    },
+    "encodeTerm": {
+      "bits": 5281,
+      "sha256": "1e2e5b78035bca186bea50dc21c7b7fb50086959414a574477e9c44cba72d36c"
+    },
+    "separate_term_total_bits": 11045
+  },
+  "development_surface": {
+    "valid_terms": 10,
+    "decode_error_cases": 6,
+    "encode_error_cases": 6,
+    "forced_nat_observations": 132,
+    "round_trip_law_valid_terms": 10
+  },
+  "results": {
+    "python_need_resource_refusals": 0,
+    "go_need_resource_refusals": 0,
+    "go_cbn_resource_refusals": 88,
+    "python_go_need_values_matched": 132,
+    "python_go_need_values_total": 132,
+    "largest_python_need_transitions": 1474600,
+    "largest_python_need_case": "law2:letcomplex:stream",
+    "largest_go_need_transitions": 651083,
+    "largest_go_need_case": "law2:letcomplex:stream"
+  },
+  "decision": "candidate v0.1 passes the frozen development workload and remains frozen for bounded-exhaustive/historical-checkpoint/holdout evaluation",
+  "holdout_status": "preregistered_unexecuted"
+}
