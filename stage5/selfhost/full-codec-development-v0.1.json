@@ -1,0 +1,34 @@
+{
+  "schema": "nex-selfhost-full-codec-workload",
+  "version": "0.1",
+  "classification": "development",
+  "status": "frozen_before_full_codec_candidate_v0.1",
+  "valid_terms": [
+    {"id":"var0","bits":"001","tokens":[0,0]},
+    {"id":"var3","bits":"0000100","tokens":[0,3]},
+    {"id":"lamvar0","bits":"01001","tokens":[1,0,0]},
+    {"id":"appvar0nat2","bits":"100011110011","tokens":[2,0,0,4,2]},
+    {"id":"letnat0lamvar0","bits":"1101110101001","tokens":[3,4,0,1,0,0]},
+    {"id":"nat17","bits":"1110000010010","tokens":[4,17]},
+    {"id":"prim10","bits":"11110001011","tokens":[5,10]},
+    {"id":"nestedlamapp","bits":"01100011110000010010","tokens":[1,2,0,0,4,17]},
+    {"id":"letcomplex","bits":"1101111010100011110011","tokens":[3,5,1,2,0,0,4,2]},
+    {"id":"applamnat3","bits":"1001001111000100","tokens":[2,1,0,0,4,3]}
+  ],
+  "decode_errors": [
+    {"id":"decode-empty","bits":"","expected_status":1},
+    {"id":"decode-var-prefix-only","bits":"00","expected_status":1},
+    {"id":"decode-lam-missing-body","bits":"01","expected_status":1},
+    {"id":"decode-app-missing-right","bits":"10001","expected_status":1},
+    {"id":"decode-var0-trailing","bits":"0011","expected_status":2},
+    {"id":"decode-nat-truncated-u","bits":"11100","expected_status":1}
+  ],
+  "encode_errors": [
+    {"id":"encode-empty","tokens":[],"expected_status":3},
+    {"id":"encode-var-missing-payload","tokens":[0],"expected_status":3},
+    {"id":"encode-lam-missing-body","tokens":[1],"expected_status":3},
+    {"id":"encode-app-missing-right","tokens":[2,0,0],"expected_status":3},
+    {"id":"encode-unknown-tag","tokens":[6],"expected_status":3},
+    {"id":"encode-var0-trailing","tokens":[0,0,4,2],"expected_status":3}
+  ]
+}
