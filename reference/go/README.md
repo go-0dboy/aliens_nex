@@ -45,15 +45,17 @@ It is **not** the language specification. The normative source is `../../docs/NE
 - language-neutral evaluation conformance in `../../conformance/eval-v0.1.json`;
 - evaluator determinism/property fuzzing.
 
-The reference evaluator deliberately does **not** memoize thunks. A future call-by-need implementation may add sharing only if it remains observationally equivalent on Core programs.
+The normative reference evaluator deliberately does **not** memoize thunks. A separate experimental call-by-need/sharing implementation exists under `experiment/` and is used for empirical feasibility and differential controls. It does not replace weak call-by-name as the normative NEX-1 v0.1 semantics; observational preservation remains an explicit research obligation.
 
-Still outside this implementation stage:
+The post-Stage-5 self-sufficiency work also adds experimental control/probe commands under `cmd/` for executing and comparing NEX-written self-hosting artifacts. These are engineering/research controls, not new Core semantics or host callbacks available to NEX programs.
+
+Still outside the normative reference-implementation layer:
 
 - byte transport framing/padding container;
 - external machine/system profiles;
 - frontend source syntax;
-- optimizer/compiler/self-hosting;
-- call-by-need optimization/sharing implementation.
+- optimizer/native compiler;
+- a normative self-hosted implementation replacing the host reference.
 
 ## Run verification
 
