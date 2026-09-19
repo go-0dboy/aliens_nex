@@ -5,7 +5,7 @@
 **Тип документа:** живая исследовательская рукопись в диссертационном стиле  
 **Каноническая версия:** `RESEARCH-DISSERTATION.md`  
 **Язык этой версии:** русский  
-**Граница учтённых результатов:** этапы 0–5 завершены; повторный аудит литературы учтён; Stage 5.11 operational meta-representation завершён; pre-Stage-6 проверка самодостаточности Core активна и учтена до принятого bounded checkpoint Stage 5.12f stream-parser по состоянию на 19.09.2026  
+**Граница учтённых результатов:** этапы 0–5 завершены; повторный аудит литературы учтён; Stage 5.11 operational meta-representation завершён; Stage 5.12 self wire codec завершён принятием full-codec v0.3 после frozen development, полного bounded класса из 27 Term, зелёного pre-holdout historical checkpoint и одноразового preregistered hold-out; Stage 5.13 запланирован как следующий последовательный подэтап по состоянию на 19.09.2026  
 **Проект:** NEX / `aliens_nex`
 
 > Рукопись представляет исследовательский синтез проекта. Она не заменяет нормативную спецификацию NEX-1 v0.1, ADR, проверочные векторы, исходный код и воспроизводимые экспериментальные артефакты.
@@ -46,7 +46,9 @@ Stage 5.12f затем проверил, способен ли этот fixed-ty
 
 Затем аудит последовательности выявил, что Stage 5.11 формально не был закрыт: исторические v0.1/v0.2 представляли рекурсивные meta-data одним натуральным числом, тогда как успешная ветка Stage 5.12 уже перешла к functional streams. Stage 5.11 теперь завершён через operational `meta-representation-v0.3`. Внешний wire представлен как `FiniteBits = (N -> N) * N`, а рекурсивные внутренние meta-data — как `FiniteNatTokens = (N -> N) * N`. `Term` стал каноническим prefix token tree (`Var -> [0,k]`, `Lam -> [1]++body`, `App -> [2]++f++x`, `Let -> [3]++v++body`, `Nat -> [4,n]`, `Prim -> [5,p]`); точные token grammar также зафиксированы для Type, Scheme, Substitution, TypeEnvironment, portable observations и классов request/result. Host-validator проверяет bounded examples и полный сгенерированный класс Term размером 1–4 узла на token round-trip, восстановление canonical wire и bounded injectivity. Это устраняет drift контракта представления без изменения NEX-1 v0.1 и без превращения полного codec в identity operation.
 
-Непосредственный исследовательский вопрос по-прежнему — самодостаточность Core, а не curriculum. Stage 5.12 остаётся Active и должен полностью закрыть NEX-written `decodeTerm`/`encodeTerm` до начала Stage 5.13. Stage 6 остаётся Planned и может стать Active только после достаточного результата gate 5.10–5.20.
+Stage 5.12 теперь Complete. Два предшествующих full-codec кандидата сохранены как отрицательные свидетельства: v0.1 прошёл development и bounded exhaustive class, но провалил одноразовый preregistered hold-out на `law2:deepmixed:stream`; v0.2 был отклонён уже на frozen development на том же историческом случае; оба дошли до `5 000 001 > 5 000 000` переходов Python call-by-need. Preregistered-преемник v0.3 сохранил тот же Core, wire, carriers и budgets, но один раз строит композиционные functional fragments при рекурсивном проходе вместо random-access decoded view, повторно разбирающего источник для разных индексов. Он прошёл 120/120 development sharing-наблюдений, все 27 термов полного frozen small-term class с 108/108 NEX law observations, зелёный pre-holdout historical checkpoint и одноразовый unseen hold-out с 34/34 совпадениями Python/Go sharing и нулём sharing-refusals. Самый тяжёлый unseen law потребовал 487 579 переходов Python need и 212 893 Go need; 30 отказов нормативного Go CBN на hold-out сохранены как явное свидетельство операционной стоимости.
+
+Непосредственный исследовательский вопрос по-прежнему — самодостаточность Core, а не curriculum. Stage 5.13 structural validation теперь является следующим Planned последовательным подэтапом, но никакая реализация Stage 5.13 не входит в closeout Stage 5.12. Stage 6 остаётся Planned и может стать Active только после достаточного результата gate 5.10–5.20.
 
 **Ключевые слова:** архитектурно-независимые вычисления, self-hosting, учебный протокол, бинарное представление программ, индексы де Брёйна, Хиндли—Милнер, bootstrap, предпосылки получателя, Binary Lambda Calculus, дифференциальная проверка, межзвёздная связь.
 
@@ -163,7 +165,7 @@ Self-sufficiency gate добавляет предварительное усло
 
 Для представлений Stage 5.12 до первого runtime-execution `functional-stream-v0.2` был введён anti-tuning protocol. Он фиксирует ресурсные бюджеты, запрещает удалять неудачные случаи или повышать лимиты для той же версии кандидата, требует новую версию после алгоритмического изменения и отличает уже увиденные development cases от отдельно зарегистрированного hold-out. Провал hold-out отклоняет проверяемую версию, а не разрешает подгонять её на том же скрытом наборе. Stage 5.12f сохранил ту же дисциплину: интерфейс parser, 27 development cases, 12 hold-out cases, ожидаемые результаты и бюджеты были зафиксированы до запуска parser-кандидата; между development-pass и одноразовым hold-out требовался полный historical regression.
 
-Позднейший аудит порядка работ добавил ещё одно правило: нумерованные подэтапы self-sufficiency не перескакиваются. Поэтому Stage 5.11 был формально повторно проверен и закрыт только после того, как operational representation v0.3 согласовал успешную функционально-потоковую ветку с исходными обязательствами representation stage. Stage 5.12 остаётся Active до полного выполнения codec-контракта; Stage 5.13 до этого не является implementation-active.
+Позднейший аудит порядка работ добавил ещё одно правило: нумерованные подэтапы self-sufficiency не перескакиваются. Поэтому Stage 5.11 был формально повторно проверен и закрыт только после того, как operational representation v0.3 согласовал успешную функционально-потоковую ветку с исходными обязательствами representation stage. Stage 5.12 затем прошёл ту же дисциплину: full-codec v0.1 был отклонён на preregistered hold-out, v0.2 — на frozen development, а v0.3 был preregistered до реализации с новым hold-out. Только после прохождения v0.3 frozen development, полного 27-Term class, зелёного historical checkpoint и одноразового hold-out Stage 5.12 был отмечен Complete. Поэтому Stage 5.13 является следующим Planned последовательным подэтапом, но не становится implementation-active в рамках этого closeout.
 
 Замороженные бюджеты:
 
@@ -605,7 +607,7 @@ CBN refusals являются практической квалификацие�
 
 **RQ9.** Пока не отвечен. Это запланированный teaching-вопрос после self-sufficiency gate.
 
-**RQ10.** Частично поддержан. NEX-written арифметика и integer-wire machinery исполняются; fixed-type finite-stream representation и NEX-written cursor/parser прошли замороженные development workload и отдельно preregistered hold-out; Stage 5.11 теперь имеет завершённый operational representation contract v0.3 для Bits, Term, Type, Scheme, Substitution, TypeEnvironment, observations и классов request/result. Полные NEX-written `decodeTerm`/`encodeTerm`, structural validation, HM inference, evaluator, integrated toolchain и self-processing ещё не построены.
+**RQ10.** Частично поддержан, причём wire-codec часть теперь установлена на bounded frozen surfaces. NEX-written арифметика и integer-wire machinery исполняются; fixed-type finite-stream representation и NEX-written cursor/parser прошли frozen development и отдельно preregistered hold-outs; Stage 5.11 имеет завершённый operational representation contract v0.3; Stage 5.12 теперь имеет принятый NEX-written full `decodeTerm`/`encodeTerm` codec v0.3, прошедший 120/120 development sharing-наблюдений, полный frozen 27-Term class, зелёный historical pre-holdout checkpoint и одноразовый preregistered unseen hold-out 34/34 без изменений Core, wire, carrier или budgets. Structural validation, HM inference, evaluator, integrated toolchain, self-processing и классификация 5.20 остаются не построенными/открытыми.
 
 ---
 
@@ -620,7 +622,8 @@ CBN refusals являются практической квалификацие�
 - Self-sufficiency workloads остаются bounded и проектно разработанными.
 - Успешный preregistered hold-out уменьшает риск подгонки, но не устанавливает общую корректность.
 - Validator v0.3 подтверждает согласованность representation contract и bounded injectivity, но не практичность/производительность каждой будущей операции над этими tokens.
-- Parser hold-out проверяет cursor-based structural traversal, а не полный Stage 5.12 codec или static checker.
+- Parser hold-out проверяет cursor-based structural traversal; отдельные evidence полного Stage 5.12 codec теперь существуют, но остаются bounded, а не глобальным доказательством.
+- Принятый hold-out full-codec v0.3 уменьшает риск подгонки, но остаётся bounded empirical evidence; ресурсные отказы нормативного Go CBN остаются существенным свидетельством операционной стоимости даже там, где обе sharing-реализации завершаются.
 - Согласие call-by-need эмпирическое; NEX-specific observational-preservation metatheory остаётся открытой.
 - Альтернатива с явной типовой информацией не построена как полный checker/bootstrap.
 - Профили получателя — исследовательские условия, а не утверждения о реальном внеземном знании.
@@ -650,7 +653,8 @@ CBN refusals являются практической квалификацие�
 15. anti-tuning protocol с versioning кандидатов, frozen budgets и preregistered hold-out;
 16. functional finite-bit-stream representation, прошедший frozen development и preregistered hold-out на проверенной области;
 17. NEX-written cursor/parser, прошедший frozen development и отдельно preregistered hold-out при рекурсивном проходе canonical NEX term wire на проверенной области;
-18. завершённый Stage 5.11 operational meta-representation v0.3, который для активной работы заменяет непрактичный recursive numeric packing на конечные functional bit/token streams, сохраняя v0.1/v0.2 как исторические evidence.
+18. завершённый Stage 5.11 operational meta-representation v0.3, который для активной работы заменяет непрактичный recursive numeric packing на конечные functional bit/token streams, сохраняя v0.1/v0.2 как исторические evidence;
+19. принятый NEX-written full Term wire codec v0.3, полученный с сохранением провалов v0.1/v0.2 и проверенный frozen development, полным 27-Term class, зелёным historical pre-holdout checkpoint и одноразовым preregistered unseen hold-out при неизменных budgets и неизменённом NEX-1 v0.1.
 
 Это результаты проекта, а не утверждение, что каждая используемая идея исторически впервые появилась в NEX.
 
@@ -658,13 +662,14 @@ CBN refusals являются практической квалификацие�
 
 ```text
 5.11 Complete
-        -> полностью закрыть 5.12 self wire codec
-        -> только затем 5.13–5.20 Core self-sufficiency evidence
+        -> 5.12 Complete
+        -> далее 5.13 structural validation
+        -> затем 5.14–5.20 Core self-sufficiency evidence
         -> классифицировать NEX-1 v0.1 в gate 5.20
         -> если цель остаётся поддерживаемой, активировать Stage 6 teaching/bootstrap
 ```
 
-Непосредственный следующий технический вопрос — **не** Stage 5.13. Это Gate 1 Stage 5.12: заморозить точный full-codec interface/result contract для принятых v0.3 `Bits` и `Term`, preregister full-codec development/hold-out workloads и только затем реализовывать NEX `decodeTerm`/`encodeTerm` и проверять round-trip/canonicalization laws.
+Непосредственный следующий технический вопрос — Stage 5.13 structural validation: корректность de Bruijn scope, допустимость Core primitive-ID, closed-program validity и необходимые structural rejection classes поверх принятого v0.3 Term representation. Это только следующий Planned подэтап; никакая реализация Stage 5.13 не входит в closeout Stage 5.12.
 
 Stage 6 остаётся **Planned**, а не Active. Его целевая цепочка сохраняется:
 
@@ -690,7 +695,7 @@ Stage 6 остаётся **Planned**, а не Active. Его целевая це
 
 Последующий аудит последовательности выявил реальный gap контракта, а не дефект Core: historical all-`N` meta-representation Stage 5.11 перестал соответствовать успешному operational stream route. Operational v0.3 закрывает этот gap: wire data представлены конечными functional bit streams, рекурсивные внутренние meta-data — конечными natural-token streams с явными canonical grammars и equality rules. Это позволяет не притворяться, что непрактичный Gödel-style tree code остаётся активным представлением, сохраняя его как историческое свидетельство выразимости.
 
-Поэтому непосредственная исследовательская задача — **полностью завершить Stage 5.12**: зафиксировать full-codec contract и workloads, построить NEX-written `decodeTerm` и `encodeTerm` поверх v0.3, проверить обе обязательные round-trip/canonicalization laws, усилить evidence bounded complete small-term class и differential controls и только затем открывать Stage 5.13. После 5.20, если неизменённый Core остаётся поддерживаемым, Stage 6 сможет перейти к конечному передаваемому teaching artifact. Когда полный teaching/bootstrap artifact появится, его точная битовая длина сможет заменить косвенные оценки bootstrap cost.
+Stage 5.12 тем самым завершён на объявленной bounded evidence surface. Принятый codec v0.3 показывает, что неизменённый Core способен преобразовывать canonical wire в принятое внутреннее Term representation и восстанавливать canonical wire из этого представления при frozen experimental discipline; сохранённые CBN refusals одновременно показывают, что операционная стоимость остаётся серьёзным ограничением. Непосредственная следующая исследовательская задача — Stage 5.13 structural validation, затем последовательно self HM inference, evaluation, integration, self-processing, более широкая validation, metatheory и классификация 5.20. После 5.20, если неизменённый Core остаётся поддерживаемым, Stage 6 сможет перейти к конечному передаваемому teaching artifact. Когда полный teaching/bootstrap artifact появится, его точная битовая длина сможет заменить косвенные оценки bootstrap cost.
 
 ---
 
