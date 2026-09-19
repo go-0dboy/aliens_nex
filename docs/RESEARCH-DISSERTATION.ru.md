@@ -5,7 +5,7 @@
 **Тип документа:** живая исследовательская рукопись в диссертационном стиле  
 **Каноническая версия:** `RESEARCH-DISSERTATION.md`  
 **Язык этой версии:** русский  
-**Граница учтённых результатов:** этапы 0–5 завершены; повторный аудит литературы учтён; pre-Stage-6 проверка самодостаточности Core активна и учтена до принятого bounded checkpoint Stage 5.12f stream-parser по состоянию на 19.09.2026  
+**Граница учтённых результатов:** этапы 0–5 завершены; повторный аудит литературы учтён; Stage 5.11 operational meta-representation завершён; pre-Stage-6 проверка самодостаточности Core активна и учтена до принятого bounded checkpoint Stage 5.12f stream-parser по состоянию на 19.09.2026  
 **Проект:** NEX / `aliens_nex`
 
 > Рукопись представляет исследовательский синтез проекта. Она не заменяет нормативную спецификацию NEX-1 v0.1, ADR, проверочные векторы, исходный код и воспроизводимые экспериментальные артефакты.
@@ -42,9 +42,11 @@ C | A = |M_A|.
 
 Работы pre-Stage-6 дали смешанные, но содержательные результаты. Арифметическая основа и целочисленная часть канонического wire codec написаны на самом NEX и исполняются. Первое рекурсивное числовое представление `2^a(2b+1)-1` математически корректно, но даёт патологический рост кода при вложенных структурах; bit-interleaving устраняет рост размера, однако его NEX-реализация превышает заранее замороженные sharing-depth budgets на умеренных значениях. Эти отрицательные результаты сохранены, а лимиты не повышались ради зелёного теста. Затем было проверено другое представление: конечный поток битов как функция `N -> N`, где `0/1` — данные, а `2` — EOF. Его indexed-кандидат v0.2 был заморожен под anti-tuning protocol, прошёл 26/26 development-наблюдений и отдельно зарегистрированный hold-out 11/11 без ресурсных отказов Python need, Go need или Go CBN при неизменных лимитах.
 
-Stage 5.12f затем проверил, способен ли этот fixed-type stream поддерживать **реальный рекурсивный проход по каноническому wire термов NEX**. Четыре NEX-терма (`decodeUAt`, `readHead`, `skipTerm`, `exactTerm`) были заморожены только после предварительной регистрации 27 development-случаев и отдельного hold-out из 12 случаев. Неизменённый parser прошёл 108/108 проецируемых полей development-наблюдений и 48/48 полей hold-out при нуле ресурсных отказов Python need и Go need. Нормативный Go CBN дал 16 ресурсных отказов на development и 18 на hold-out при неизменном лимите; по заранее зафиксированному правилу это операционная квалификация, а не семантическая некорректность. Таким образом, на проверенной области подтверждён bounded cursor-based проход по каноническому wire; но ещё не подтверждены материализованный рекурсивный `Term`, полный `decodeTerm`/`encodeTerm`, структурная валидация, HM inference, вычисление, self-processing или нейтральный bootstrap.
+Stage 5.12f затем проверил, способен ли этот fixed-type stream поддерживать **реальный рекурсивный проход по каноническому wire термов NEX**. Четыре NEX-терма (`decodeUAt`, `readHead`, `skipTerm`, `exactTerm`) были заморожены только после предварительной регистрации 27 development-случаев и отдельного hold-out из 12 случаев. Неизменённый parser прошёл 108/108 проецируемых полей development-наблюдений и 48/48 полей hold-out при нуле ресурсных отказов Python need и Go need. Нормативный Go CBN дал 16 ресурсных отказов на development и 18 на hold-out при неизменном лимите; по заранее зафиксированному правилу это операционная квалификация, а не семантическая некорректность. Таким образом, на проверенной области подтверждён bounded cursor-based проход по каноническому wire; но ещё не подтверждены полный `decodeTerm`/`encodeTerm`, структурная валидация, HM inference, вычисление, self-processing или нейтральный bootstrap.
 
-Поэтому непосредственный исследовательский вопрос сейчас — самодостаточность Core, а не учебный курс. Stage 6 остаётся Planned и может стать Active только после достаточного результата gate 5.10–5.20.
+Затем аудит последовательности выявил, что Stage 5.11 формально не был закрыт: исторические v0.1/v0.2 представляли рекурсивные meta-data одним натуральным числом, тогда как успешная ветка Stage 5.12 уже перешла к functional streams. Stage 5.11 теперь завершён через operational `meta-representation-v0.3`. Внешний wire представлен как `FiniteBits = (N -> N) * N`, а рекурсивные внутренние meta-data — как `FiniteNatTokens = (N -> N) * N`. `Term` стал каноническим prefix token tree (`Var -> [0,k]`, `Lam -> [1]++body`, `App -> [2]++f++x`, `Let -> [3]++v++body`, `Nat -> [4,n]`, `Prim -> [5,p]`); точные token grammar также зафиксированы для Type, Scheme, Substitution, TypeEnvironment, portable observations и классов request/result. Host-validator проверяет bounded examples и полный сгенерированный класс Term размером 1–4 узла на token round-trip, восстановление canonical wire и bounded injectivity. Это устраняет drift контракта представления без изменения NEX-1 v0.1 и без превращения полного codec в identity operation.
+
+Непосредственный исследовательский вопрос по-прежнему — самодостаточность Core, а не curriculum. Stage 5.12 остаётся Active и должен полностью закрыть NEX-written `decodeTerm`/`encodeTerm` до начала Stage 5.13. Stage 6 остаётся Planned и может стать Active только после достаточного результата gate 5.10–5.20.
 
 **Ключевые слова:** архитектурно-независимые вычисления, self-hosting, учебный протокол, бинарное представление программ, индексы де Брёйна, Хиндли—Милнер, bootstrap, предпосылки получателя, Binary Lambda Calculus, дифференциальная проверка, межзвёздная связь.
 
@@ -160,6 +162,8 @@ Self-sufficiency gate добавляет предварительное усло
 Для независимого восстановления allowlist-пакет был заморожен до создания второй реализации. Вторая реализация была content-hash заморожена до доступа к `reference/go`. После этого сравнивались только переносимые наблюдения.
 
 Для представлений Stage 5.12 до первого runtime-execution `functional-stream-v0.2` был введён anti-tuning protocol. Он фиксирует ресурсные бюджеты, запрещает удалять неудачные случаи или повышать лимиты для той же версии кандидата, требует новую версию после алгоритмического изменения и отличает уже увиденные development cases от отдельно зарегистрированного hold-out. Провал hold-out отклоняет проверяемую версию, а не разрешает подгонять её на том же скрытом наборе. Stage 5.12f сохранил ту же дисциплину: интерфейс parser, 27 development cases, 12 hold-out cases, ожидаемые результаты и бюджеты были зафиксированы до запуска parser-кандидата; между development-pass и одноразовым hold-out требовался полный historical regression.
+
+Позднейший аудит порядка работ добавил ещё одно правило: нумерованные подэтапы self-sufficiency не перескакиваются. Поэтому Stage 5.11 был формально повторно проверен и закрыт только после того, как operational representation v0.3 согласовал успешную функционально-потоковую ветку с исходными обязательствами representation stage. Stage 5.12 остаётся Active до полного выполнения codec-контракта; Stage 5.13 до этого не является implementation-active.
 
 Замороженные бюджеты:
 
@@ -367,6 +371,38 @@ Evaluate
 
 Native-компилятор x86/ARM/WASM не требуется этим gate, поскольку такой backend привносит отдельно определяемую target machine, ABI и memory model.
 
+## 9.0 Stage 5.11 — завершение operational meta-representation
+
+Первые контракты Stage 5.11 использовали одно натуральное число как физический carrier рекурсивных meta-data. Это установило выразимость, но дальнейшие эксперименты Stage 5.12 выявили две практические проблемы: pow2-adic recursive packing дал патологию размера кода, а проверенный bit-interleaving replacement превысил frozen sharing-depth budgets на умеренных случаях.
+
+Принятый operational v0.3 вместо этого фиксирует:
+
+```text
+FiniteBits      = (N -> N) * N
+FiniteNatTokens = (N -> N) * N
+```
+
+Внешние канонические битовые строки используют `FiniteBits`, рекурсивные внутренние объекты — канонические natural-token streams.
+
+`Term` задаётся как:
+
+```text
+Var(k)   -> [0,k]
+Lam(t)   -> [1] ++ t
+App(a,b) -> [2] ++ a ++ b
+Let(v,b) -> [3] ++ v ++ b
+Nat(n)   -> [4,n]
+Prim(p)  -> [5,p]
+```
+
+Точные грамматики также заморожены для `Type`, `Scheme`, `Substitution`, `TypeEnvironment`, `PortableObservation`, `StaticResult`, `ToolRequest` и `ToolResult`. Равенство экстенсионально на объявленной конечной длине потока. Некорректные внутренние meta-data отделены от некорректного canonical wire, scope/primitive/type errors и resource refusal.
+
+Validator проверяет точный dependency inventory, все обязательные representation families, bounded examples и полный сгенерированный класс Term размером 1–4 узла для своего frozen leaf set. Каждый сгенерированный term проходит token round-trip, восстанавливает canonical NEX wire и не имеет token/wire collision в этом bounded классе.
+
+Representation явно запрещает превращать полный codec в identity shortcut: `decodeTerm` обязан преобразовать canonical `Bits` в `Term` tokens, а `encodeTerm` обязан заново построить canonical wire из этих tokens.
+
+**Stage 5.11 завершён (Complete).** Это результат по representation contract, а не свидетельство существования полного Stage 5.12 codec.
+
 ## 9.1 Stage 5.12a — арифметическая основа
 
 Шесть закрытых NEX-written helpers заморожены и проверены Python и Go:
@@ -485,7 +521,7 @@ Git blob identity кандидата и hold-out проверялись пере
 
 > неизменённый NEX-1 v0.1 способен представлять и запрашивать динамически размерные конечные bit streams через фиксированный HM function type на проверенных development и preregistered hold-out surfaces при замороженных budgets.
 
-Это ещё не устанавливает практичный `Term`, HM environments, substitutions, evaluator state, полный self-hosting или receiver-neutral bootstrap.
+Это ещё не устанавливает полный v0.3 `Term` codec, HM inference, evaluator state, полный self-hosting или receiver-neutral bootstrap.
 
 ## 9.6 Stage 5.12f — bounded cursor/parser канонического wire
 
@@ -543,7 +579,7 @@ max Go need transitions               6 392  skip-let-complex:a
 
 > на замороженных development и preregistered hold-out surfaces неизменённый NEX-1 v0.1 способен декодировать канонические integer fields, различать все шесть конструкторов термов, рекурсивно проходить полную каноническую структуру терма, переносить natural cursor и выявлять premature EOF/trailing data через fixed-type functional bit stream.
 
-Результат усиливает evidence по finite stream, но остаётся bounded. Он **не** даёт материализованный рекурсивный `Term`, полный `decodeTerm`/`encodeTerm`, scope/primitive-ID validation, principal HM inference, evaluation, integrated self-hosting toolchain, self-processing или receiver-neutral bootstrap.
+Результат усиливает evidence по finite stream, но остаётся bounded. Он **не** даёт полную конструкцию v0.3 `Term` tokens, полный `decodeTerm`/`encodeTerm`, scope/primitive-ID validation, principal HM inference, evaluation, integrated self-hosting toolchain, self-processing или receiver-neutral bootstrap.
 
 CBN refusals являются практической квалификацией: оба sharing controls завершили все acceptance observations, тогда как нормативный Go CBN превысил фиксированный budget на 16 development и 18 hold-out projections. По заранее зарегистрированному правилу это записывается как операционный cost result, а не semantic invalidity или Core-defect. NEX-specific metatheory сохранения наблюдений CBN/call-by-need остаётся открытой.
 
@@ -569,7 +605,7 @@ CBN refusals являются практической квалификацие�
 
 **RQ9.** Пока не отвечен. Это запланированный teaching-вопрос после self-sufficiency gate.
 
-**RQ10.** Частично поддержан. NEX-written арифметика и integer-wire machinery исполняются; fixed-type finite-stream representation и NEX-written cursor/parser прошли замороженные development workload и отдельно preregistered hold-out. Полный materialized `Term` codec, structural validation, HM inference, evaluator, integrated toolchain и self-processing ещё не построены.
+**RQ10.** Частично поддержан. NEX-written арифметика и integer-wire machinery исполняются; fixed-type finite-stream representation и NEX-written cursor/parser прошли замороженные development workload и отдельно preregistered hold-out; Stage 5.11 теперь имеет завершённый operational representation contract v0.3 для Bits, Term, Type, Scheme, Substitution, TypeEnvironment, observations и классов request/result. Полные NEX-written `decodeTerm`/`encodeTerm`, structural validation, HM inference, evaluator, integrated toolchain и self-processing ещё не построены.
 
 ---
 
@@ -583,7 +619,8 @@ CBN refusals являются практической квалификацие�
 - Runtime transition counters зависят от реализации и не являются wall-clock timings.
 - Self-sufficiency workloads остаются bounded и проектно разработанными.
 - Успешный preregistered hold-out уменьшает риск подгонки, но не устанавливает общую корректность.
-- Parser hold-out проверяет cursor-based structural traversal, а не полный decoder или static checker.
+- Validator v0.3 подтверждает согласованность representation contract и bounded injectivity, но не практичность/производительность каждой будущей операции над этими tokens.
+- Parser hold-out проверяет cursor-based structural traversal, а не полный Stage 5.12 codec или static checker.
 - Согласие call-by-need эмпирическое; NEX-specific observational-preservation metatheory остаётся открытой.
 - Альтернатива с явной типовой информацией не построена как полный checker/bootstrap.
 - Профили получателя — исследовательские условия, а не утверждения о реальном внеземном знании.
@@ -612,19 +649,22 @@ CBN refusals являются практической квалификацие�
 14. сохранённые отрицательные свидетельства по двум recursive numeric representation strategies;
 15. anti-tuning protocol с versioning кандидатов, frozen budgets и preregistered hold-out;
 16. functional finite-bit-stream representation, прошедший frozen development и preregistered hold-out на проверенной области;
-17. NEX-written cursor/parser, прошедший frozen development и отдельно preregistered hold-out при рекурсивном проходе canonical NEX term wire на проверенной области.
+17. NEX-written cursor/parser, прошедший frozen development и отдельно preregistered hold-out при рекурсивном проходе canonical NEX term wire на проверенной области;
+18. завершённый Stage 5.11 operational meta-representation v0.3, который для активной работы заменяет непрактичный recursive numeric packing на конечные functional bit/token streams, сохраняя v0.1/v0.2 как исторические evidence.
 
 Это результаты проекта, а не утверждение, что каждая используемая идея исторически впервые появилась в NEX.
 
-Порядок исследования сохраняется:
+Порядок исследования теперь явно последовательный:
 
 ```text
-завершить evidence по Core self-sufficiency 5.10–5.20
+5.11 Complete
+        -> полностью закрыть 5.12 self wire codec
+        -> только затем 5.13–5.20 Core self-sufficiency evidence
         -> классифицировать NEX-1 v0.1 в gate 5.20
         -> если цель остаётся поддерживаемой, активировать Stage 6 teaching/bootstrap
 ```
 
-Непосредственный следующий технический вопрос переходит от wire traversal Stage 5.12 к structural validation Stage 5.13. До реализации проект должен preregister способ, которым validation использует `(BitStream, Cursor)`/parser results, либо ввести отдельно versioned materialized representation, если он действительно необходим. Далее остаются HM inference, evaluation, integration, self-processing, bounded/differential validation и supporting metatheory.
+Непосредственный следующий технический вопрос — **не** Stage 5.13. Это Gate 1 Stage 5.12: заморозить точный full-codec interface/result contract для принятых v0.3 `Bits` и `Term`, preregister full-codec development/hold-out workloads и только затем реализовывать NEX `decodeTerm`/`encodeTerm` и проверять round-trip/canonicalization laws.
 
 Stage 6 остаётся **Planned**, а не Active. Его целевая цепочка сохраняется:
 
@@ -646,9 +686,11 @@ Stage 6 остаётся **Planned**, а не Active. Его целевая це
 
 Сравнение с предшествующими работами делает одну недостающую часть точной: неизвестному получателю в итоге нужен curriculum, а не только grammar или interpreter. Post-Stage-5 self-sufficiency work показывает и другое предварительное условие: прежде чем учить NEX-1 как стабильной цели, проект должен знать, способен ли неизменённый Core нести собственную существенную implementation machinery.
 
-Текущая evidence не является ни полным успехом, ни выводом о дефекте Core. NEX-written arithmetic и integer wire coding работают. Две recursive numeric data strategies выявили реальные практические проблемы и сохранены как negative evidence. Function-valued finite-stream representation прошёл frozen development и separately preregistered hold-out без изменения кандидата или budgets. Затем NEX-written cursor/parser использовал этот stream для прохода по реальной canonical NEX term structure и также прошёл frozen development плюс отдельно preregistered hold-out. Эти результаты снимают две непосредственные опасения — что rank-1 HM принципиально не позволяет динамически размерные finite bit data и что stream representation не способен поддерживать рекурсивный wire traversal, — но не отвечают на вопрос, удастся ли практически реализовать полную validation, typing, evaluator state и self-processing.
+Текущая evidence не является ни полным успехом, ни выводом о дефекте Core. NEX-written arithmetic и integer wire coding работают. Две recursive numeric data strategies выявили реальные практические проблемы и сохранены как negative evidence. Function-valued finite-stream representation прошёл frozen development и separately preregistered hold-out без изменения кандидата или budgets. Затем NEX-written cursor/parser использовал этот stream для прохода по реальной canonical NEX term structure и также прошёл frozen development плюс отдельно preregistered hold-out.
 
-Поэтому непосредственная исследовательская задача — продолжить gate 5.10–5.20 с preregistered интерфейсом structural validation Stage 5.13 и затем построить оставшуюся self-static/self-dynamic machinery. Только после решения gate 5.20 следует активировать Stage 6 и создавать конечный передаваемый учебный артефакт. После появления полного teaching/bootstrap artifact его точная битовая длина сможет заменить косвенные оценки загрузочной основы.
+Последующий аудит последовательности выявил реальный gap контракта, а не дефект Core: historical all-`N` meta-representation Stage 5.11 перестал соответствовать успешному operational stream route. Operational v0.3 закрывает этот gap: wire data представлены конечными functional bit streams, рекурсивные внутренние meta-data — конечными natural-token streams с явными canonical grammars и equality rules. Это позволяет не притворяться, что непрактичный Gödel-style tree code остаётся активным представлением, сохраняя его как историческое свидетельство выразимости.
+
+Поэтому непосредственная исследовательская задача — **полностью завершить Stage 5.12**: зафиксировать full-codec contract и workloads, построить NEX-written `decodeTerm` и `encodeTerm` поверх v0.3, проверить обе обязательные round-trip/canonicalization laws, усилить evidence bounded complete small-term class и differential controls и только затем открывать Stage 5.13. После 5.20, если неизменённый Core остаётся поддерживаемым, Stage 6 сможет перейти к конечному передаваемому teaching artifact. Когда полный teaching/bootstrap artifact появится, его точная битовая длина сможет заменить косвенные оценки bootstrap cost.
 
 ---
 
