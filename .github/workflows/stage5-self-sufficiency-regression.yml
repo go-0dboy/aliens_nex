@@ -71,6 +71,9 @@ jobs:
       - name: Validate preregistered Stage 5.12f parser contract/workloads
         run: python stage5/selfhost/validate_parser_contract.py
 
+      - name: Reproduce Stage 5.12f parser v0.1 development result
+        run: python stage5/selfhost/verify_stream_parser.py
+
       - name: Verify independent Python implementation
         working-directory: independent/python
         run: python verify.py
