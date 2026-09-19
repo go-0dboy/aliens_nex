@@ -27,13 +27,13 @@ permissions:
   contents: read
 
 jobs:
-  active-invariants:
+  accepted-invariants:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - name: Compile active Stage 5.12 tooling
+      - name: Compile accepted Stage 5.11/5.12 tooling
         run: |
           python -m py_compile stage5/selfhost/validate_meta_representation_v0_3.py
           python -m py_compile stage5/selfhost/validate_experiment_protocol.py
@@ -44,6 +44,7 @@ jobs:
           python -m py_compile stage5/selfhost/verify_full_codec_static_v0_3.py
           python -m py_compile stage5/selfhost/verify_full_codec_development_v0_3.py
           python -m py_compile stage5/selfhost/verify_full_codec_exhaustive_v0_3.py
+          python -m py_compile stage5/selfhost/verify_full_codec_result_v0_3.py
       - name: Validate accepted Stage 5.11 representation
         run: python stage5/selfhost/validate_meta_representation_v0_3.py
       - name: Validate frozen anti-tuning protocol
@@ -58,7 +59,8 @@ jobs:
           assert d['status']=='rejected_on_frozen_development_resource_refusal' and d['decision']=='rejected'
           print('full-codec v0.2 rejection: preserved')
           PY
-      - name: Validate active Stage 5.12 v0.3 preregistration and identity
+      - name: Validate accepted Stage 5.12 v0.3 identity and frozen result
         run: |
           python stage5/selfhost/validate_full_codec_contract_v0_3.py
           python stage5/selfhost/build_full_codec_v0_3.py --check
+          python stage5/selfhost/verify_full_codec_result_v0_3.py
