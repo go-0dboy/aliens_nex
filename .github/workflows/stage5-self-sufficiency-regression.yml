@@ -77,6 +77,15 @@ jobs:
       - name: Validate frozen Stage 5.12f holdout result without re-executing holdout
         run: python stage5/selfhost/verify_stream_parser_result.py
 
+      - name: Verify frozen Stage 5.12 full-codec identity and static typing
+        run: python stage5/selfhost/verify_full_codec_static.py
+
+      - name: Reproduce Stage 5.12 full-codec development result
+        run: python stage5/selfhost/verify_full_codec_development.py
+
+      - name: Reproduce Stage 5.12 complete bounded-exhaustive codec class
+        run: python stage5/selfhost/verify_full_codec_exhaustive.py
+
       - name: Verify independent Python implementation
         working-directory: independent/python
         run: python verify.py
