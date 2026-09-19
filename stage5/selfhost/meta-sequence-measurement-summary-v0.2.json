@@ -1,0 +1,59 @@
+{
+  "schema": "nex-selfhost-meta-sequence-measurement-summary",
+  "version": "0.2",
+  "date": "2026-09-19",
+  "candidate": "pow2-adic-pair-v0.1 / nat-sequence-v0.1",
+  "core_version": "NEX-1 v0.1",
+  "source_head": "42c243977901b24d29106d2a36fba0522f29af83",
+  "workflow_run_id": 35428624295,
+  "workflow_artifact_id": 10579164444,
+  "full_report_sha256": "4f6baafe007f785f2a274abd6905f4961dfa49b3eabebe85835c32d51f58683b",
+  "budgets": {
+    "python_cbn_max_steps": 5000000,
+    "python_cbn_max_depth": 700,
+    "python_need_max_transitions": 5000000,
+    "python_need_max_depth": 2000,
+    "go_cbn_max_transitions": 5000000,
+    "go_cbn_max_depth": 20000,
+    "go_need_max_transitions": 5000000,
+    "go_need_max_depth": 20000
+  },
+  "artifact": {
+    "canonical_functions": 7,
+    "canonical_bits_as_separate_terms": 3290,
+    "measurement_cases": 37
+  },
+  "outcomes": {
+    "python_cbn_resource_refusals": 8,
+    "python_call_by_need_resource_refusals": 0,
+    "go_cbn_resource_refusals": 5,
+    "go_call_by_need_resource_refusals": 0,
+    "portable_observation_mismatches_when_values_returned": 0,
+    "python_go_call_by_need_observation_mismatches": 0
+  },
+  "largest_successful_go_cbn_to_need_ratio": {
+    "function": "unpair_right",
+    "args": [27],
+    "go_cbn_transitions": 4857667,
+    "go_call_by_need_transitions": 1793,
+    "ratio": 2709.239821528165
+  },
+  "sharing_corroboration": {
+    "python_call_by_need_cases_completed": 37,
+    "go_call_by_need_cases_completed": 37,
+    "portable_results_agreed": 37,
+    "note": "Transition counters are implementation-specific and are not compared as portable semantics."
+  },
+  "decision": {
+    "representation_status": "retain_for_stage5_12_with_sharing_condition",
+    "reason": "Two sharing-capable controls complete the frozen workload with identical portable observations while pure CBN shows severe resource amplification.",
+    "next": "Implement NEX-written encodeU/decodeU and self term-wire processing using the same frozen representation; preserve CBN resource outcomes and sharing controls as separate evidence."
+  },
+  "interpretation": [
+    "The N-only representation remains an executable expressiveness construction.",
+    "Pure CBN is operationally poor on several small encoded values under the declared budgets.",
+    "Both Python and Go call-by-need controls complete all 37 frozen cases with identical portable observations.",
+    "This corroborates sharing as an engineering feasibility condition for the current representation.",
+    "The result does not prove NEX-specific CBN/call-by-need equivalence and does not establish a Core defect."
+  ]
+}
