@@ -1,0 +1,40 @@
+{
+  "schema": "nex-selfhost-stream-parser-workload",
+  "version": "0.1",
+  "classification": "development",
+  "status": "frozen_before_parser_implementation",
+  "contract": "stage5/selfhost/parser-contract-v0.1.json",
+  "result_fields": ["status", "a", "b", "next_offset"],
+  "cases": [
+    {"id": "u0", "operation": "decodeUAt", "bits": "1", "offset": 0, "expected": [0,0,0,1]},
+    {"id": "u1", "operation": "decodeUAt", "bits": "010", "offset": 0, "expected": [0,1,0,3]},
+    {"id": "u2", "operation": "decodeUAt", "bits": "011", "offset": 0, "expected": [0,2,0,3]},
+    {"id": "u3", "operation": "decodeUAt", "bits": "00100", "offset": 0, "expected": [0,3,0,5]},
+    {"id": "u4", "operation": "decodeUAt", "bits": "00101", "offset": 0, "expected": [0,4,0,5]},
+    {"id": "u-trunc-1", "operation": "decodeUAt", "bits": "0", "offset": 0, "expected": [1,0,0,1]},
+    {"id": "u-trunc-2", "operation": "decodeUAt", "bits": "00", "offset": 0, "expected": [1,0,0,2]},
+    {"id": "u-trunc-payload", "operation": "decodeUAt", "bits": "0010", "offset": 0, "expected": [1,0,0,4]},
+
+    {"id": "head-var0", "operation": "readHead", "bits": "001", "offset": 0, "expected": [0,0,0,3]},
+    {"id": "head-lam", "operation": "readHead", "bits": "01001", "offset": 0, "expected": [0,1,0,2]},
+    {"id": "head-app", "operation": "readHead", "bits": "100011110011", "offset": 0, "expected": [0,2,0,2]},
+    {"id": "head-let", "operation": "readHead", "bits": "1101110101001", "offset": 0, "expected": [0,3,0,3]},
+    {"id": "head-nat2", "operation": "readHead", "bits": "1110011", "offset": 0, "expected": [0,4,2,7]},
+    {"id": "head-prim10", "operation": "readHead", "bits": "11110001011", "offset": 0, "expected": [0,5,10,11]},
+    {"id": "head-trunc-prefix", "operation": "readHead", "bits": "0", "offset": 0, "expected": [1,0,0,1]},
+    {"id": "head-trunc-nat", "operation": "readHead", "bits": "1110", "offset": 0, "expected": [1,0,0,4]},
+
+    {"id": "skip-var0", "operation": "skipTerm", "bits": "001", "offset": 0, "expected": [0,1,0,3]},
+    {"id": "skip-lam-var0", "operation": "skipTerm", "bits": "01001", "offset": 0, "expected": [0,2,0,5]},
+    {"id": "skip-app", "operation": "skipTerm", "bits": "100011110011", "offset": 0, "expected": [0,3,0,12]},
+    {"id": "skip-let", "operation": "skipTerm", "bits": "1101110101001", "offset": 0, "expected": [0,4,0,13]},
+    {"id": "skip-nested", "operation": "skipTerm", "bits": "1001001111000100", "offset": 0, "expected": [0,4,0,16]},
+    {"id": "skip-missing-lam-body", "operation": "skipTerm", "bits": "01", "offset": 0, "expected": [1,0,0,2]},
+    {"id": "skip-missing-app-right", "operation": "skipTerm", "bits": "10001", "offset": 0, "expected": [1,0,0,5]},
+
+    {"id": "exact-var0", "operation": "exactTerm", "bits": "001", "offset": 0, "expected": [0,1,0,3]},
+    {"id": "exact-let", "operation": "exactTerm", "bits": "1101110101001", "offset": 0, "expected": [0,4,0,13]},
+    {"id": "exact-empty", "operation": "exactTerm", "bits": "", "offset": 0, "expected": [1,0,0,0]},
+    {"id": "exact-trailing", "operation": "exactTerm", "bits": "0011", "offset": 0, "expected": [2,1,0,3]}
+  ]
+}
