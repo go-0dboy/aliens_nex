@@ -1,1 +1,1 @@
-registered 2026-09-19; do not update until historical checkpoint is green
+execute once after green historical checkpoint 35434076839
